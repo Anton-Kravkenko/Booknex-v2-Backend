@@ -11,23 +11,46 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  email        String   @unique
+  id           Int         @id @default(autoincrement())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  email        String      @unique
   name         String?
   password     String
-  likedBooks   Book[]   @relation("LikedBooks")
-  readBooks    Book[]   @relation("ReadBooks")
-  readingBooks Book[]   @relation("ReadingBooks")
+  role         String      @default("USER")
+  bookMarks    Int
+  quotes       Quotation[]
+  history      History[]
+  likedBooks   Book[]      @relation("LikedBooks")
+  readBooks    Book[]      @relation("ReadBooks")
+  readingBooks Book[]      @relation("ReadingBooks")
+  message      Message[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  from      String
+  text      String
+  users     User[]
+}
+
+model Author {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  photo     String
+  bio       String
+  books     Book[]
 }
 
 model Book {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id           Int         @id @default(autoincrement())
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
   title        String
-  author       String
   description  String
   isbn         String
   pages        Int
@@ -35,9 +58,25 @@ model Book {
   epub         String
   likedPercent Int
   genre        Genre[]
-  likedBy      User[]   @relation("LikedBooks")
-  readBy       User[]   @relation("ReadBooks")
-  readingBy    User[]   @relation("ReadingBooks")
+  quotations   Quotation[]
+  likedBy      User[]      @relation("LikedBooks")
+  readBy       User[]      @relation("ReadBooks")
+  readingBy    User[]      @relation("ReadingBooks")
+  author       Author?     @relation(fields: [authorId], references: [id])
+  authorId     Int?
+  history      History[]
+}
+
+model Quotation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  text      String
+  emoji     String
+  book      Book?    @relation(fields: [bookId], references: [id])
+  bookId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
 }
 
 model Genre {
@@ -46,4 +85,14 @@ model Genre {
   updatedAt DateTime @updatedAt
   name      String
   books     Book[]
+}
+
+model History {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Book      Book?    @relation(fields: [bookId], references: [id])
+  bookId    Int?
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
 }

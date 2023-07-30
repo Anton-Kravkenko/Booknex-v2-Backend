@@ -21,5 +21,46 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+     "@typescript-eslint/naming-convention":[
+       "error",
+       {
+            selector: "default",
+            format: ["camelCase"],
+       },
+       {
+         selector: "variable",
+         format: ["PascalCase", "UPPER_CASE"],
+         types: ["boolean"],
+         prefix: ["is", "should", "has", "can", "did", "will"],
+       },
+       {
+         selector: "variableLike",
+         format: ["camelCase", "UPPER_CASE", "PascalCase"],
+       },
+       {
+         selector: "parameter",
+         format: ["camelCase"],
+       },
+       {
+         selector: "memberLike",
+         modifiers: ["private"],
+         format: ["camelCase"],
+         leadingUnderscore: "forbid",
+       },
+       {
+         selector: "typeLike",
+         format: ["PascalCase"],
+       },
+       {
+         selector: "property",
+         modifiers: ["readonly"],
+         format: ["PascalCase"],
+       },
+       {
+         selector: "enumMember",
+         format: ["UPPER_CASE"],
+       },
+     
+     ]
   },
 };
