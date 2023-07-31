@@ -36,21 +36,12 @@ model Message {
   users     User[]
 }
 
-model Author {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  photo     String
-  bio       String
-  books     Book[]
-}
-
 model Book {
   id           Int         @id @default(autoincrement())
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   title        String
+  author       String
   description  String
   isbn         String
   pages        Int
@@ -62,8 +53,6 @@ model Book {
   likedBy      User[]      @relation("LikedBooks")
   readBy       User[]      @relation("ReadBooks")
   readingBy    User[]      @relation("ReadingBooks")
-  author       Author?     @relation(fields: [authorId], references: [id])
-  authorId     Int?
   history      History[]
 }
 
