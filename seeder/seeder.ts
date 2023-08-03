@@ -1,6 +1,5 @@
 import { green } from 'colors'
 import * as fs from 'fs'
-import Dataset from './books_1.Best_Books_Ever.json'
 import { getEpubFromBook } from './getEpubFromBook'
 
 interface Book {
@@ -31,7 +30,7 @@ interface Book {
 	price: string
 }
 export const seeder = async () => {
-	const books = JSON.parse(JSON.stringify(Dataset))
+	const books = []
 		.filter((book: Book) => book.language === 'English')
 		.slice(0, 1000)
 
@@ -44,7 +43,7 @@ export const seeder = async () => {
 			if (!epub) {
 				continue
 			}
-			console.log(green(`Epub for ${book.title} is ${epub}`))
+			console.log(green(`Epub for ${book.title} is ${epub} in ${i} iteration`))
 			resolvedBooks.push({
 				title: book.title,
 				author: book.author,

@@ -1,7 +1,7 @@
 # compiled output
 /dist
 /node_modules
-
+/seeder/books_1.Best_Books_Ever.json
 # Logs
 logs
 *.log
@@ -32,4 +32,4 @@ lerna-debug.log*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
-!.vscode/extensions.json
+!.vscode/extensions.json!/books_1.Best_Books_Ever.json

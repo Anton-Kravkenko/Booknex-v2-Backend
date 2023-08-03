@@ -1,30 +1,32 @@
 import {
-	Controller,
-	Get,
-	Post,
 	Body,
-	Patch,
-	Param,
-	Delete
+	Controller,
+	Post,
+	UsePipes,
+	ValidationPipe
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
+import { AuthDto, RefreshDto } from './dto/auth.dto'
+
 @Controller('auth')
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
-	@Get()
-	findAll() {
-		return this.authService.findAll()
+	@UsePipes(new ValidationPipe())
+	@Post('/register')
+	async register(@Body() dto: AuthDto) {
+		return this.authService.register(dto)
 	}
 
-	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.authService.findOne(+id)
+	@UsePipes(new ValidationPipe())
+	@Post('/login')
+	async login(@Body() dto: AuthDto) {
+		return this.authService.login(dto)
 	}
 
-
-	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.authService.remove(+id)
+	@UsePipes(new ValidationPipe())
+	@Post('/access-token')
+	async refreshToken(@Body() dto: RefreshDto) {
+		return this.authService.refresh(dto.refresh_token)
 	}
 }
