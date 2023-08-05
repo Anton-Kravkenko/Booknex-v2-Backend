@@ -4,7 +4,7 @@ import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
 
 export const getEpubFromBook = async (name: string, author: string) => {
 	const adblocker = AdblockerPlugin({
-		blockTrackers: true // default: false
+		blockTrackers: true
 	})
 	puppeteer.use(adblocker)
 	const browser = await puppeteer.launch({
@@ -12,18 +12,19 @@ export const getEpubFromBook = async (name: string, author: string) => {
 		ignoreHTTPSErrors: true
 	})
 	const page = await browser.newPage()
-	await page.goto('https://royallib.com/book/')
-	await page.type('#q', `${name}`)
-	await page.click('.srch-sbm')
-	await page.waitForSelector('.viewbook')
+	await page.goto('https://www.z-epub.com/')
+	await page.waitForSelector('.search-open')
+	await page.click('.search-open')
+	await page.type('.form-control .search-input', `${name}`)
+	await page.click('#header-search')
+	await page.waitForSelector('.row .book-grid')
 	const isError = await page.evaluate(() => {
 		const error = document.querySelector(
-			'.content > table:nth-child(8) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1)'
+			'html body div.page div.container div.row div.col-md-12.col-sm-12.col-xs-12.books-listing div.books-list div.top-filter.row div.col-lg-8.text span'
 		)
-		if (error) return error.textContent === 'Не найдено'
-		return null
+		if (error.textContent === '0 books') return null
 	})
-	if (isError) return console.log(red(`book ${name} is not found`))
+	if (!isError) return console.log(red(`book ${name} is not found`))
 	const bookArray = await page.evaluate(() => {
 		const quotes = document.querySelectorAll(
 			'.content > table:nth-child(8) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr'
@@ -44,10 +45,10 @@ export const getEpubFromBook = async (name: string, author: string) => {
 	const filterArray = bookArray.find(
 		book =>
 			author.toLowerCase().includes(book.author.toLowerCase().split(' ')[0]) &&
-			name.toLowerCase() === book.title.toLowerCase()
+			book.title.toLowerCase().includes(name.toLowerCase().split(' ')[0])
 	)
 	if (!filterArray)
-		return console.log(yellow(`book ${name} is not found on list`))
+		return console.log(yellow(`book "${name}" by "${author}" not found`))
 	await page.goto(`http:${filterArray.link}`)
 	const isError2 = await page.evaluate(() => {
 		const error = document.querySelector(

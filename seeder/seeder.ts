@@ -1,5 +1,6 @@
+import { PrismaClient } from '@prisma/client'
 import { green } from 'colors'
-import * as fs from 'fs'
+import JsonBooks from './books_1.Best_Books_Ever.json'
 import { getEpubFromBook } from './getEpubFromBook'
 
 interface Book {
@@ -29,34 +30,49 @@ interface Book {
 	bbeVotes: number
 	price: string
 }
+const prisma = new PrismaClient()
 export const seeder = async () => {
-	const books = []
-		.filter((book: Book) => book.language === 'English')
-		.slice(0, 1000)
-
-	const resolvedBooks = []
-
+	const books = JSON.parse(JSON.stringify(JsonBooks))
+	books.filter((book: Book) => book.language === 'English')
+		.slice(0, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 30000)
 	for (let i = 0; i < books.length; i++) {
 		const book = books[i]
 		try {
+			const bookExist =  await prisma.book.findFirst({
+				where: {
+					title: book.title,
+				}
+			})
+			if (bookExist) {
+				console.log(green(`book ${book.title} already exists`))
+				continue
+			}
 			const epub = await getEpubFromBook(book.title, book.author)
 			if (!epub) {
 				continue
 			}
-			console.log(green(`Epub for ${book.title} is ${epub} in ${i} iteration`))
-			resolvedBooks.push({
+			await prisma.book.create({
+				data: {
 				title: book.title,
 				author: book.author,
-				rating: book.rating,
 				description: book.description,
 				isbn: book.isbn,
-				genres: book.genres,
-				pages: book.pages,
-				publishDate: book.publishDate || book.firstPublishDate,
+					genre: {
+						connectOrCreate: book.genres.split(',').map((genre) => {
+							return {
+								where: { name: genre },
+								create: { name: genre },
+							};
+						}),
+					},
+				image: book.coverImg,
+				pages: Number(book.pages),
 				likedPercent: book.likedPercent,
-				coverImg: book.coverImg,
-				epub
-			})
+				epub,
+				rared: book.numRatings < 1000 ? 'Common' : book.numRatings < 10000 ? 'Uncommon' : book.numRatings < 100000 ? 'Rare' : book.numRatings < 1000000 ? 'Very Rare' : 'Extremely Rare',
+					},
+				})
+			console.log(green(`Epub for ${book.title} is ${epub} in ${i} iteration`))
 		} catch (error) {
 			console.error(
 				`Failed to generate ePub for ${book.title} by ${book.author}: ${error}`
@@ -64,7 +80,6 @@ export const seeder = async () => {
 		}
 	}
 
-	fs.writeFileSync('seeder/epub0-1000.json', JSON.stringify(resolvedBooks))
 }
 
 seeder().then(() => process.exit(0))

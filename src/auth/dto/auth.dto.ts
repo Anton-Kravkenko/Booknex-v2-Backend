@@ -13,5 +13,5 @@ export class AuthDto {
 
 export class RefreshDto {
 	@IsString()
-	refresh_token: string
+	refreshToken: string
 }

@@ -18,22 +18,12 @@ model User {
   name         String?
   password     String
   role         String      @default("USER")
-  bookMarks    Int
+  bookMarks    Int         @default(0)
   quotes       Quotation[]
   history      History[]
   likedBooks   Book[]      @relation("LikedBooks")
   readBooks    Book[]      @relation("ReadBooks")
   readingBooks Book[]      @relation("ReadingBooks")
-  message      Message[]
-}
-
-model Message {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  from      String
-  text      String
-  users     User[]
 }
 
 model Book {
@@ -48,6 +38,7 @@ model Book {
   image        String
   epub         String
   likedPercent Int
+  rared        String
   genre        Genre[]
   quotations   Quotation[]
   likedBy      User[]      @relation("LikedBooks")
@@ -72,7 +63,7 @@ model Genre {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  name      String
+  name      String   @unique
   books     Book[]
 }
 

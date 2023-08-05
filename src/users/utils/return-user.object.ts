@@ -1,7 +1,7 @@
-import { defaultReturnObject } from "../../utils/return-object";
+import { defaultReturnObject } from '../../utils/return-object'
 
 export const returnUserObject = {
-  ...defaultReturnObject,
-  email: true,
-  password: false
-};
+	...defaultReturnObject,
+	email: true,
+	password: false
+}
