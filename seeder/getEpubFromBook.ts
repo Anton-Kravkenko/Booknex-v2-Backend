@@ -1,4 +1,4 @@
-import { blue, yellow } from 'colors'
+import { blue, magenta, yellow } from 'colors'
 import prompts from 'prompts'
 import puppeteer from 'puppeteer-extra'
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
@@ -33,7 +33,7 @@ export const getEpubFromBook = async (
 	})
 	if (isError) {
 		if (numRating < 100000)
-			return console.log(yellow(`No result for ${betterName} by ${author}`))
+			return console.log(yellow(`❌ No result for ${betterName} by ${author}`))
 		return await royalParser({ page, betterName, name, author })
 	}
 	await page.waitForSelector(
@@ -86,10 +86,16 @@ export const getEpubFromBook = async (
 		const response = await prompts({
 			type: 'select',
 			name: 'value',
-			message: `${blue(betterName) + ' ∙ ' + yellow(author)}`,
+			message: `${
+				blue(betterName) +
+				' ∙ ' +
+				yellow(author) +
+				' ∙ ' +
+				magenta.bold.italic('Z-epub')
+			}`,
 			choices: [
 				{
-					title: '⛔  None',
+					title: '❌  None',
 					value: null
 				},
 				{
@@ -111,6 +117,8 @@ export const getEpubFromBook = async (
 
 			return customResponse.value
 		}
+		if (response.value === 'royal')
+			return await royalParser({ page, betterName, name, author })
 		if (!response.value) return
 		await page.goto(`https://www.z-epub.com${response.value.link}`)
 		await page.waitForSelector(

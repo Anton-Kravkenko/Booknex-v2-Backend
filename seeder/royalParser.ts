@@ -1,4 +1,4 @@
-import { blue, red, yellow } from 'colors'
+import { blue, magenta, red, yellow } from 'colors'
 import prompts from 'prompts'
 import { Page } from 'puppeteer'
 
@@ -6,12 +6,14 @@ export const royalParser = async ({
 	page,
 	betterName,
 	name,
-	author
+	author,
+	noSelect
 }: {
 	page: Page
 	betterName: string
 	name: string
 	author: string
+	noSelect?: boolean
 }) => {
 	await page.goto('https://royallib.com/book/')
 	await page.type('#q', `${name}`)
@@ -24,7 +26,7 @@ export const royalParser = async ({
 		if (error) return error.textContent === 'Не найдено'
 		return null
 	})
-	if (isError) return console.log(red(`books ${name} is not found`))
+	if (isError) return console.log(red(`❌ books ${name} is not found`))
 	const bookArray = await page.evaluate(() => {
 		const quotes = document.querySelectorAll(
 			'.content > table:nth-child(8) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr'
@@ -51,18 +53,38 @@ export const royalParser = async ({
 				.includes(book.author.toLowerCase().trim().split(' ')[0])
 	)
 	if (!filterArray) {
+		if (
+			bookArray.filter(
+				book =>
+					book.title
+						.toLowerCase()
+						.trim()
+						.includes(betterName.toLowerCase().trim()) ||
+					betterName
+						.toLowerCase()
+						.trim()
+						.includes(book.title.toLowerCase().trim())
+			).length === 0
+		)
+			return console.log(red(`❌ book ${name} is not found`))
 		const response = await prompts({
 			type: 'select',
 			name: 'value',
-			message: `${blue(betterName) + ' ∙ ' + yellow(author)}`,
+			message: `${
+				blue(betterName) +
+				' ∙ ' +
+				yellow(author) +
+				' ∙ ' +
+				magenta.bold.italic('Royallib')
+			}`,
 			choices: [
+				{
+					title: `❌ None`,
+					value: null
+				},
 				{
 					title: '🔍 Write your own link',
 					value: 'custom'
-				},
-				{
-					title: `📚 Skip`,
-					value: null
 				},
 				...bookArray
 					.filter(
@@ -76,8 +98,8 @@ export const royalParser = async ({
 								.trim()
 								.includes(book.title.toLowerCase().trim())
 					)
-					.map(book => ({
-						title: `📖 ${book.title} by ${book.author}`,
+					.map((book, index) => ({
+						title: `📖 ${index++}: ${book.title} ∙ ${book.author}`,
 						value: book.link
 					}))
 			]
@@ -91,7 +113,7 @@ export const royalParser = async ({
 
 			return customResponse.value
 		}
-		if (response.value === null) return console.log('Skip success ✅')
+		if (response.value === null) return
 		await page.goto(`http:${response.value}`)
 		const isError3 = await page.evaluate(() => {
 			const error = document.querySelector(
@@ -99,7 +121,7 @@ export const royalParser = async ({
 			)
 			if (!error) return true
 		})
-		if (isError3) return console.log(red(`book ${name} is not available`))
+		if (isError3) return console.log(red(`❌ book ${name} is not available`))
 		await page.waitForSelector(
 			'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
 		)
@@ -117,7 +139,7 @@ export const royalParser = async ({
 		)
 		if (!error) return true
 	})
-	if (isError2) return console.log(red(`book ${name} is not available`))
+	if (isError2) return console.log(red(`❌ book ${name} is not available `))
 	await page.waitForSelector(
 		'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
 	)

@@ -33,18 +33,28 @@ interface Book {
 const prisma = new PrismaClient()
 export const seeder = async () => {
 	const books = JSON.parse(JSON.stringify(JsonBooks))
-	const bookExist = await prisma.book.findFirst({
+	const { id: lastBookIndex } = await prisma.book.findFirst({
 		orderBy: {
-			createdAt: 'desc',
+			id: 'desc'
 		},
 		take: 1,
+		select: {
+			id: true
+		}
 	})
-	const lastBookIndex = books.findIndex((book: Book) => Number(book.pages) === bookExist.pages) + 1
 	books.filter((book: Book) => book.language === 'English')
-		.slice(lastBookIndex, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 30000)
-	for (let i = lastBookIndex; i < books.length; i++) {
+		.slice(lastBookIndex + 1, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 30000)
+	for (let i = lastBookIndex + 1; i < books.length; i++) {
 		const book = books[i]
 		try {
+			const oldBook = await prisma.book.findFirst({
+				where: {
+					title: book.title,
+				}
+			})
+			if (oldBook) {
+				continue
+			}
 			const epub = await getEpubFromBook(
 				book.title, book.author.replace(/,.*|\(.*?\)/g, '').trim(), 	book.numRatings)
 			if (!epub) {
@@ -71,10 +81,10 @@ export const seeder = async () => {
 				rared: book.numRatings < 1000 ? 'Common' : book.numRatings < 10000 ? 'Uncommon' : book.numRatings < 100000 ? 'Rare' : book.numRatings < 1000000 ? 'Very Rare' : book.numRatings < 5000000 ? 'Legendary' : 'Mythical',
 					},
 				})
-			console.log(green(`${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()} ✅`))
+			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))
 		} catch (error) {
 			console.error(
-				`Failed to generate ePub for ${book.title} by ${book.author}: ${error}`
+				`❌ Failed to generate ePub for ${book.title} by ${book.author}: ${error}`
 			)
 		}
 	}
@@ -82,3 +92,7 @@ export const seeder = async () => {
 }
 
 seeder().then(() => process.exit(0))
+
+
+
+
