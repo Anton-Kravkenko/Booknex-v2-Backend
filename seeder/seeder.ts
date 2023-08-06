@@ -33,28 +33,27 @@ interface Book {
 const prisma = new PrismaClient()
 export const seeder = async () => {
 	const books = JSON.parse(JSON.stringify(JsonBooks))
+	const bookExist = await prisma.book.findFirst({
+		orderBy: {
+			createdAt: 'desc',
+		},
+		take: 1,
+	})
+	const lastBookIndex = books.findIndex((book: Book) => Number(book.pages) === bookExist.pages) + 1
 	books.filter((book: Book) => book.language === 'English')
-		.slice(0, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 30000)
-	for (let i = 0; i < books.length; i++) {
+		.slice(lastBookIndex, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 30000)
+	for (let i = lastBookIndex; i < books.length; i++) {
 		const book = books[i]
 		try {
-			const bookExist =  await prisma.book.findFirst({
-				where: {
-					title: book.title,
-				}
-			})
-			if (bookExist) {
-				console.log(green(`book ${book.title} already exists`))
-				continue
-			}
-			const epub = await getEpubFromBook(book.title, book.author)
+			const epub = await getEpubFromBook(
+				book.title, book.author.replace(/,.*|\(.*?\)/g, '').trim(), 	book.numRatings)
 			if (!epub) {
 				continue
 			}
 			await prisma.book.create({
 				data: {
 				title: book.title,
-				author: book.author,
+				author: book.author.replace(/,.*|\(.*?\)/g, '').trim(),
 				description: book.description,
 				isbn: book.isbn,
 					genre: {
@@ -68,11 +67,11 @@ export const seeder = async () => {
 				image: book.coverImg,
 				pages: Number(book.pages),
 				likedPercent: book.likedPercent,
-				epub,
-				rared: book.numRatings < 1000 ? 'Common' : book.numRatings < 10000 ? 'Uncommon' : book.numRatings < 100000 ? 'Rare' : book.numRatings < 1000000 ? 'Very Rare' : 'Extremely Rare',
+				epub: epub,
+				rared: book.numRatings < 1000 ? 'Common' : book.numRatings < 10000 ? 'Uncommon' : book.numRatings < 100000 ? 'Rare' : book.numRatings < 1000000 ? 'Very Rare' : book.numRatings < 5000000 ? 'Legendary' : 'Mythical',
 					},
 				})
-			console.log(green(`Epub for ${book.title} is ${epub} in ${i} iteration`))
+			console.log(green(`${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()} ✅`))
 		} catch (error) {
 			console.error(
 				`Failed to generate ePub for ${book.title} by ${book.author}: ${error}`
