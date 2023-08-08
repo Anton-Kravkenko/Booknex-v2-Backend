@@ -7,7 +7,7 @@ export const royalParser = async ({
 	betterName,
 	name,
 	author,
-	noSelect
+	noSelect = false
 }: {
 	page: Page
 	betterName: string
@@ -52,7 +52,34 @@ export const royalParser = async ({
 				.trim()
 				.includes(book.author.toLowerCase().trim().split(' ')[0])
 	)
-	if (!filterArray) {
+	if (filterArray && noSelect) {
+		if (
+			bookArray.filter(
+				book =>
+					book.title
+						.toLowerCase()
+						.trim()
+						.includes(betterName.toLowerCase().trim()) ||
+					betterName
+						.toLowerCase()
+						.trim()
+						.includes(book.title.toLowerCase().trim())
+			).length === 0
+		)
+			return null
+		return bookArray.filter(
+			book =>
+				book.title
+					.toLowerCase()
+					.trim()
+					.includes(betterName.toLowerCase().trim()) ||
+				betterName
+					.toLowerCase()
+					.trim()
+					.includes(book.title.toLowerCase().trim())
+		)
+	}
+	if (!filterArray && !noSelect) {
 		if (
 			bookArray.filter(
 				book =>

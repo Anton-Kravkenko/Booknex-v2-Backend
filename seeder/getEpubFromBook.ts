@@ -1,28 +1,22 @@
-import { blue, magenta, yellow } from 'colors'
+import { blue, magenta, red, yellow } from 'colors'
 import prompts from 'prompts'
-import puppeteer from 'puppeteer-extra'
-import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
+import { Page } from 'puppeteer'
 import { royalParser } from './royalParser'
 
 export const getEpubFromBook = async (
 	name: string,
 	author: string,
-	numRating: number
+	numRating: number,
+	page: Page
 ) => {
 	const betterName = name
 		.replace(/(\[|\()(.+?)(\]|\))/g, ' ')
 		.replace('-', ' ')
 		.trim()
-	const adblocker = AdblockerPlugin({
-		blockTrackers: true
+
+	await page.goto('https://www.z-epub.com/', {
+		waitUntil: 'domcontentloaded'
 	})
-	puppeteer.use(adblocker)
-	const browser = await puppeteer.launch({
-		headless: 'new',
-		ignoreHTTPSErrors: true
-	})
-	const page = await browser.newPage()
-	await page.goto('https://www.z-epub.com/')
 	await page.click('.search-open')
 	await page.type('.search-input', betterName)
 	await page.click('#header-search')
@@ -32,7 +26,7 @@ export const getEpubFromBook = async (
 		return error.innerHTML.includes('0 books')
 	})
 	if (isError) {
-		if (numRating < 100000)
+		if (numRating < 200000)
 			return console.log(yellow(`❌ No result for ${betterName} by ${author}`))
 		return await royalParser({ page, betterName, name, author })
 	}
@@ -83,6 +77,24 @@ export const getEpubFromBook = async (
 				author.toLowerCase().trim() == book.author.toLowerCase().trim()
 		)
 	if (!filterArray) {
+		const royal = await royalParser({
+			page,
+			betterName,
+			name,
+			author,
+			noSelect: true
+		})
+		if (!royal) return
+		if (typeof royal === 'string') return royal
+		const epub = royal.find(
+			book =>
+				name.toLowerCase().trim() == book.title.toLowerCase() &&
+				author
+					.toLowerCase()
+					.trim()
+					.includes(book.author.toLowerCase().trim().split(' ')[0])
+		)
+		if (epub) return epub.link
 		const response = await prompts({
 			type: 'select',
 			name: 'value',
@@ -102,8 +114,14 @@ export const getEpubFromBook = async (
 					title: '🔧 Custom',
 					value: 'custom'
 				},
+				...royal.map((book, i) => ({
+					title: magenta(`👑 ${i}: ${book.title} ∙ ${book.author}`),
+					value: book.link
+				})),
 				...bookArray.map(book => ({
-					title: `📖 ${book.id}: ${book.title} ∙ ${book.author} ∙ ${book.year}`,
+					title: blue(
+						`📖 ${book.id}: ${book.title} ∙ ${book.author} ∙ ${book.year}`
+					),
 					value: book
 				}))
 			]
@@ -117,10 +135,29 @@ export const getEpubFromBook = async (
 
 			return customResponse.value
 		}
-		if (response.value === 'royal')
-			return await royalParser({ page, betterName, name, author })
 		if (!response.value) return
-		await page.goto(`https://www.z-epub.com${response.value.link}`)
+		if (typeof response.value === 'string') {
+			await page.goto(`http:${response.value}`)
+			const isError2 = await page.evaluate(() => {
+				const error = document.querySelector(
+					'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
+				)
+				if (!error) return true
+			})
+			if (isError2) return console.log(red(`❌ book ${name} is not available `))
+			await page.waitForSelector(
+				'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
+			)
+			return await page.evaluate(() => {
+				const epub = document.querySelector(
+					'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
+				)
+				return `http:${epub.getAttribute('href')}`
+			})
+		}
+		await page.goto(`https://www.z-epub.com${response.value.link}`, {
+			waitUntil: 'domcontentloaded'
+		})
 		await page.waitForSelector(
 			'div.book-links.row.justify-content-center a.col-lg-4.col-sm-4.download-link'
 		)
@@ -131,7 +168,9 @@ export const getEpubFromBook = async (
 			return `https://www.z-epub.com${epub.getAttribute('href')}`
 		})
 	}
-	await page.goto(`https://www.z-epub.com${filterArray.link}`)
+	await page.goto(`https://www.z-epub.com${filterArray.link}`, {
+		waitUntil: 'domcontentloaded'
+	})
 	await page.waitForSelector(
 		'div.book-links.row.justify-content-center a.col-lg-4.col-sm-4.download-link'
 	)
