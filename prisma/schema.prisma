@@ -18,10 +18,12 @@ model User {
   name         String?
   password     String
   role         String      @default("USER")
-  bookMarks    Int         @default(0)
+  bookMarks    Int         @default(300)
   quotes       Quotation[]
   history      History[]
+  readingTime  Int         @default(0)
   likedBooks   Book[]      @relation("LikedBooks")
+  buyBooks     Book[]      @relation("BuyBooks")
   readBooks    Book[]      @relation("ReadBooks")
   readingBooks Book[]      @relation("ReadingBooks")
 }
@@ -44,6 +46,7 @@ model Book {
   likedBy      User[]      @relation("LikedBooks")
   readBy       User[]      @relation("ReadBooks")
   readingBy    User[]      @relation("ReadingBooks")
+  buyBy        User[]      @relation("BuyBooks")
   history      History[]
 }
 

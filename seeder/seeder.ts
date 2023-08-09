@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { gray, green, rainbow } from 'colors'
 import puppeteer from 'puppeteer-extra'
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
-import JsonBooks from './books_1.Best_Books_Ever.json'
+// import JsonBooks from './books_1.Best_Books_Ever.json'
 import { getEpubFromBook } from './getEpubFromBook'
 
 interface Book {
@@ -34,7 +34,10 @@ interface Book {
 }
 const prisma = new PrismaClient()
 export const seeder = async () => {
-	const books = JSON.parse(JSON.stringify(JsonBooks))
+	const books = JSON.parse(JSON.stringify(
+		// JsonBooks 
+		[]
+	))
 	const { id: lastBookIndex } = await prisma.book.findFirst({
 		orderBy: {
 			id: 'desc'

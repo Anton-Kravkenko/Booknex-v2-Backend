@@ -64,4 +64,24 @@ export class UsersService {
 			isFavorite: `${!isFavorite}`
 		}
 	}
+
+	async buyBook(userId: number, id: number) {
+		const user = await this.getById(+userId, {
+			buyBooks: true
+		})
+		if (!user) return new BadRequestException('User not found')
+		const isBought = user.buyBooks.some(item => item.id === +id)
+		await this.prisma.user.update({
+			where: { id: +userId },
+			data: {
+				buyBooks: {
+					[isBought ? 'disconnect' : 'connect']: { id: +id }
+				}
+			}
+		})
+		return {
+			id: id,
+			isBought: `${!isBought}`
+		}
+	}
 }
