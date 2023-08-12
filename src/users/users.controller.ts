@@ -33,7 +33,7 @@ export class UsersController {
 
 	@HttpCode(200)
 	@Auth()
-	@Patch('/toggle-favorite/:type/:id')
+	@Patch('/toggle-favorite/:id')
 	async toggleFavorite(
 		@CurrentUser('id') userId: number,
 		@Param('id') id: number

@@ -74,8 +74,7 @@ model History {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Book      Book?    @relation(fields: [bookId], references: [id])
-  bookId    Int?
-  User      User?    @relation(fields: [userId], references: [id])
+  books     Book[]
+  user      User?    @relation(fields: [userId], references: [id])
   userId    Int?
 }
