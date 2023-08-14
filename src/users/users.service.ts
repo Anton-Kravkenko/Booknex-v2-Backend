@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { hash } from 'argon2'
 import { PrismaService } from '../prisma.service'
+import { returnUserObject } from '../utils/return-object/return.user.object'
 import { UserUpdateDto } from './dto/user.update.dto'
-import { returnUserObject } from './utils/return-user.object'
 
 @Injectable()
 export class UsersService {
@@ -62,26 +62,6 @@ export class UsersService {
 		return {
 			id: id,
 			isFavorite: `${!isFavorite}`
-		}
-	}
-
-	async buyBook(userId: number, id: number) {
-		const user = await this.getById(+userId, {
-			buyBooks: true
-		})
-		if (!user) return new BadRequestException('User not found')
-		const isBought = user.buyBooks.some(item => item.id === +id)
-		await this.prisma.user.update({
-			where: { id: +userId },
-			data: {
-				buyBooks: {
-					[isBought ? 'disconnect' : 'connect']: { id: +id }
-				}
-			}
-		})
-		return {
-			id: id,
-			isBought: `${!isBought}`
 		}
 	}
 }

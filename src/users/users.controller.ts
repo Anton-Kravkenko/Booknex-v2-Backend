@@ -27,7 +27,8 @@ export class UsersController {
 			likedBooks: true,
 			bookMarks: true,
 			readBooks: true,
-			readingBooks: true
+			readingBooks: true,
+			buyBooks: true
 		})
 	}
 
@@ -48,12 +49,5 @@ export class UsersController {
 	async updateUser(@CurrentUser('id') id, @Body() dto: UserUpdateDto) {
 		return this.usersService.updateUser(id, dto)
 	}
-
-	@HttpCode(200)
-	@Auth()
-	@UsePipes(new ValidationPipe())
-	@Post('/buy-book')
-	async buyBook(@CurrentUser('id') id, @Body() bookId: number) {
-		return this.usersService.buyBook(id, bookId)
-	}
+	// TODO: сделать пополнение таймера чтения
 }

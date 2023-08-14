@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
+import { defaultReturnObject } from '../utils/return-object/return.default.object'
+import { returnUserObject } from '../utils/return-object/return.user.object'
 
 @Injectable()
 export class HistoryService {
@@ -7,6 +9,13 @@ export class HistoryService {
 
 	getHistory(userId: number) {
 		return this.prisma.history.findMany({
+			select: {
+				...defaultReturnObject,
+				books: true,
+				user: {
+					select: returnUserObject
+				}
+			},
 			where: {
 				userId: userId
 			}

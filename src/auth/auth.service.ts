@@ -40,7 +40,8 @@ export class AuthService {
 			data: {
 				email: dto.email,
 				password: await hash(dto.password),
-				bookMarks: 0
+				bookMarks: 300,
+				name: dto.email.split('@')[0]
 			}
 		})
 		const tokens = await this.issueToken(user.id)
