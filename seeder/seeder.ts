@@ -35,7 +35,7 @@ interface Book {
 const prisma = new PrismaClient()
 export const seeder = async () => {
 	const books = JSON.parse(JSON.stringify(
-		// JsonBooks 
+		// JsonBooks
 		[]
 	))
 	const { id: lastBookIndex } = await prisma.book.findFirst({
@@ -49,7 +49,7 @@ export const seeder = async () => {
 	})
 	console.log(rainbow(`Last book index: ${lastBookIndex}`))
 	books.filter((book: Book) => book.language === 'English')
-		.slice(lastBookIndex + 1, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 30000)
+		.slice(lastBookIndex + 1, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 20000)
 	const adblocker = AdblockerPlugin({
 		blockTrackers: true,
 	})
@@ -89,6 +89,9 @@ export const seeder = async () => {
 			if (typeof epub !== 'string') {
 				continue
 			}
+			const  rared = book.numRatings < 30000 ? 'Common' : book.numRatings < 60000 ? 'Uncommon' : book.numRatings < 100000 ? 'Rare' : book.numRatings < 500000 ? 'Very Rare' : book.numRatings < 1000000 ? 'Limited' : book.numRatings < 2000000 ? 'Exquisite' : book.numRatings < 4000000 ? 'Mythic' : book.numRatings < 5500000 ? 'Precious' : book.numRatings < 8500000 ? 'Priceless' : book.numRatings < 10000000 ? 'Antiquarian' : 'Relic'
+			
+			const price =  book.numRatings < 30000 ? 20 : book.numRatings < 60000 ? 50 : book.numRatings < 100000 ? 100 : book.numRatings < 500000 ? 250 : book.numRatings < 1000000 ? 500 : book.numRatings < 2000000 ? 1000 : book.numRatings < 4000000 ? 2000 : book.numRatings < 5500000 ? 5000 : book.numRatings < 8500000 ? 10000 : book.numRatings < 10000000 ? 20000 : 40000
 			await prisma.book.create({
 				data: {
 				title: book.title,
@@ -107,7 +110,8 @@ export const seeder = async () => {
 				pages: Number(book.pages),
 				likedPercent: book.likedPercent,
 				epub: epub,
-				rared: book.numRatings < 1000 ? 'Common' : book.numRatings < 10000 ? 'Uncommon' : book.numRatings < 100000 ? 'Rare' : book.numRatings < 1000000 ? 'Very Rare' : book.numRatings < 5000000 ? 'Legendary' : 'Mythical',
+				rared,
+					price,
 					},
 				})
 			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))

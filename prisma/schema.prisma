@@ -19,7 +19,6 @@ model User {
   password     String
   role         String    @default("USER")
   bookMarks    Int       @default(300)
-  readingTime  Int       @default(0)
   history      History[]
   likedBooks   Book[]    @relation("LikedBooks")
   buyBooks     Book[]    @relation("BuyBooks")
@@ -40,6 +39,7 @@ model Book {
   epub         String
   likedPercent Int
   rared        String
+  price        Int
   genre        Genre[]
   likedBy      User[]    @relation("LikedBooks")
   readBy       User[]    @relation("ReadBooks")
@@ -61,6 +61,7 @@ model History {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   books     Book[]
+  time      Int
   user      User?    @relation(fields: [userId], references: [id])
   userId    Int?
 }

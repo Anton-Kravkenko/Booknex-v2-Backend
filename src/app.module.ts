@@ -14,6 +14,12 @@ import { WalletModule } from './wallet/wallet.module'
 		CatalogModule,
 		HistoryModule,
 		WalletModule
+		// TODO: сделать кэширование
+		// CacheModule.register({
+		// 	store: redisStore,
+		// 	host: 'localhost',
+		// 	port: 6379
+		// })
 	],
 	controllers: [AppController],
 	providers: [AppService]
