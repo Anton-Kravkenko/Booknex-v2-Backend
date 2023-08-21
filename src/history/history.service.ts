@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
 import { defaultReturnObject } from '../utils/return-object/return.default.object'
 import { returnUserObject } from '../utils/return-object/return.user.object'
+import { AddHistoryDto } from './dto/add.history.dto'
 
 @Injectable()
 export class HistoryService {
@@ -21,9 +22,10 @@ export class HistoryService {
 			}
 		})
 	}
-	async addHistory(userId: number, dto: { bookIds: number[] }) {
+	async addHistory(userId: number, dto: AddHistoryDto) {
 		await this.prisma.history.create({
 			data: {
+				time: dto.time,
 				books: {
 					connect: dto.bookIds.map(id => ({ id }))
 				},

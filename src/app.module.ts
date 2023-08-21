@@ -6,6 +6,7 @@ import { CatalogModule } from './catalog/catalog.module'
 import { HistoryModule } from './history/history.module'
 import { UsersModule } from './users/users.module'
 import { WalletModule } from './wallet/wallet.module'
+import { GenreModule } from './genre/genre.module';
 
 @Module({
 	imports: [
@@ -13,7 +14,8 @@ import { WalletModule } from './wallet/wallet.module'
 		AuthModule,
 		CatalogModule,
 		HistoryModule,
-		WalletModule
+		WalletModule,
+		GenreModule
 		// TODO: сделать кэширование
 		// CacheModule.register({
 		// 	store: redisStore,

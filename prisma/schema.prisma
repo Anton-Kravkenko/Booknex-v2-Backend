@@ -17,7 +17,7 @@ model User {
   email        String    @unique
   name         String?
   password     String
-  role         String    @default("USER")
+  isAdmin      Boolean   @default(false)
   bookMarks    Int       @default(300)
   history      History[]
   likedBooks   Book[]    @relation("LikedBooks")
@@ -39,7 +39,7 @@ model Book {
   epub         String
   likedPercent Int
   rared        String
-  price        Int
+  price        Int       @default(0)
   genre        Genre[]
   likedBy      User[]    @relation("LikedBooks")
   readBy       User[]    @relation("ReadBooks")
@@ -53,6 +53,7 @@ model Genre {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String   @unique
+  color     String   @default("#000000")
   books     Book[]
 }
 
