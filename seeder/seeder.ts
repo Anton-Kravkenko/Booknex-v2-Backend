@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { gray, green, rainbow } from 'colors'
 import puppeteer from 'puppeteer-extra'
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
+import randomColor from 'randomcolor'
 // import JsonBooks from './books_1.Best_Books_Ever.json'
 import { getEpubFromBook } from './getEpubFromBook'
 
@@ -38,7 +39,7 @@ export const seeder = async () => {
 		// JsonBooks
 		[]
 	))
-	const { id: lastBookIndex } = await prisma.book.findFirst({
+	const lastBook = await prisma.book.findFirst({
 		orderBy: {
 			id: 'desc'
 		},
@@ -46,10 +47,10 @@ export const seeder = async () => {
 		select: {
 			id: true
 		}
-	})
-	console.log(rainbow(`Last book index: ${lastBookIndex}`))
+	}) || { id: 0 }
+	console.log(rainbow(`Last book index: ${lastBook.id}`))
 	books.filter((book: Book) => book.language === 'English')
-		.slice(lastBookIndex + 1, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 20000)
+		.slice(lastBook.id + 1, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 20000)
 	const adblocker = AdblockerPlugin({
 		blockTrackers: true,
 	})
@@ -67,7 +68,7 @@ export const seeder = async () => {
 			req.continue()
 		}
 	})
-	for (let i = lastBookIndex + 1; i < books.length; i++) {
+	for (let i = lastBook.id + 1; i < books.length; i++) {
 		const book = books[i]
 		try {
 			const oldBook = await prisma.book.findFirst({
@@ -89,9 +90,9 @@ export const seeder = async () => {
 			if (typeof epub !== 'string') {
 				continue
 			}
-			const  rared = book.numRatings < 30000 ? 'Common' : book.numRatings < 60000 ? 'Uncommon' : book.numRatings < 100000 ? 'Rare' : book.numRatings < 500000 ? 'Very Rare' : book.numRatings < 1000000 ? 'Limited' : book.numRatings < 2000000 ? 'Exquisite' : book.numRatings < 4000000 ? 'Mythic' : book.numRatings < 5500000 ? 'Precious' : book.numRatings < 8500000 ? 'Priceless' : book.numRatings < 10000000 ? 'Antiquarian' : 'Relic'
+			const  rared = book.numRatings < 30000 ? 'Common' : book.numRatings < 60000 ? 'Uncommon' : book.numRatings < 100000 ? 'Rare' : book.numRatings < 300000 ? 'Very Rare' : book.numRatings < 500000 ? 'Limited' : book.numRatings < 1000000 ? 'Exquisite' : book.numRatings < 1500000 ? 'Mythic' : book.numRatings < 2500000 ? 'Precious' : book.numRatings < 3500000 ? 'Priceless' : book.numRatings < 5000000 ? 'Antiquarian' : 'Relic'
 			
-			const price =  book.numRatings < 30000 ? 20 : book.numRatings < 60000 ? 50 : book.numRatings < 100000 ? 100 : book.numRatings < 500000 ? 250 : book.numRatings < 1000000 ? 500 : book.numRatings < 2000000 ? 1000 : book.numRatings < 4000000 ? 2000 : book.numRatings < 5500000 ? 5000 : book.numRatings < 8500000 ? 10000 : book.numRatings < 10000000 ? 20000 : 40000
+			const price =  book.numRatings < 30000 ? 20 : book.numRatings < 60000 ? 50 : book.numRatings < 100000 ? 100 : book.numRatings < 300000 ? 250 : book.numRatings < 500000 ? 500 : book.numRatings < 1000000 ? 700 : book.numRatings < 1500000 ? 1000 : book.numRatings < 2500000 ? 2000 : book.numRatings < 3500000 ? 3500 : book.numRatings < 4500000 ? 5000 : 8000
 			await prisma.book.create({
 				data: {
 				title: book.title,
@@ -102,7 +103,8 @@ export const seeder = async () => {
 						connectOrCreate: book.genres.split(',').map((genre) => {
 							return {
 								where: { name: genre },
-								create: { name: genre },
+								// replace [] and '
+								create: { name: genre.replace(/[\[\]']/g, '').trim(), color: randomColor()},
 							};
 						}),
 					},

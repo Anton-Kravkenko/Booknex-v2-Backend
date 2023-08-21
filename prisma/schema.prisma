@@ -20,6 +20,7 @@ model User {
   isAdmin      Boolean   @default(false)
   bookMarks    Int       @default(300)
   history      History[]
+  boxes        Boxes[]
   likedBooks   Book[]    @relation("LikedBooks")
   buyBooks     Book[]    @relation("BuyBooks")
   readBooks    Book[]    @relation("ReadBooks")
@@ -65,4 +66,17 @@ model History {
   time      Int
   user      User?    @relation(fields: [userId], references: [id])
   userId    Int?
+}
+
+model Boxes {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String   @unique
+  image       String   @default("")
+  description String   @default("No description")
+  rare        String   @default("Common")
+  price       Int      @default(0)
+  isBought    Boolean  @default(false)
+  users       User[]
 }

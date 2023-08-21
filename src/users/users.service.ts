@@ -64,4 +64,25 @@ export class UsersService {
 			isFavorite: `${!isFavorite}`
 		}
 	}
+
+	async changeMarks(userId: number, count: number) {
+		if (typeof count !== 'number' || isNaN(count))
+			return new BadRequestException('Count must be a number').getResponse()
+		const user = await this.getById(+userId, {
+			bookMarks: true
+		})
+		if (!user) return new BadRequestException('User not found').getResponse()
+		if (count + user.bookMarks < 0)
+			return new BadRequestException('You dont have enough money').getResponse()
+		await this.prisma.user.update({
+			where: { id: +userId },
+			data: {
+				bookMarks: count + user.bookMarks
+			}
+		})
+		return {
+			message: 'Success',
+			bookMarks: count + user.bookMarks
+		}
+	}
 }

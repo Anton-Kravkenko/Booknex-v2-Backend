@@ -49,5 +49,11 @@ export class UsersController {
 	async updateUser(@CurrentUser('id') id, @Body() dto: UserUpdateDto) {
 		return this.usersService.updateUser(id, dto)
 	}
-	// TODO: сделать пополнение таймера чтения
+	@HttpCode(200)
+	@Auth()
+	@UsePipes(new ValidationPipe())
+	@Post('/:count')
+	async changeMarks(@CurrentUser('id') id, @Param() param: { count: number }) {
+		return this.usersService.changeMarks(id, +param.count)
+	}
 }

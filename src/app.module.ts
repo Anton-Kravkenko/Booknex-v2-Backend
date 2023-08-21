@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
+import { BookModule } from './book/book.module'
 import { CatalogModule } from './catalog/catalog.module'
+import { GenreModule } from './genre/genre.module'
 import { HistoryModule } from './history/history.module'
 import { UsersModule } from './users/users.module'
-import { WalletModule } from './wallet/wallet.module'
-import { GenreModule } from './genre/genre.module';
+import { BoxesModule } from './boxes/boxes.module';
 
 @Module({
 	imports: [
@@ -14,8 +15,9 @@ import { GenreModule } from './genre/genre.module';
 		AuthModule,
 		CatalogModule,
 		HistoryModule,
-		WalletModule,
-		GenreModule
+		GenreModule,
+		BookModule,
+		BoxesModule
 		// TODO: сделать кэширование
 		// CacheModule.register({
 		// 	store: redisStore,
