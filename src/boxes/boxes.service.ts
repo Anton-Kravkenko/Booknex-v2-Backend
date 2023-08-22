@@ -23,7 +23,7 @@ export class BoxesService {
 		if (!boxes) throw new BadRequestException('Box not found')
 		return boxes
 	}
-
+	// TODO: openBox function
 	async openBox(userId: number, boxId: number) {
 		console.log(userId, boxId)
 	}

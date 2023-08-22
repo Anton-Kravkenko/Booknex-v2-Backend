@@ -32,4 +32,28 @@ export class BookService {
 			bookMarks: user.bookMarks - price
 		}
 	}
+
+	async reviewBook(userId: number, id: number) {
+		console.log(userId, id)
+	}
+	//TODO: доделать получение реков с книги
+	async getBookInfoById(id: number) {
+		const book = await this.prisma.book.findUnique({
+			where: { id: +id },
+			include: {
+				genre: {
+					select: {
+						name: true,
+						id: true,
+						color: true
+					}
+				}
+			}
+		})
+		if (!book) return new BadRequestException('Book not found')
+
+		return {
+			...book
+		}
+	}
 }
