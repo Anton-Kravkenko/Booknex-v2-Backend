@@ -5,26 +5,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-model User {
-  id           Int       @id @default(autoincrement())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  email        String    @unique
-  name         String?
-  password     String
-  isAdmin      Boolean   @default(false)
-  bookMarks    Int       @default(300)
-  history      History[]
-  boxes        Boxes[]
-  likedBooks   Book[]    @relation("LikedBooks")
-  buyBooks     Book[]    @relation("BuyBooks")
-  readBooks    Book[]    @relation("ReadBooks")
-  readingBooks Book[]    @relation("ReadingBooks")
 }
 
 model Book {
@@ -68,17 +55,59 @@ model History {
   userId    Int?
 }
 
-// TODO: loot box model
+model User {
+  id           Int             @id @default(autoincrement())
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  email        String          @unique
+  name         String?
+  password     String
+  isAdmin      Boolean         @default(false)
+  bookMarks    Int             @default(300)
+  history      History[]
+  likedBooks   Book[]          @relation("LikedBooks")
+  buyBooks     Book[]          @relation("BuyBooks")
+  readBooks    Book[]          @relation("ReadBooks")
+  readingBooks Book[]          @relation("ReadingBooks")
+  inventory    InventoryItem[]
+}
+
 model Boxes {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  name        String   @unique
-  image       String   @default("")
-  description String   @default("No description")
-  rare        String   @default("Common")
-  price       Int      @default(0)
-  isBought    Boolean  @default(false)
-  user        User?    @relation(fields: [userId], references: [id])
-  userId      Int?
+  id            Int             @id @default(autoincrement())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  name          String          @unique
+  image         String          @default("")
+  description   String          @default("No description")
+  rare          String          @default("Common")
+  price         Int             @default(0)
+  isBought      Boolean         @default(false)
+  InventoryItem InventoryItem[] @relation("BoxInventoryItem")
+}
+
+model Theme {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  rare      String   @default("Common")
+
+  InventoryItem InventoryItem[] @relation("ThemeInventoryItem")
+}
+
+enum InventoryItemType {
+  Boxes
+  Theme
+}
+
+model InventoryItem {
+  id              Int               @id @default(autoincrement())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  user            User?             @relation(fields: [userId], references: [id])
+  userId          Int?
+  InventoryItemId Int?
+  type            InventoryItemType
+  Boxes           Boxes?            @relation("BoxInventoryItem", fields: [InventoryItemId], references: [id], map: "BoxInventoryItem")
+  Theme           Theme?            @relation("ThemeInventoryItem", fields: [InventoryItemId], references: [id], map: "ThemeInventoryItem")
 }
