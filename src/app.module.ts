@@ -6,8 +6,8 @@ import { BookModule } from './book/book.module'
 import { CatalogModule } from './catalog/catalog.module'
 import { GenreModule } from './genre/genre.module'
 import { HistoryModule } from './history/history.module'
+import { InventoryModule } from './inventory/inventory.module'
 import { UsersModule } from './users/users.module'
-import { BoxesModule } from './boxes/boxes.module';
 
 @Module({
 	imports: [
@@ -17,7 +17,7 @@ import { BoxesModule } from './boxes/boxes.module';
 		HistoryModule,
 		GenreModule,
 		BookModule,
-		BoxesModule
+		InventoryModule
 		// TODO: сделать кэширование
 		// CacheModule.register({
 		// 	store: redisStore,

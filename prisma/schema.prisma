@@ -49,10 +49,11 @@ model History {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  books     Book[]
+  book      Book     @relation(fields: [bookId], references: [id])
   time      Int
   user      User?    @relation(fields: [userId], references: [id])
   userId    Int?
+  bookId    Int
 }
 
 model User {
@@ -81,23 +82,24 @@ model Boxes {
   description   String          @default("No description")
   rare          String          @default("Common")
   price         Int             @default(0)
-  isBought      Boolean         @default(false)
   InventoryItem InventoryItem[] @relation("BoxInventoryItem")
 }
 
-model Theme {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String   @unique
-  rare      String   @default("Common")
-
-  InventoryItem InventoryItem[] @relation("ThemeInventoryItem")
+model Perks {
+  id            Int             @id @default(autoincrement())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  name          String          @unique
+  image         String          @default("")
+  description   String          @default("No description")
+  rare          String          @default("Common")
+  price         Int             @default(0)
+  InventoryItem InventoryItem[] @relation("PerkInventoryItem")
 }
 
 enum InventoryItemType {
   Boxes
-  Theme
+  Perks
 }
 
 model InventoryItem {
@@ -108,6 +110,7 @@ model InventoryItem {
   userId          Int?
   InventoryItemId Int?
   type            InventoryItemType
+  isBought        Boolean           @default(false)
   Boxes           Boxes?            @relation("BoxInventoryItem", fields: [InventoryItemId], references: [id], map: "BoxInventoryItem")
-  Theme           Theme?            @relation("ThemeInventoryItem", fields: [InventoryItemId], references: [id], map: "ThemeInventoryItem")
+  Perks           Perks?            @relation("PerkInventoryItem", fields: [InventoryItemId], references: [id], map: "PerkInventoryItem")
 }

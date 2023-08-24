@@ -12,7 +12,7 @@ export class HistoryService {
 		return this.prisma.history.findMany({
 			select: {
 				...defaultReturnObject,
-				books: true,
+				book: true,
 				user: {
 					select: returnUserObject
 				}
@@ -22,21 +22,35 @@ export class HistoryService {
 			}
 		})
 	}
+
+	getHistoryByBookId(bookId: number) {
+		return this.prisma.history.findMany({
+			select: {
+				...defaultReturnObject,
+				book: false,
+				time: true
+			},
+			where: {
+				bookId: +bookId
+			}
+		})
+	}
 	async addHistory(userId: number, dto: AddHistoryDto) {
-		await this.prisma.history.create({
+		await this.prisma.user.update({
+			where: { id: userId },
 			data: {
-				time: dto.time,
-				books: {
-					connect: dto.bookIds.map(id => ({ id }))
-				},
-				user: {
-					connect: {
-						id: userId
+				history: {
+					createMany: {
+						data: dto.history.map(item => {
+							return {
+								bookId: item.bookId,
+								time: item.time
+							}
+						})
 					}
 				}
 			}
 		})
-
 		return {
 			message: 'History added'
 		}

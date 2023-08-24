@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common'
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
 import { Auth } from '../auth/decorator/auth.decorator'
 import { CurrentUser } from '../auth/decorator/user.decorator'
 import { AddHistoryDto } from './dto/add.history.dto'
@@ -14,6 +14,12 @@ export class HistoryController {
 		return this.historyService.getHistory(id)
 	}
 
+	@Get('/book/:id')
+	@Auth()
+	@HttpCode(200)
+	async getHistoryByBookId(@Param('id') id: number) {
+		return this.historyService.getHistoryByBookId(id)
+	}
 	@Post('/add')
 	@Auth()
 	@HttpCode(200)
