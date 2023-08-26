@@ -16,12 +16,13 @@ Table Book {
   likedPercent Int [not null]
   rared String [not null]
   price Int [not null, default: 0]
-  genre Genre [not null]
   likedBy User [not null]
   readBy User [not null]
   readingBy User [not null]
   buyBy User [not null]
   history History [not null]
+  genre Genre [not null]
+  reviews Review [not null]
 }
 
 Table Genre {
@@ -31,6 +32,18 @@ Table Genre {
   name String [unique, not null]
   color String [not null, default: '#000000']
   books Book [not null]
+}
+
+Table Review {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  book Book [not null]
+  bookId Int [not null]
+  user User [not null]
+  userId Int [not null]
+  text String [not null]
+  emotion String[] [not null]
 }
 
 Table History {
@@ -50,39 +63,17 @@ Table User {
   updatedAt DateTime [not null]
   email String [unique, not null]
   name String
+  picture String
   password String [not null]
   isAdmin Boolean [not null, default: false]
   bookMarks Int [not null, default: 300]
-  history History [not null]
   likedBooks Book [not null]
   buyBooks Book [not null]
   readBooks Book [not null]
   readingBooks Book [not null]
+  history History [not null]
   inventory InventoryItem [not null]
-}
-
-Table Boxes {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  name String [unique, not null]
-  image String [not null, default: '']
-  description String [not null, default: 'No description']
-  rare String [not null, default: 'Common']
-  price Int [not null, default: 0]
-  InventoryItem InventoryItem [not null]
-}
-
-Table Perks {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  name String [unique, not null]
-  image String [not null, default: '']
-  description String [not null, default: 'No description']
-  rare String [not null, default: 'Common']
-  price Int [not null, default: 0]
-  InventoryItem InventoryItem [not null]
+  review Review [not null]
 }
 
 Table InventoryItem {
@@ -91,17 +82,40 @@ Table InventoryItem {
   updatedAt DateTime [not null]
   user User
   userId Int
-  InventoryItemId Int
-  type InventoryItemType [not null]
+  inventoryItemId Int
+  enhancements Enhancements
   isBought Boolean [not null, default: false]
-  Boxes Boxes
-  Perks Perks
 }
 
-Enum InventoryItemType {
-  Boxes
-  Perks
+Table Enhancements {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [unique, not null]
+  image String [not null, default: '']
+  description String [not null, default: 'No description']
+  rare rare [not null, default: 'Common']
+  price Int [not null, default: 0]
+  type EnhancementsType [not null]
+  inventoryItem InventoryItem [not null]
 }
+
+Enum EnhancementsType {
+  Box
+  Pets
+  Modifications
+}
+
+Enum rare {
+  Common
+  Rare
+  Epic
+  Legendary
+}
+
+Ref: Review.bookId > Book.id
+
+Ref: Review.userId > User.id
 
 Ref: History.bookId > Book.id
 
@@ -109,6 +123,4 @@ Ref: History.userId > User.id
 
 Ref: InventoryItem.userId > User.id
 
-Ref: InventoryItem.InventoryItemId > Boxes.id
-
-Ref: InventoryItem.InventoryItemId > Perks.id
+Ref: InventoryItem.inventoryItemId > Enhancements.id

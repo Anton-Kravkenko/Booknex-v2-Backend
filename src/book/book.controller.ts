@@ -1,8 +1,7 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
+import { Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
 import { Auth } from '../auth/decorator/auth.decorator'
 import { CurrentUser } from '../auth/decorator/user.decorator'
 import { BookService } from './book.service'
-import { BuyBookDto } from './dto/buy.book.dto'
 
 @Controller('book')
 export class BookController {
@@ -10,15 +9,15 @@ export class BookController {
 
 	@HttpCode(200)
 	@Auth()
-	@Post('/buy-book')
-	async buyBook(@CurrentUser('id') id, @Body() dto: BuyBookDto) {
-		return this.bookService.buyBook(+id, +dto.bookId, +dto.price)
+	@Post('/buy/:id')
+	async buyBook(@CurrentUser('id') userId, @Param('id') bookId: number) {
+		return this.bookService.buyBook(+userId, +bookId)
 	}
 	@Post('/review/:id')
 	@Auth()
 	@HttpCode(200)
-	async reviewBook(@CurrentUser('id') id, @Body() dto: BuyBookDto) {
-		return this.bookService.reviewBook(+id, +dto.bookId)
+	async reviewBook(@CurrentUser('id') id, @Param('id') bookId: number) {
+		return this.bookService.reviewBook(+id, +bookId)
 	}
 	@Get('/:id')
 	@HttpCode(200)

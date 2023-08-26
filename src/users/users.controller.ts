@@ -28,10 +28,11 @@ export class UsersController {
 			bookMarks: true,
 			readBooks: true,
 			readingBooks: true,
-			buyBooks: true
+			buyBooks: true,
+			inventory: true
 		})
 	}
-
+	//TODO: сделать добавление в избранное и много другое
 	@HttpCode(200)
 	@Auth()
 	@Patch('/toggle-favorite/:id')
@@ -41,7 +42,7 @@ export class UsersController {
 	) {
 		return this.usersService.toggleFavorite(userId, id)
 	}
-
+	//TODO: сделать добавление картинки профиля своей
 	@HttpCode(200)
 	@Auth()
 	@UsePipes(new ValidationPipe())
