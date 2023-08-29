@@ -1,4 +1,6 @@
-export 		function weightedRandom(weights: { [key: string]: number }) {
+
+
+export function weightedRandom(weights: { [key: string]: number }) {
   let i: string
   let sum = 0
   const r = Math.random()

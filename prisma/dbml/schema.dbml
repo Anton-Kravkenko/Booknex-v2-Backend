@@ -14,8 +14,6 @@ Table Book {
   image String [not null]
   epub String [not null]
   likedPercent Int [not null]
-  rared String [not null]
-  price Int [not null, default: 0]
   likedBy User [not null]
   readBy User [not null]
   readingBy User [not null]
@@ -66,51 +64,12 @@ Table User {
   picture String
   password String [not null]
   isAdmin Boolean [not null, default: false]
-  bookMarks Int [not null, default: 300]
   likedBooks Book [not null]
   buyBooks Book [not null]
   readBooks Book [not null]
   readingBooks Book [not null]
   history History [not null]
-  inventory InventoryItem [not null]
   review Review [not null]
-}
-
-Table InventoryItem {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  user User
-  userId Int
-  inventoryItemId Int
-  enhancements Enhancements
-  isBought Boolean [not null, default: false]
-}
-
-Table Enhancements {
-  id Int [pk, increment]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  name String [unique, not null]
-  image String [not null, default: '']
-  description String [not null, default: 'No description']
-  rare rare [not null, default: 'Common']
-  price Int [not null, default: 0]
-  type EnhancementsType [not null]
-  inventoryItem InventoryItem [not null]
-}
-
-Enum EnhancementsType {
-  Box
-  Pets
-  Modifications
-}
-
-Enum rare {
-  Common
-  Rare
-  Epic
-  Legendary
 }
 
 Ref: Review.bookId > Book.id
@@ -120,7 +79,3 @@ Ref: Review.userId > User.id
 Ref: History.bookId > Book.id
 
 Ref: History.userId > User.id
-
-Ref: InventoryItem.userId > User.id
-
-Ref: InventoryItem.inventoryItemId > Enhancements.id

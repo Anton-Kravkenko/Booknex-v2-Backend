@@ -7,21 +7,18 @@ import { BookService } from './book.service'
 export class BookController {
 	constructor(private readonly bookService: BookService) {}
 
-	@HttpCode(200)
-	@Auth()
-	@Post('/buy/:id')
-	async buyBook(@CurrentUser('id') userId, @Param('id') bookId: number) {
-		return this.bookService.buyBook(+userId, +bookId)
-	}
 	@Post('/review/:id')
 	@Auth()
 	@HttpCode(200)
-	async reviewBook(@CurrentUser('id') id, @Param('id') bookId: number) {
-		return this.bookService.reviewBook(+id, +bookId)
+	async reviewBook(
+		@CurrentUser('id') userId: number,
+		@Param('id') bookId: string
+	) {
+		return this.bookService.reviewBook(+userId, +bookId)
 	}
 	@Get('/:id')
 	@HttpCode(200)
-	async getBookInfoById(@Param('id') id: number) {
-		return this.bookService.getBookInfoById(+id)
+	async getBookInfoById(@Param('id') bookId: string) {
+		return this.bookService.getBookInfoById(+bookId)
 	}
 }

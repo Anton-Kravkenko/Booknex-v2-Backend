@@ -12,7 +12,7 @@ export class GenreController {
 	}
 	@Get('/:id')
 	@HttpCode(200)
-	async getGenreById(@Param('id') id: number) {
-		return this.genreService.getGenreById(id)
+	async getGenreById(@Param('id') genreId: string) {
+		return this.genreService.getGenreById(+genreId)
 	}
 }

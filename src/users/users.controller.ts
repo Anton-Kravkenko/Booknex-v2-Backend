@@ -25,11 +25,9 @@ export class UsersController {
 		return this.usersService.getById(id, {
 			email: true,
 			likedBooks: true,
-			bookMarks: true,
 			readBooks: true,
 			readingBooks: true,
-			buyBooks: true,
-			inventory: true
+			buyBooks: true
 		})
 	}
 	//TODO: сделать добавление в избранное и много другое
@@ -38,23 +36,16 @@ export class UsersController {
 	@Patch('/toggle-favorite/:id')
 	async toggleFavorite(
 		@CurrentUser('id') userId: number,
-		@Param('id') id: number
+		@Param('id') id: string
 	) {
-		return this.usersService.toggleFavorite(userId, id)
+		return this.usersService.toggleFavorite(userId, +id)
 	}
 	//TODO: сделать добавление картинки профиля своей
 	@HttpCode(200)
 	@Auth()
 	@UsePipes(new ValidationPipe())
 	@Post('/update-user')
-	async updateUser(@CurrentUser('id') id, @Body() dto: UserUpdateDto) {
-		return this.usersService.updateUser(id, dto)
-	}
-	@HttpCode(200)
-	@Auth()
-	@UsePipes(new ValidationPipe())
-	@Post('/:count')
-	async changeMarks(@CurrentUser('id') id, @Param() param: { count: number }) {
-		return this.usersService.changeMarks(id, +param.count)
+	async updateUser(@CurrentUser('id') id: number, @Body() dto: UserUpdateDto) {
+		return this.usersService.updateUser(+id, dto)
 	}
 }

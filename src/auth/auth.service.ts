@@ -40,7 +40,6 @@ export class AuthService {
 			data: {
 				email: dto.email,
 				password: await hash(dto.password),
-				bookMarks: 300,
 				name: dto.email.split('@')[0]
 			}
 		})

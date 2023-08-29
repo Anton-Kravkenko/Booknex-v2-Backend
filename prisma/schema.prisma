@@ -26,8 +26,6 @@ model Book {
   image        String
   epub         String
   likedPercent Int
-  rared        String
-  price        Int       @default(0)
   likedBy      User[]    @relation("LikedBooks")
   readBy       User[]    @relation("ReadBooks")
   readingBy    User[]    @relation("ReadingBooks")
@@ -70,57 +68,18 @@ model History {
 }
 
 model User {
-  id           Int             @id @default(autoincrement())
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  email        String          @unique
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  email        String    @unique
   name         String?
   picture      String?
   password     String
-  isAdmin      Boolean         @default(false)
-  bookMarks    Int             @default(300)
-  likedBooks   Book[]          @relation("LikedBooks")
-  buyBooks     Book[]          @relation("BuyBooks")
-  readBooks    Book[]          @relation("ReadBooks")
-  readingBooks Book[]          @relation("ReadingBooks")
+  isAdmin      Boolean   @default(false)
+  likedBooks   Book[]    @relation("LikedBooks")
+  buyBooks     Book[]    @relation("BuyBooks")
+  readBooks    Book[]    @relation("ReadBooks")
+  readingBooks Book[]    @relation("ReadingBooks")
   history      History[]
-  inventory    InventoryItem[]
   review       Review[]
-}
-
-model InventoryItem {
-  id              Int           @id @default(autoincrement())
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  user            User?         @relation(fields: [userId], references: [id])
-  userId          Int?
-  inventoryItemId Int?
-  enhancements    Enhancements? @relation(fields: [inventoryItemId], references: [id])
-  isBought        Boolean       @default(false)
-}
-
-enum EnhancementsType {
-  Box
-  Pets
-  Modifications
-}
-
-enum rare {
-  Common
-  Rare
-  Epic
-  Legendary
-}
-
-model Enhancements {
-  id            Int              @id @default(autoincrement())
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  name          String           @unique
-  image         String           @default("")
-  description   String           @default("No description")
-  rare          rare             @default(Common)
-  price         Int              @default(0)
-  type          EnhancementsType
-  inventoryItem InventoryItem[]
 }

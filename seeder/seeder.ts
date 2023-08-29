@@ -90,27 +90,7 @@ export const seeder = async () => {
 			if (typeof epub !== 'string' || !epub.startsWith('http')) {
 				continue
 			}
-			const rared = book.numRatings < 30000 ? 'Common' :
-				book.numRatings < 60000 ? 'Uncommon' :
-					book.numRatings < 100000 ? 'Rare' :
-						book.numRatings < 300000 ? 'Very Rare' :
-							book.numRatings < 500000 ? 'Limited' :
-								book.numRatings < 1000000 ? 'Exquisite' :
-									book.numRatings < 1500000 ? 'Mythic' :
-										book.numRatings < 2500000 ? 'Precious' :
-											book.numRatings < 3500000 ? 'Priceless' :
-												book.numRatings < 5000000 ? 'Antiquarian' : 'Relic';
-			
-			const price = book.numRatings < 30000 ? 20 :
-				book.numRatings < 60000 ? 50 :
-					book.numRatings < 100000 ? 100 :
-						book.numRatings < 300000 ? 250 :
-							book.numRatings < 500000 ? 500 :
-								book.numRatings < 1000000 ? 700 :
-									book.numRatings < 1500000 ? 1000 :
-										book.numRatings < 2500000 ? 2000 :
-											book.numRatings < 3500000 ? 3500 :
-												book.numRatings < 4500000 ? 5000 : 8000;
+		
 			await prisma.book.create({
 				data: {
 				title: book.title,
@@ -129,8 +109,6 @@ export const seeder = async () => {
 				pages: Number(book.pages),
 				likedPercent: book.likedPercent,
 				epub: epub,
-				rared,
-				price,
 					},
 				})
 			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))
