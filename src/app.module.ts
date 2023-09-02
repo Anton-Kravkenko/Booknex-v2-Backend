@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { path } from 'app-root-path'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
@@ -15,7 +17,11 @@ import { UsersModule } from './users/users.module'
 		CatalogModule,
 		HistoryModule,
 		GenreModule,
-		BookModule
+		BookModule,
+		ServeStaticModule.forRoot({
+			rootPath: `${path}/uploads`,
+			serveRoot: '/uploads'
+		})
 		// TODO: сделать кэширование
 		// CacheModule.register({
 		// 	store: redisStore,

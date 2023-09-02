@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
-import { Auth } from '../auth/decorator/auth.decorator'
-import { CurrentUser } from '../auth/decorator/user.decorator'
+import { CurrentUser } from '../decorator/user.decorator'
+import { Auth } from '../guard/auth.decorator'
 import { AddHistoryDto } from './dto/add.history.dto'
 import { HistoryService } from './history.service'
 
