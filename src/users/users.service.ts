@@ -44,24 +44,39 @@ export class UsersService {
 		return this.getById(userId)
 	}
 
-	async toggleFavorite(userId: number, id: number) {
+	async toggle(
+		userId: number,
+		id: number,
+		type: 'reading' | 'like' | 'finish'
+	) {
+		if (!['reading', 'like', 'finish'].includes(type))
+			throw new BadRequestException('Invalid type')
 		const user = await this.getById(+userId, {
-			likedBooks: true
+			likedBooks: true,
+			readingBooks: true,
+			finishBooks: true
 		})
 		if (!user) return new BadRequestException('User not found')
+		const typeOfBooks =
+			type === 'reading'
+				? 'readingBooks'
+				: type === 'like'
+				? 'likedBooks'
+				: 'finishBooks'
 
-		const isFavorite = user.likedBooks.some(item => item.id === +id)
+		const isExist = user[typeOfBooks].some(book => book.id === id)
 		await this.prisma.user.update({
-			where: { id: +userId },
+			where: { id: user.id },
 			data: {
-				likedBooks: {
-					[isFavorite ? 'disconnect' : 'connect']: { id: +id }
+				[typeOfBooks]: {
+					[isExist ? 'disconnect' : 'connect']: {
+						id
+					}
 				}
 			}
 		})
 		return {
-			id: id,
-			isFavorite: `${!isFavorite}`
+			message: `Book ${isExist ? 'removed from' : 'added to'} ${typeOfBooks}`
 		}
 	}
 }

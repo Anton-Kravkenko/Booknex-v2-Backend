@@ -14,10 +14,10 @@ Table Book {
   image String [not null]
   epub String [not null]
   likedPercent Int [not null]
+  popularity Int [not null, default: 0]
   likedBy User [not null]
-  readBy User [not null]
+  finishBy User [not null]
   readingBy User [not null]
-  buyBy User [not null]
   history History [not null]
   genre Genre [not null]
   reviews Review [not null]
@@ -42,6 +42,8 @@ Table Review {
   userId Int [not null]
   text String [not null]
   emotion String[] [not null]
+  like Int [not null, default: 0]
+  dislike Int [not null, default: 0]
 }
 
 Table History {
@@ -65,8 +67,7 @@ Table User {
   password String [not null]
   isAdmin Boolean [not null, default: false]
   likedBooks Book [not null]
-  buyBooks Book [not null]
-  readBooks Book [not null]
+  finishBooks Book [not null]
   readingBooks Book [not null]
   history History [not null]
   review Review [not null]

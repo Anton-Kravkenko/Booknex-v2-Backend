@@ -26,10 +26,10 @@ model Book {
   image        String
   epub         String
   likedPercent Int
+  popularity   Int       @default(0)
   likedBy      User[]    @relation("LikedBooks")
-  readBy       User[]    @relation("ReadBooks")
+  finishBy     User[]    @relation("FinishBooks")
   readingBy    User[]    @relation("ReadingBooks")
-  buyBy        User[]    @relation("BuyBooks")
   history      History[]
   genre        Genre[]
   reviews      Review[]
@@ -54,6 +54,8 @@ model Review {
   userId    Int
   text      String
   emotion   String[]
+  like      Int      @default(0)
+  dislike   Int      @default(0)
 }
 
 model History {
@@ -77,8 +79,7 @@ model User {
   password     String
   isAdmin      Boolean   @default(false)
   likedBooks   Book[]    @relation("LikedBooks")
-  buyBooks     Book[]    @relation("BuyBooks")
-  readBooks    Book[]    @relation("ReadBooks")
+  finishBooks  Book[]    @relation("FinishBooks")
   readingBooks Book[]    @relation("ReadingBooks")
   history      History[]
   review       Review[]

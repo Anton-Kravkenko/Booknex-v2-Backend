@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Book" ADD COLUMN     "popularity" INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "Review" ADD COLUMN     "dislike" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "like" INTEGER NOT NULL DEFAULT 0;

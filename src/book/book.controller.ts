@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
+import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
-import { Auth } from '../guard/auth.decorator'
 import { BookService } from './book.service'
 import { ReviewBookDto } from './dto/book.dto'
 

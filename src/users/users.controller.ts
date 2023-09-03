@@ -9,8 +9,8 @@ import {
 	UsePipes,
 	ValidationPipe
 } from '@nestjs/common'
+import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
-import { Auth } from '../guard/auth.decorator'
 import { UserUpdateDto } from './dto/user.update.dto'
 import { UsersService } from './users.service'
 
@@ -25,21 +25,11 @@ export class UsersController {
 		return this.usersService.getById(id, {
 			email: true,
 			likedBooks: true,
-			readBooks: true,
-			readingBooks: true,
-			buyBooks: true
+			finishBooks: true,
+			readingBooks: true
 		})
 	}
-	//TODO: сделать добавление в избранное и много другое
-	@HttpCode(200)
-	@Auth()
-	@Patch('/toggle-favorite/:id')
-	async toggleFavorite(
-		@CurrentUser('id') userId: number,
-		@Param('id') id: string
-	) {
-		return this.usersService.toggleFavorite(userId, +id)
-	}
+
 	//TODO: сделать добавление картинки профиля своей
 	@HttpCode(200)
 	@Auth()
@@ -47,5 +37,16 @@ export class UsersController {
 	@Post('/update-user')
 	async updateUser(@CurrentUser('id') id: number, @Body() dto: UserUpdateDto) {
 		return this.usersService.updateUser(+id, dto)
+	}
+
+	@HttpCode(200)
+	@Auth()
+	@Patch('/toggle/:type/:id')
+	async toggle(
+		@CurrentUser('id') userId: number,
+		@Param('id') id: string,
+		@Param('type') type: 'reading' | 'like' | 'finish'
+	) {
+		return this.usersService.toggle(userId, +id, type)
 	}
 }

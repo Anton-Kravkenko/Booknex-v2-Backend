@@ -20,7 +20,7 @@ module.exports = {
        "error",
        {
             selector: "default",
-            format: ["camelCase"],
+            format: ["camelCase", 'PascalCase'],
        },
        {
          selector: "variable",
