@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { path } from 'app-root-path'
 import { AppController } from './app.controller'
@@ -30,6 +31,6 @@ import { UsersModule } from './users/users.module'
 		// })
 	],
 	controllers: [AppController],
-	providers: [AppService]
+	providers: [AppService, ConfigService]
 })
 export class AppModule {}
