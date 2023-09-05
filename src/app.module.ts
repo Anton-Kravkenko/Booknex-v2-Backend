@@ -10,6 +10,7 @@ import { CatalogModule } from './catalog/catalog.module'
 import { GenreModule } from './genre/genre.module'
 import { HistoryModule } from './history/history.module'
 import { UsersModule } from './users/users.module'
+import { UploadModule } from './upload/upload.module';
 
 @Module({
 	imports: [
@@ -22,7 +23,8 @@ import { UsersModule } from './users/users.module'
 		ServeStaticModule.forRoot({
 			rootPath: `${path}/uploads`,
 			serveRoot: '/uploads'
-		})
+		}),
+		UploadModule
 		// TODO: сделать кэширование
 		// CacheModule.register({
 		// 	store: redisStore,

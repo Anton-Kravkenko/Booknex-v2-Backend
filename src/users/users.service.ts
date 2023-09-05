@@ -21,7 +21,7 @@ export class UsersService {
 		return user
 	}
 
-	async updateUser(userId: number, dto: UserUpdateDto) {
+	async updateUser(userId: number, dto: UserUpdateDto, imageLink: string) {
 		const isSameUser = await this.prisma.user.findUnique({
 			where: { email: dto.email }
 		})
@@ -38,7 +38,9 @@ export class UsersService {
 			where: { id: userId },
 			data: {
 				email: dto.email ? dto.email : user.email,
-				password: dto.password ? await hash(dto.password) : user.password
+				password: dto.password ? await hash(dto.password) : user.password,
+				name: dto.name ? dto.name : user.name,
+				picture: imageLink ? imageLink : user.picture
 			}
 		})
 		return this.getById(userId)
