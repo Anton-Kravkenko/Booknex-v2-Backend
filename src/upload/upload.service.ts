@@ -15,7 +15,7 @@ export class UploadService {
 	constructor(private readonly configService: ConfigService) {}
 	async upload(file: Buffer, filename: string, folder: 'epub' | 'image') {
 		if (folder !== 'epub' && folder !== 'image')
-			throw new BadRequestException('Invalid folder name')
+			throw new BadRequestException('Invalid folder name').getResponse()
 		await this.S3Client.send(
 			new PutObjectCommand({
 				Bucket: this.configService.get<string>('AWS_BUCKET'),

@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 import { PrismaService } from '../prisma.service'
 import { UsersService } from '../users/users.service'
+import { returnBookObject } from '../utils/return-object/return.book.object'
 import { defaultReturnObject } from '../utils/return-object/return.default.object'
 import { GenreReturnObject } from '../utils/return-object/return.genre.object'
 import { returnUserObject } from '../utils/return-object/return.user.object'
@@ -12,16 +14,20 @@ export class BookService {
 		private readonly usersService: UsersService,
 		private readonly prisma: PrismaService
 	) {}
-
-	async reviewBook(userId: number, bookId: number, dto: ReviewBookDto) {
-		const user = await this.prisma.user.findUnique({ where: { id: userId } })
-		if (!user) throw new BadRequestException('User not found').getResponse()
+	async getBookById(id: number, selectObject: Prisma.BookSelect = {}) {
 		const book = await this.prisma.book.findUnique({
-			where: { id: bookId }
+			where: { id },
+			select: {
+				...returnBookObject,
+				...selectObject
+			}
 		})
-
-		if (!book) return new BadRequestException('Book not found').getResponse()
-
+		if (!book) throw new BadRequestException('User not found').getResponse()
+		return book
+	}
+	async reviewBook(userId: number, bookId: number, dto: ReviewBookDto) {
+		await this.usersService.getUserById(userId)
+		await this.getBookById(bookId)
 		await this.prisma.review.create({
 			data: {
 				user: {
@@ -52,44 +58,28 @@ export class BookService {
 						...defaultReturnObject,
 						text: true,
 						emotion: true,
-						user: {
-							select: returnUserObject
-						}
+						user: { select: returnUserObject }
 					}
 				},
-				genre: {
-					select: GenreReturnObject
-				}
-			}
-		})
-		const similarBooks = await this.prisma.book.findMany({
-			where: {
-				id: { not: +id },
-				genre: {
-					some: {
-						id: { in: book.genre.map(g => g.id) }
-					}
-				}
-			},
-			include: {
 				genre: { select: GenreReturnObject }
 			}
 		})
-
 		if (!book) return new BadRequestException('Book not found').getResponse()
+
+		const genreIds = book.genre.map(g => g.id)
+		const similarBooks = await this.prisma.book.findMany({
+			where: { id: { not: +id }, genre: { some: { id: { in: genreIds } } } },
+			include: { genre: { select: GenreReturnObject } }
+		})
 
 		return {
 			...book,
 			similarBook: similarBooks
-				.sort((a, b) => {
-					const commonGenresA = a.genre.filter(g =>
-						book.genre.map(g => g.id).includes(g.id)
-					).length
-					const commonGenresB = b.genre.filter(g =>
-						book.genre.map(g => g.id).includes(g.id)
-					).length
-					return commonGenresB - commonGenresA
-				})
+				.sort(
+					(a, b) =>
+						b.genre.filter(g => genreIds.includes(g.id)).length -
+						a.genre.filter(g => genreIds.includes(g.id)).length
+				)
 				.slice(0, 10)
 		}
 	}

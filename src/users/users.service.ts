@@ -9,7 +9,7 @@ import { UserUpdateDto } from './dto/user.update.dto'
 export class UsersService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async getById(id: number, selectObject: Prisma.UserSelect = {}) {
+	async getUserById(id: number, selectObject: Prisma.UserSelect = {}) {
 		const user = await this.prisma.user.findUnique({
 			where: { id },
 			select: {
@@ -17,7 +17,7 @@ export class UsersService {
 				...selectObject
 			}
 		})
-		if (!user) throw new BadRequestException('User not found')
+		if (!user) throw new BadRequestException('User not found').getResponse()
 		return user
 	}
 
@@ -26,12 +26,15 @@ export class UsersService {
 			where: { email: dto.email }
 		})
 
-		if (!isSameUser) throw new BadRequestException('User not found')
+		if (!isSameUser)
+			throw new BadRequestException('User not found').getResponse()
 
 		if (isSameUser && isSameUser.id !== userId)
-			throw new BadRequestException('User with this email already exists')
+			throw new BadRequestException(
+				'User with this email already exists'
+			).getResponse()
 
-		const user = await this.getById(userId, {
+		const user = await this.getUserById(userId, {
 			password: false
 		})
 		await this.prisma.user.update({
@@ -43,7 +46,7 @@ export class UsersService {
 				picture: imageLink ? imageLink : user.picture
 			}
 		})
-		return this.getById(userId)
+		return this.getUserById(userId)
 	}
 
 	async toggle(
@@ -52,13 +55,12 @@ export class UsersService {
 		type: 'reading' | 'like' | 'finish'
 	) {
 		if (!['reading', 'like', 'finish'].includes(type))
-			throw new BadRequestException('Invalid type')
-		const user = await this.getById(+userId, {
+			throw new BadRequestException('Invalid type').getResponse()
+		const user = await this.getUserById(+userId, {
 			likedBooks: true,
 			readingBooks: true,
 			finishBooks: true
 		})
-		if (!user) return new BadRequestException('User not found')
 		const typeOfBooks =
 			type === 'reading'
 				? 'readingBooks'

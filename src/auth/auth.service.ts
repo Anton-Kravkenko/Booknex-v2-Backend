@@ -34,7 +34,8 @@ export class AuthService {
 				email: dto.email
 			}
 		})
-		if (oldUser) throw new BadRequestException('User already exists')
+		if (oldUser)
+			throw new BadRequestException('User already exists').getResponse()
 
 		const user = await this.prisma.user.create({
 			data: {
@@ -52,8 +53,8 @@ export class AuthService {
 
 	async refresh(refreshToken: string) {
 		const result = await this.jwt.verifyAsync(refreshToken)
-		if (!result) throw new BadRequestException('Invalid token')
-		const user = await this.usersService.getById(result.id, {
+		if (!result) throw new BadRequestException('Invalid token').getResponse()
+		const user = await this.usersService.getUserById(result.id, {
 			email: true,
 			id: true
 		})
@@ -83,10 +84,11 @@ export class AuthService {
 				email: dto.email
 			}
 		})
-		if (!user) throw new NotFoundException('User not found')
+		if (!user) throw new NotFoundException('User not found').getResponse()
 
 		const isPasswordValid = await verify(user.password, dto.password)
-		if (!isPasswordValid) throw new BadRequestException('Invalid password')
+		if (!isPasswordValid)
+			throw new BadRequestException('Invalid password').getResponse()
 
 		return user
 	}

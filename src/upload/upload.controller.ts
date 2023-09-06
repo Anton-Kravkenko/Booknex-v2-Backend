@@ -1,6 +1,5 @@
 import {
 	Controller,
-	HttpCode,
 	MaxFileSizeValidator,
 	Param,
 	ParseFilePipe,
@@ -15,7 +14,6 @@ import { UploadService } from './upload.service'
 export class UploadController {
 	constructor(private readonly uploadService: UploadService) {}
 	@Post('/upload/:folder')
-	@HttpCode(200)
 	@UseInterceptors(FileInterceptor('file'))
 	async upload(
 		@UploadedFile(

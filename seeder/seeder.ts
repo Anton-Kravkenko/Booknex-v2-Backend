@@ -1,9 +1,11 @@
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { PrismaClient } from '@prisma/client'
 import { gray, green, rainbow } from 'colors'
+import * as process from 'process'
 import puppeteer from 'puppeteer-extra'
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
 import randomColor from 'randomcolor'
-// import JsonBooks from './books_1.Best_Books_Ever.json'
+import JsonBooks from './books_1.Best_Books_Ever.json'
 import { getEpubFromBook } from './getEpubFromBook'
 
 interface Book {
@@ -36,8 +38,7 @@ interface Book {
 const prisma = new PrismaClient()
 export const seeder = async () => {
 	const books = JSON.parse(JSON.stringify(
-		// JsonBooks
-		[]
+		JsonBooks
 	))
 	const lastBook = await prisma.book.findFirst({
 		orderBy: {
@@ -90,7 +91,27 @@ export const seeder = async () => {
 			if (typeof epub !== 'string' || !epub.startsWith('http')) {
 				continue
 			}
-		
+			const epubFile = await fetch(epub)
+			const arrayBuffer = await epubFile.arrayBuffer()
+			const epubBuffer = Buffer.from(arrayBuffer)
+			
+			const s3 =  new S3Client({
+				region: 'eu-north-1',
+				credentials: {
+					accessKeyId: process.env.AWS_ACCESS_KEY,
+					secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+				}
+			})
+			await s3.send(
+				new PutObjectCommand({
+					Bucket: process.env.AWS_BUCKET,
+					Key: `epub/${book.title}.epub`,
+					Body: epubBuffer,
+					ACL: 'public-read',
+					ContentType: 'application/epub+zip' ,
+					ContentDisposition: 'inline'
+				})
+			)
 			await prisma.book.create({
 				data: {
 				title: book.title,
@@ -108,7 +129,7 @@ export const seeder = async () => {
 				image: book.coverImg,
 				pages: Number(book.pages),
 				likedPercent: book.likedPercent,
-				epub: epub,
+				epub: `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/epub/${book.title}`,
 					},
 				})
 			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))

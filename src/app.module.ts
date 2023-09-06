@@ -1,7 +1,7 @@
+import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { ServeStaticModule } from '@nestjs/serve-static'
-import { path } from 'app-root-path'
+import { ThrottlerModule } from '@nestjs/throttler'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
@@ -9,8 +9,8 @@ import { BookModule } from './book/book.module'
 import { CatalogModule } from './catalog/catalog.module'
 import { GenreModule } from './genre/genre.module'
 import { HistoryModule } from './history/history.module'
+import { UploadModule } from './upload/upload.module'
 import { UsersModule } from './users/users.module'
-import { UploadModule } from './upload/upload.module';
 
 @Module({
 	imports: [
@@ -20,17 +20,18 @@ import { UploadModule } from './upload/upload.module';
 		HistoryModule,
 		GenreModule,
 		BookModule,
-		ServeStaticModule.forRoot({
-			rootPath: `${path}/uploads`,
-			serveRoot: '/uploads'
-		}),
-		UploadModule
-		// TODO: сделать кэширование
-		// CacheModule.register({
-		// 	store: redisStore,
-		// 	host: 'localhost',
-		// 	port: 6379
-		// })
+		UploadModule,
+		ThrottlerModule.forRoot([
+			{
+				ttl: 60,
+				limit: 10
+			}
+		]),
+		CacheModule.register({
+			isGlobal: true,
+			ttl: 5000,
+			max: 1000
+		})
 	],
 	controllers: [AppController],
 	providers: [AppService, ConfigService]

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { BookService } from './book.service'
@@ -9,7 +9,6 @@ export class BookController {
 	constructor(private readonly bookService: BookService) {}
 	@Post('/review/:id')
 	@Auth()
-	@HttpCode(200)
 	async reviewBook(
 		@CurrentUser('id') userId: number,
 		@Param('id') bookId: string,
@@ -19,7 +18,6 @@ export class BookController {
 	}
 
 	@Get('/:id')
-	@HttpCode(200)
 	async getBookInfoById(@Param('id') bookId: string) {
 		return this.bookService.getBookInfoById(+bookId)
 	}

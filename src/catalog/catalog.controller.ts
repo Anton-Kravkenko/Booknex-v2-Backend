@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Param } from '@nestjs/common'
+import { Controller, Get, Param } from '@nestjs/common'
 import { CatalogService } from './catalog.service'
 
 @Controller('catalog')
@@ -12,7 +12,6 @@ export class CatalogController {
 	}
 
 	@Get('/')
-	@HttpCode(200)
 	async getCatalog() {
 		return this.catalogService.getCatalog()
 	}

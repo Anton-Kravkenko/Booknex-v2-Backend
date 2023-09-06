@@ -8,7 +8,7 @@ import { AddHistoryDto } from './dto/add.history.dto'
 export class HistoryService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	getHistory(userId: number) {
+	getUserHistory(userId: number) {
 		return this.prisma.history.findMany({
 			select: {
 				...defaultReturnObject,

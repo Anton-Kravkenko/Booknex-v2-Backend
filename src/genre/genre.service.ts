@@ -15,9 +15,7 @@ export class GenreService {
 				id: +id
 			}
 		})
-
-		if (!genre) throw new BadRequestException('Genre not found')
-
+		if (!genre) throw new BadRequestException('Genre not found').getResponse()
 		return genre
 	}
 }
