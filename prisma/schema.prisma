@@ -75,7 +75,7 @@ model User {
   updatedAt    DateTime  @updatedAt
   email        String    @unique
   name         String?
-  picture      String?
+  picture      String?   @default("https://i.imgur.com/6VBx3io.png")
   password     String
   isAdmin      Boolean   @default(false)
   likedBooks   Book[]    @relation("LikedBooks")

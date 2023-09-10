@@ -27,6 +27,9 @@ export class UsersController {
 	async getProfile(@CurrentUser('id') id: number) {
 		return this.usersService.getUserById(id, {
 			email: true,
+			isAdmin: true,
+			name: true,
+			picture: true,
 			likedBooks: true,
 			finishBooks: true,
 			readingBooks: true

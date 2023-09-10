@@ -9,6 +9,7 @@ import { hash, verify } from 'argon2'
 import { PrismaService } from '../prisma.service'
 import { UsersService } from '../users/users.service'
 import { AuthDto } from './dto/auth.dto'
+import { getRandomPicture } from './utils/getRandomPicture'
 
 @Injectable()
 export class AuthService {
@@ -36,12 +37,13 @@ export class AuthService {
 		})
 		if (oldUser)
 			throw new BadRequestException('User already exists').getResponse()
-
+		const userPicture = await getRandomPicture()
 		const user = await this.prisma.user.create({
 			data: {
 				email: dto.email,
 				password: await hash(dto.password),
-				name: dto.email.split('@')[0]
+				name: dto.email.split('@')[0],
+				picture: userPicture
 			}
 		})
 		const tokens = await this.issueToken(user.id)
@@ -96,7 +98,8 @@ export class AuthService {
 	private userFields(user: User) {
 		return {
 			id: user.id,
-			email: user.email
+			email: user.email,
+			isAdmin: user.isAdmin
 		}
 	}
 }

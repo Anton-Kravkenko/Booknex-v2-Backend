@@ -5,7 +5,7 @@ import * as process from 'process'
 import puppeteer from 'puppeteer-extra'
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
 import randomColor from 'randomcolor'
-import JsonBooks from './books_1.Best_Books_Ever.json'
+// import JsonBooks from './books_1.Best_Books_Ever.json'
 import { getEpubFromBook } from './getEpubFromBook'
 
 interface Book {
@@ -38,7 +38,8 @@ interface Book {
 const prisma = new PrismaClient()
 export const seeder = async () => {
 	const books = JSON.parse(JSON.stringify(
-		JsonBooks
+		// JsonBooks
+		[]
 	))
 	const lastBook = await prisma.book.findFirst({
 		orderBy: {
@@ -129,7 +130,7 @@ export const seeder = async () => {
 				image: book.coverImg,
 				pages: Number(book.pages),
 				likedPercent: book.likedPercent,
-				epub: `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/epub/${book.title}`,
+				epub: `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/epub/${book.title}.epub`,
 					},
 				})
 			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))
