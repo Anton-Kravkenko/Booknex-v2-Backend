@@ -3,9 +3,7 @@ import { Prisma } from '@prisma/client'
 import { PrismaService } from '../prisma.service'
 import { UsersService } from '../users/users.service'
 import { returnBookObject } from '../utils/return-object/return.book.object'
-import { defaultReturnObject } from '../utils/return-object/return.default.object'
 import { GenreReturnObject } from '../utils/return-object/return.genre.object'
-import { returnUserObject } from '../utils/return-object/return.user.object'
 import { ReviewBookDto } from './dto/book.dto'
 
 @Injectable()
@@ -49,27 +47,25 @@ export class BookService {
 			message: 'Review added'
 		}
 	}
+	//TODO: возможно упросить silimarBooks по необходимости
 	async getBookInfoById(id: number) {
 		const book = await this.prisma.book.findUnique({
 			where: { id: +id },
 			include: {
-				reviews: {
-					select: {
-						...defaultReturnObject,
-						text: true,
-						emotion: true,
-						user: { select: returnUserObject }
-					}
-				},
 				genre: { select: GenreReturnObject }
 			}
 		})
 		if (!book) return new BadRequestException('Book not found').getResponse()
-
 		const genreIds = book.genre.map(g => g.id)
 		const similarBooks = await this.prisma.book.findMany({
-			where: { id: { not: +id }, genre: { some: { id: { in: genreIds } } } },
-			include: { genre: { select: GenreReturnObject } }
+			where: {
+				id: { not: +id },
+				genre: { some: { id: { in: genreIds } } }
+			},
+			select: {
+				...returnBookObject,
+				genre: { select: GenreReturnObject }
+			}
 		})
 
 		return {
@@ -80,7 +76,9 @@ export class BookService {
 						b.genre.filter(g => genreIds.includes(g.id)).length -
 						a.genre.filter(g => genreIds.includes(g.id)).length
 				)
+				// no genre field
 				.slice(0, 10)
+				.map(({ genre, ...rest }) => ({ ...rest }))
 		}
 	}
 }

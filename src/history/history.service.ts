@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
+import { returnBookObject } from '../utils/return-object/return.book.object'
 import { defaultReturnObject } from '../utils/return-object/return.default.object'
-import { returnUserObject } from '../utils/return-object/return.user.object'
 import { AddHistoryDto } from './dto/add.history.dto'
 
 @Injectable()
@@ -12,9 +12,9 @@ export class HistoryService {
 		return this.prisma.history.findMany({
 			select: {
 				...defaultReturnObject,
-				book: true,
-				user: {
-					select: returnUserObject
+				time: true,
+				book: {
+					select: returnBookObject
 				}
 			},
 			where: {
@@ -27,8 +27,8 @@ export class HistoryService {
 		return this.prisma.history.findMany({
 			select: {
 				...defaultReturnObject,
-				book: false,
-				time: true
+				time: true,
+				book: false
 			},
 			where: {
 				bookId: +bookId
@@ -43,8 +43,8 @@ export class HistoryService {
 					createMany: {
 						data: dto.history.map(item => {
 							return {
-								bookId: item.bookId,
-								time: item.time
+								time: item.time,
+								bookId: item.bookId
 							}
 						})
 					}

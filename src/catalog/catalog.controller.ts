@@ -1,4 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common'
+import { Auth } from '../decorator/auth.decorator'
+import { CurrentUser } from '../decorator/user.decorator'
 import { CatalogService } from './catalog.service'
 
 @Controller('catalog')
@@ -12,7 +14,8 @@ export class CatalogController {
 	}
 
 	@Get('/')
-	async getCatalog() {
-		return this.catalogService.getCatalog()
+	@Auth()
+	async getCatalog(@CurrentUser('id') userId: number) {
+		return this.catalogService.getCatalog(+userId)
 	}
 }

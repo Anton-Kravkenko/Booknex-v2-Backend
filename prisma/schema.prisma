@@ -40,7 +40,6 @@ model Genre {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String   @unique
-  color     String   @default("#000000")
   books     Book[]
 }
 

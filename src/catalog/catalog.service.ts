@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
-import { defaultReturnObject } from '../utils/return-object/return.default.object'
+import { returnBookObject } from '../utils/return-object/return.book.object'
 
 @Injectable()
 export class CatalogService {
 	constructor(private readonly prisma: PrismaService) {}
-	//TODO: Сделать специально для тебя рекомендации книг
-	async getCatalog() {
+	async getCatalog(userId: number) {
 		return {
+			recomedations: await this.getRecommendations(userId),
 			popularNow: await this.prisma.book.findMany({
 				take: 10,
 				orderBy: {
 					popularity: 'desc'
 				},
+				select: returnBookObject,
 				where: {
 					history: {
 						some: {
@@ -27,32 +28,38 @@ export class CatalogService {
 				take: 10,
 				orderBy: {
 					popularity: 'desc'
-				}
+				},
+				select: returnBookObject
 			}),
 			newReleases: await this.prisma.book.findMany({
 				take: 10,
 				orderBy: {
 					createdAt: 'desc'
-				}
+				},
+				select: returnBookObject
 			}),
-			genres: await this.prisma.genre.findMany({
-				where: { books: { some: {} } },
-				select: {
-					...defaultReturnObject,
-					name: true,
-					books: {
-						distinct: ['id'],
-						take: 10,
-						orderBy: {
-							createdAt: 'desc'
+			...(
+				await this.prisma.genre.findMany({
+					take: 10,
+					include: {
+						books: {
+							take: 10,
+							orderBy: {
+								popularity: 'desc'
+							},
+							select: returnBookObject
 						}
 					}
-				}
-			})
+				})
+			).reduce((acc, genre) => {
+				acc[genre.name] = genre.books
+				return acc
+			}, {})
 		}
 	}
 	search(query: string) {
 		return this.prisma.book.findMany({
+			select: returnBookObject,
 			where: {
 				OR: [
 					{
@@ -73,5 +80,29 @@ export class CatalogService {
 				]
 			}
 		})
+	}
+
+	async getRecommendations(userId: number) {
+		const userMostLikedBook = await this.prisma.book.findMany({
+			where: {
+				likedBy: {
+					some: {
+						id: userId
+					}
+				}
+			},
+			include: {
+				genre: {
+					select: {
+						id: true
+					}
+				}
+			}
+		})
+		const userMostLikedGenresIds = userMostLikedBook.map(genre => genre.id)
+		console.log(userMostLikedGenresIds)
+		return {
+			userMostLikedGenresIds
+		}
 	}
 }
