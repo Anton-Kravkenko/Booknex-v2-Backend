@@ -27,9 +27,7 @@ export class UploadService {
 			})
 		)
 		return {
-			url: `https://${this.configService.get<string>(
-				'AWS_BUCKET'
-			)}.s3.amazonaws.com/${folder}/${filename}`
+			name: filename
 		}
 	}
 }

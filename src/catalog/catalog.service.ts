@@ -38,23 +38,19 @@ export class CatalogService {
 				},
 				select: returnBookObject
 			}),
-			...(
-				await this.prisma.genre.findMany({
-					take: 10,
-					include: {
-						books: {
-							take: 10,
-							orderBy: {
-								popularity: 'desc'
-							},
-							select: returnBookObject
-						}
+			genres: await this.prisma.genre.findMany({
+				take: 10,
+				select: {
+					name: true,
+					books: {
+						take: 10,
+						orderBy: {
+							popularity: 'desc'
+						},
+						select: returnBookObject
 					}
-				})
-			).reduce((acc, genre) => {
-				acc[genre.name] = genre.books
-				return acc
-			}, {})
+				}
+			})
 		}
 	}
 	search(query: string) {

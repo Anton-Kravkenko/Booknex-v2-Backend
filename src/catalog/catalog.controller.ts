@@ -5,7 +5,6 @@ import { CatalogService } from './catalog.service'
 
 @Controller('catalog')
 export class CatalogController {
-	// TODO: Сделать рекомендации книг
 	constructor(private readonly catalogService: CatalogService) {}
 
 	@Get('/search/:query')

@@ -130,7 +130,7 @@ export const seeder = async () => {
 				image: book.coverImg,
 				pages: Number(book.pages),
 				likedPercent: book.likedPercent,
-				epub: `https://${process.env.AWS_BUCKET}.s3.amazonaws.com/epub/${book.title}.epub`,
+				epub: `epub/${book.title}.epub`,
 					},
 				})
 			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))
