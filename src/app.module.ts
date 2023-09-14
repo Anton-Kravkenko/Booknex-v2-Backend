@@ -2,6 +2,7 @@ import { CacheModule } from '@nestjs/cache-manager'
 import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ThrottlerModule } from '@nestjs/throttler'
+import { AdminModule } from './admin/admin.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
@@ -31,7 +32,8 @@ import { UsersModule } from './users/users.module'
 			isGlobal: true,
 			ttl: 5000,
 			max: 1000
-		})
+		}),
+		AdminModule
 	],
 	controllers: [AppController],
 	providers: [AppService, ConfigService]

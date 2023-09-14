@@ -1,16 +1,12 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
-import { UploadService } from '../upload/upload.service'
 import { UserUpdateDto } from './dto/user.update.dto'
 import { UsersService } from './users.service'
 
 @Controller('users')
 export class UsersController {
-	constructor(
-		private readonly usersService: UsersService,
-		private readonly uploadService: UploadService
-	) {}
+	constructor(private readonly usersService: UsersService) {}
 
 	@Auth()
 	@Get('/get-profile')
