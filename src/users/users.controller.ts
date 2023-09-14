@@ -1,14 +1,4 @@
-import {
-	Body,
-	Controller,
-	Get,
-	MaxFileSizeValidator,
-	Param,
-	ParseFilePipe,
-	Patch,
-	Post,
-	UploadedFile
-} from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { UploadService } from '../upload/upload.service'
@@ -38,26 +28,8 @@ export class UsersController {
 
 	@Auth()
 	@Post('/update-user')
-	async updateUser(
-		@CurrentUser('id') id: number,
-		@Body() dto: UserUpdateDto,
-		@UploadedFile(
-			new ParseFilePipe({
-				validators: [
-					new MaxFileSizeValidator({
-						maxSize: 10000000
-					})
-				]
-			})
-		)
-		file: Express.Multer.File
-	) {
-		const imageLink = await this.uploadService.upload(
-			file.buffer,
-			file.originalname,
-			'image'
-		)
-		return this.usersService.updateUser(+id, dto, imageLink.url)
+	async updateUser(@CurrentUser('id') id: number, @Body() dto: UserUpdateDto) {
+		return this.usersService.updateUser(+id, dto)
 	}
 
 	@Auth()

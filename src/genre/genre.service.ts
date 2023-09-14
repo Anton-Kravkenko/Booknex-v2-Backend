@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
 
 @Injectable()
@@ -15,7 +15,7 @@ export class GenreService {
 				id: +id
 			}
 		})
-		if (!genre) throw new BadRequestException('Genre not found').getResponse()
+		if (!genre) throw new NotFoundException('Genre not found').getResponse()
 		return genre
 	}
 }

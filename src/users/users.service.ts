@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException
+} from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { hash } from 'argon2'
 import { PrismaService } from '../prisma.service'
@@ -17,17 +21,16 @@ export class UsersService {
 				...selectObject
 			}
 		})
-		if (!user) throw new BadRequestException('User not found').getResponse()
+		if (!user) throw new NotFoundException('User not found').getResponse()
 		return user
 	}
 
-	async updateUser(userId: number, dto: UserUpdateDto, imageLink: string) {
+	async updateUser(userId: number, dto: UserUpdateDto) {
 		const isSameUser = await this.prisma.user.findUnique({
 			where: { email: dto.email }
 		})
 
-		if (!isSameUser)
-			throw new BadRequestException('User not found').getResponse()
+		if (!isSameUser) throw new NotFoundException('User not found').getResponse()
 
 		if (isSameUser && isSameUser.id !== userId)
 			throw new BadRequestException(
@@ -43,7 +46,7 @@ export class UsersService {
 				email: dto.email ? dto.email : user.email,
 				password: dto.password ? await hash(dto.password) : user.password,
 				name: dto.name ? dto.name : user.name,
-				picture: imageLink ? imageLink : user.picture
+				picture: dto.picture ? dto.picture : user.picture
 			}
 		})
 		return this.getUserById(userId)

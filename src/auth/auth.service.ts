@@ -86,11 +86,16 @@ export class AuthService {
 				email: dto.email
 			}
 		})
-		if (!user) throw new NotFoundException('User not found').getResponse()
+		if (!user)
+			throw new NotFoundException(
+				"Email or password doesn't work"
+			).getResponse()
 
 		const isPasswordValid = await verify(user.password, dto.password)
 		if (!isPasswordValid)
-			throw new BadRequestException('Invalid password').getResponse()
+			throw new BadRequestException(
+				"Email or password doesn't work"
+			).getResponse()
 
 		return user
 	}

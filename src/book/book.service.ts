@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '../prisma.service'
 import { UsersService } from '../users/users.service'
@@ -20,7 +20,7 @@ export class BookService {
 				...selectObject
 			}
 		})
-		if (!book) throw new BadRequestException('User not found').getResponse()
+		if (!book) throw new NotFoundException('Book not found').getResponse()
 		return book
 	}
 	async reviewBook(userId: number, bookId: number, dto: ReviewBookDto) {
@@ -47,7 +47,6 @@ export class BookService {
 			message: 'Review added'
 		}
 	}
-	//TODO: возможно упросить silimarBooks по необходимости
 	async getBookInfoById(id: number) {
 		const book = await this.prisma.book.findUnique({
 			where: { id: +id },
@@ -55,7 +54,7 @@ export class BookService {
 				genre: { select: GenreReturnObject }
 			}
 		})
-		if (!book) return new BadRequestException('Book not found').getResponse()
+		if (!book) return new NotFoundException('Book not found').getResponse()
 		const genreIds = book.genre.map(g => g.id)
 		const similarBooks = await this.prisma.book.findMany({
 			where: {

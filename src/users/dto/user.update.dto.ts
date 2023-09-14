@@ -12,4 +12,7 @@ export class UserUpdateDto {
 
 	@IsOptional()
 	name: string
+
+	@IsOptional()
+	picture: string
 }
