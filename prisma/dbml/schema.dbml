@@ -10,17 +10,22 @@ Table Book {
   author String [not null]
   description String [not null]
   isbn String [not null]
-  pages Int [not null]
   image String [not null]
   epub String [not null]
+  color String [not null, default: '#fff']
+  pages Int [not null]
   likedPercent Int [not null]
   popularity Int [not null, default: 0]
+  mainGenreId Int [not null]
+  shortRetelling String [not null]
+  majorGenre Genre [not null]
+  histories History [not null]
+  genres Genre [not null]
+  reviews Review [not null]
+  shelves Shelves [not null]
   likedBy User [not null]
   finishBy User [not null]
   readingBy User [not null]
-  history History [not null]
-  genre Genre [not null]
-  reviews Review [not null]
 }
 
 Table Genre {
@@ -28,30 +33,32 @@ Table Genre {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   name String [unique, not null]
-  color String [not null, default: '#000000']
+  users User [not null]
+  shelves Shelves [not null]
   books Book [not null]
+  majorBooks Book [not null]
 }
 
 Table Review {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  book Book [not null]
+  dislike Int [not null, default: 0]
+  like Int [not null, default: 0]
   bookId Int [not null]
-  user User [not null]
   userId Int [not null]
   text String [not null]
+  book Book [not null]
+  user User [not null]
   emotion String[] [not null]
-  like Int [not null, default: 0]
-  dislike Int [not null, default: 0]
 }
 
 Table History {
   id Int [pk, increment]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  book Book [not null]
   time Int [not null]
+  book Book [not null]
   user User
   userId Int
   bookId Int [not null]
@@ -66,12 +73,26 @@ Table User {
   picture String
   password String [not null]
   isAdmin Boolean [not null, default: false]
+  history History [not null]
+  review Review [not null]
+  inititalGenre Genre [not null]
   likedBooks Book [not null]
   finishBooks Book [not null]
   readingBooks Book [not null]
-  history History [not null]
-  review Review [not null]
 }
+
+Table Shelves {
+  id Int [pk, increment]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  like Int [not null, default: 0]
+  color String [not null, default: '#fff']
+  genres Genre [not null]
+  books Book [not null]
+}
+
+Ref: Book.mainGenreId > Genre.id
 
 Ref: Review.bookId > Book.id
 

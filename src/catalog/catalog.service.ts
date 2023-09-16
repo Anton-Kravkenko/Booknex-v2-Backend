@@ -1,21 +1,62 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
 import { returnBookObject } from '../utils/return-object/return.book.object'
+import { defaultReturnObject } from '../utils/return-object/return.default.object'
 
 @Injectable()
 export class CatalogService {
 	constructor(private readonly prisma: PrismaService) {}
 	async getCatalog(userId: number) {
 		return {
+			//TODO: Сделать тут жанры которые пользователь выбрал при регистрации и те, которые в реках
+			mostRelatedGenres: await this.prisma.genre
+				.findMany({
+					select: {
+						...defaultReturnObject,
+						name: true
+					},
+					where: {
+						OR: [
+							{
+								books: {
+									some: {
+										likedBy: {
+											some: {
+												id: userId
+											}
+										}
+									}
+								}
+							},
+							{
+								name: {
+									in: ['Fantasy', 'Romance', 'Horror', 'Thriller', 'Sci-Fi']
+								}
+							}
+						]
+					}
+				})
+				.then(genres =>
+					genres
+						.sort(
+							(a, b) =>
+								genres.filter(genre => genre.name === a.name).length -
+								genres.filter(genre => genre.name === b.name).length
+						)
+						.slice(0, 5)
+				),
 			recommendations: await this.getRecommendations(userId),
 			popularNow: await this.prisma.book.findMany({
 				take: 10,
 				orderBy: {
 					popularity: 'desc'
 				},
-				select: returnBookObject,
+				select: {
+					...returnBookObject,
+					description: true
+				},
 				where: {
-					history: {
+					histories: {
 						some: {
 							createdAt: {
 								gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
@@ -39,14 +80,14 @@ export class CatalogService {
 				select: returnBookObject
 			}),
 			genres: await this.prisma.genre.findMany({
-				take: 10,
+				take: 5,
 				select: {
 					name: true,
-					books: {
-						take: 10,
+					majorBooks: {
 						orderBy: {
-							popularity: 'desc'
+							createdAt: 'desc'
 						},
+						take: 10,
 						select: returnBookObject
 					}
 				}
@@ -79,45 +120,46 @@ export class CatalogService {
 	}
 
 	async getRecommendations(userId: number) {
-		const user = await this.prisma.user.findUnique({
-			where: {
-				id: userId
-			},
+		const likedGenres = await this.prisma.genre.findMany({
 			select: {
-				likedBooks: {
-					select: {
-						genre: {
-							select: {
-								name: true
+				name: true
+			},
+			where: {
+				books: {
+					some: {
+						likedBy: {
+							some: {
+								id: userId
 							}
 						}
 					}
 				}
 			}
 		})
-		if (!user) throw new NotFoundException('User not found')
-
+		//TODO: сделать это короче
 		const genres = Object.entries(
-			user.likedBooks.reduce((acc, book) => {
-				book.genre.forEach(
-					genre => (acc[genre.name] = (acc[genre.name] || 0) + 1)
-				)
+			likedGenres.reduce((acc, book) => {
+				book.name.split(',').forEach(genre => {
+					if (acc[genre]) acc[genre]++
+					else acc[genre] = 1
+				})
 				return acc
 			}, {})
 		)
 			.sort((a, b) => Number(b[1]) - Number(a[1]))
-			.slice(0, 3)
-			.map(item => item[0]) || ['Fantasy', 'Romance', 'Mystery']
-
+			.slice(0, 5)
+			.map(item => item[0])
+		console.log(genres)
 		return this.prisma.book.findMany({
 			take: 10,
 			orderBy: { popularity: 'desc' },
 			select: returnBookObject,
 			where: {
-				genre: {
+				genres: {
 					some: {
 						name: {
-							in: genres
+							// TODO: fix this: add user likes genre in first
+							in: genres.length ? genres : ['Fantasy', 'Romance']
 						}
 					}
 				},

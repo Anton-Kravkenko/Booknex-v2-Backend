@@ -51,19 +51,19 @@ export class BookService {
 		const book = await this.prisma.book.findUnique({
 			where: { id: +id },
 			include: {
-				genre: { select: GenreReturnObject }
+				genres: { select: GenreReturnObject }
 			}
 		})
 		if (!book) return new NotFoundException('Book not found').getResponse()
-		const genreIds = book.genre.map(g => g.id)
+		const genreIds = book.genres.map(g => g.id)
 		const similarBooks = await this.prisma.book.findMany({
 			where: {
 				id: { not: +id },
-				genre: { some: { id: { in: genreIds } } }
+				genres: { some: { id: { in: genreIds } } }
 			},
 			select: {
 				...returnBookObject,
-				genre: { select: GenreReturnObject }
+				genres: { select: GenreReturnObject }
 			}
 		})
 
@@ -72,12 +72,12 @@ export class BookService {
 			similarBook: similarBooks
 				.sort(
 					(a, b) =>
-						b.genre.filter(g => genreIds.includes(g.id)).length -
-						a.genre.filter(g => genreIds.includes(g.id)).length
+						b.genres.filter(g => genreIds.includes(g.id)).length -
+						a.genres.filter(g => genreIds.includes(g.id)).length
 				)
 				// no genre field
 				.slice(0, 10)
-				.map(({ genre, ...rest }) => ({ ...rest }))
+				.map(({ genres, ...rest }) => ({ ...rest }))
 		}
 	}
 }

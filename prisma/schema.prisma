@@ -15,71 +15,91 @@ datasource db {
 }
 
 model Book {
-  id           Int       @id @default(autoincrement())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  title        String
-  author       String
-  description  String
-  isbn         String
-  pages        Int
-  image        String
-  epub         String
-  likedPercent Int
-  popularity   Int       @default(0)
-  likedBy      User[]    @relation("LikedBooks")
-  finishBy     User[]    @relation("FinishBooks")
-  readingBy    User[]    @relation("ReadingBooks")
-  history      History[]
-  genre        Genre[]
-  reviews      Review[]
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  title          String
+  author         String
+  description    String
+  isbn           String
+  image          String
+  epub           String
+  color          String    @default("#fff")
+  pages          Int
+  likedPercent   Int
+  popularity     Int       @default(0)
+  mainGenreId    Int
+  shortRetelling String
+  majorGenre     Genre     @relation("BookMajorGenre", fields: [mainGenreId], references: [id])
+  histories      History[]
+  genres         Genre[]   @relation("BookGenre")
+  reviews        Review[]
+  shelves        Shelves[]
+  likedBy        User[]    @relation("LikedBooks")
+  finishBy       User[]    @relation("FinishBooks")
+  readingBy      User[]    @relation("ReadingBooks")
 }
 
 model Genre {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String   @unique
-  books     Book[]
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  name       String    @unique
+  users      User[]
+  shelves    Shelves[]
+  books      Book[]    @relation("BookGenre")
+  majorBooks Book[]    @relation("BookMajorGenre")
 }
 
 model Review {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  book      Book     @relation(fields: [bookId], references: [id])
+  dislike   Int      @default(0)
+  like      Int      @default(0)
   bookId    Int
-  user      User     @relation(fields: [userId], references: [id])
   userId    Int
   text      String
+  book      Book     @relation(fields: [bookId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   emotion   String[]
-  like      Int      @default(0)
-  dislike   Int      @default(0)
 }
 
 model History {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  book      Book     @relation(fields: [bookId], references: [id])
   time      Int
+  book      Book     @relation(fields: [bookId], references: [id])
   user      User?    @relation(fields: [userId], references: [id])
   userId    Int?
   bookId    Int
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  email        String    @unique
-  name         String?
-  picture      String?   @default("https://i.imgur.com/6VBx3io.png")
-  password     String
-  isAdmin      Boolean   @default(false)
-  likedBooks   Book[]    @relation("LikedBooks")
-  finishBooks  Book[]    @relation("FinishBooks")
-  readingBooks Book[]    @relation("ReadingBooks")
-  history      History[]
-  review       Review[]
+  id            Int       @id @default(autoincrement())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  email         String    @unique
+  name          String?
+  picture       String?
+  password      String
+  isAdmin       Boolean   @default(false)
+  history       History[]
+  review        Review[]
+  inititalGenre Genre[]
+  likedBooks    Book[]    @relation("LikedBooks")
+  finishBooks   Book[]    @relation("FinishBooks")
+  readingBooks  Book[]    @relation("ReadingBooks")
+}
+
+model Shelves {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  like      Int      @default(0)
+  color     String   @default("#fff")
+  genres    Genre[]
+  books     Book[]
 }

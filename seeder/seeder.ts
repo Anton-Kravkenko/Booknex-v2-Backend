@@ -113,13 +113,24 @@ export const seeder = async () => {
 					ContentDisposition: 'inline'
 				})
 			)
+			console.log(book.genres[0].replace(/[\[\]']/g, '').trim())
 			await prisma.book.create({
 				data: {
 				title: book.title,
 				author: book.author.replace(/,.*|\(.*?\)/g, '').trim(),
 				description: book.description,
 				isbn: book.isbn,
-					genre: {
+					majorGenre: {
+							connectOrCreate: {
+								where: {
+									name: book.genres[0].replace(/[\[\]']/g, '').trim(),
+								},
+								create: {
+									name:book.genres[0].replace(/[\[\]']/g, '').trim()
+								}
+							}
+					},
+					genres: {
 						connectOrCreate: book.genres.split(',').map((genre) => {
 							return {
 								where: { name: genre.replace(/[\[\]']/g, '').trim() },

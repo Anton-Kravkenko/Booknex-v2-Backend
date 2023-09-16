@@ -16,7 +16,7 @@ export class AdminService {
 			totalReadTime: totalTimeRead._sum.time,
 			mostReadBook: await this.prisma.book.findFirst({
 				orderBy: {
-					history: {
+					histories: {
 						_count: 'desc'
 					}
 				}
