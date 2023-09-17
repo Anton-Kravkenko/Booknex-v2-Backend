@@ -26,9 +26,14 @@ export const getEpubFromBook = async (
 		return error.innerHTML.includes('0 books')
 	})
 	if (isError) {
-		if (numRating < 200000)
+		if (numRating < 300000)
 			return console.log(yellow(`❌ No result for ${betterName} by ${author}`))
-		return await royalParser({ page, betterName, name, author })
+		return await royalParser({
+			page,
+			betterName,
+			name,
+			author
+		})
 	}
 	await page.waitForSelector(
 		'div.row div.col-md-12.col-sm-12.col-xs-12.books-listing div.books-list div.row.book-grid div.col-sm-12.col-md-6.col-lg-4.book-3-row'

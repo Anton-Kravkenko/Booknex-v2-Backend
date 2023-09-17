@@ -15,17 +15,19 @@ datasource db {
 }
 
 model Book {
-  id             Int       @id @default(autoincrement())
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  title          String
-  author         String
-  description    String
-  isbn           String
-  image          String
-  epub           String
-  color          String    @default("#fff")
-  pages          Int
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  author      String
+  description String
+  isbn        String
+  image       String
+  epub        String
+  color       String   @default("#fff")
+  pages       Int
+
+  readingTime    Int       @default(0)
   likedPercent   Int
   popularity     Int       @default(0)
   mainGenreId    Int

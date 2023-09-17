@@ -14,6 +14,7 @@ Table Book {
   epub String [not null]
   color String [not null, default: '#fff']
   pages Int [not null]
+  readingTime Int [not null, default: 0]
   likedPercent Int [not null]
   popularity Int [not null, default: 0]
   mainGenreId Int [not null]
