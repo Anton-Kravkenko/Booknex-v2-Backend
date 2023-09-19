@@ -2,8 +2,11 @@ import { magenta, yellow } from 'colors'
 import prompts from 'prompts'
 import { Page } from 'puppeteer'
 
-export const customLinkSelect = (book: { title: string; author: string }) => {
-	const typeLastLink = prompts({
+export const customLinkSelect = async (book: {
+	title: string
+	author: string
+}) => {
+	const typeLastLink = await prompts({
 		type: 'select',
 		name: 'value',
 		message: `epub for ${magenta(book.title)} by ${yellow(
@@ -22,7 +25,7 @@ export const customLinkSelect = (book: { title: string; author: string }) => {
 	})
 	if (typeLastLink.value === null) return null
 	if (typeLastLink.value === 'custom') {
-		const customResponse = prompts({
+		const customResponse = await prompts({
 			type: 'text',
 			name: 'value',
 			message: `Your link:`
@@ -33,7 +36,7 @@ export const customLinkSelect = (book: { title: string; author: string }) => {
 
 
 export const getBookFromList = async (page: Page, link: string, numbPages: number, bookTitle: string) => {
-	await page.goto(`https://www.z-epub.com${link}`, {
+	await page.goto(link.startsWith('http') ? link : `https://www.z-epub.com${link}`, {
 		waitUntil: 'domcontentloaded'
 	})
 	await page.waitForSelector(
@@ -47,7 +50,7 @@ export const getBookFromList = async (page: Page, link: string, numbPages: numbe
 	})
 	const bookPagesFunc = await page.evaluate((numbPages) => {
 		const pages = document.querySelector('.table > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > span:nth-child(1)')
-		if (Number(pages.textContent.replace('pages', '')) - numbPages > 50)
+		if (Number(pages.textContent.replace('pages', '')) - numbPages > 160)
 			return Number(pages.textContent.replace('pages', ''))
 		return null
 	}, numbPages)
@@ -55,7 +58,7 @@ export const getBookFromList = async (page: Page, link: string, numbPages: numbe
 		const response = await prompts({
 			type: 'select',
 			name: 'value',
-			message: `A large page difference has been recorded for ${bookTitle}`,
+			message: `A large page difference has been recorded for ${bookTitle} | ${bookPagesFunc} of ${numbPages}:`,
 			choices: [
 				{
 					title: '❌  Skip',
@@ -67,14 +70,13 @@ export const getBookFromList = async (page: Page, link: string, numbPages: numbe
 				},
 			]
 		})
-		if (response.value === null) return null
 		if (response.value === 'custom') {
-			const customResponse = prompts({
+			const customResponse = await prompts({
 				type: 'text',
 				name: 'value',
 				message: `Your link:`
 			})
-			return customResponse.value
+			return getBookFromList(page, customResponse.value, numbPages, bookTitle)
 		}
 	}
 	if (!isEnglishBook) {
@@ -83,7 +85,7 @@ export const getBookFromList = async (page: Page, link: string, numbPages: numbe
 			name: 'value',
 			message: 'Book is not in English, enter your own link to epub:'
 		})
-		return customResponse.value
+		return getBookFromList(page, customResponse.value, numbPages, bookTitle)
 	}
 	
 	return  await page.evaluate(() => {

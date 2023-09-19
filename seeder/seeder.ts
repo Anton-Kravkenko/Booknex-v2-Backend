@@ -1,3 +1,4 @@
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { PrismaClient } from '@prisma/client'
 import { bgRed, gray, green, rainbow, yellow } from 'colors'
 import { getAverageColor } from 'fast-average-color-node'
@@ -59,8 +60,37 @@ export const seeder = async () => {
 		"Adult Fiction",
 		"Chick Lit",
 		"Book Club",
-		
-		
+		"Childrens",
+		"Animals",
+		"Canada",
+		"Historical Romance",
+		"Classic Literature",
+		"Holocaust",
+		"World War II",
+		"European Literature",
+		"British Literature",
+		"British",
+		"Food",
+		"India",
+		"Books About Books",
+		"Comedy",
+		"Realistic Fiction",
+		"Picture Books",
+		"Juvenile",
+		"Kids",
+			"Short Stories",
+		"Supernatural",
+		"Magical Realism",
+		"Spanish Literature",
+		'Literary Fiction',
+		"Latin American",
+		"Mythology",
+		"Urban Fantasy",
+		"Greek Mythology",
+		"20th Century",
+		"Unfinished",
+		"Space Opera",
+		"Medieval"
 	]
 	const books = JSON.parse(JSON.stringify(
 		JsonBooks
@@ -82,7 +112,7 @@ export const seeder = async () => {
 	})
 	puppeteer.use(adblocker)
 	const browser = await puppeteer.launch({
-		headless: false,
+		headless: true,
 		ignoreHTTPSErrors: true
 	})
 	const page = await browser.newPage()
@@ -123,30 +153,45 @@ export const seeder = async () => {
 			if (!customLink) return
 		})
 			if ((typeof epub === 'string' && !epub) || !epub.link) continue
-	
-			// const epubFile = await fetch(epub)
-			// const arrayBuffer = await epubFile.arrayBuffer()
-			// const epubBuffer = Buffer.from(arrayBuffer)
-			//
-			// const s3 =  new S3Client({
-			// 	region: 'eu-north-1',
-			// 	credentials: {
-			// 		accessKeyId: process.env.AWS_ACCESS_KEY,
-			// 		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-			// 	}
-			// })
-			// await s3.send(
-			// 	new PutObjectCommand({
-			// 		Bucket: process.env.AWS_BUCKET,
-			// 		Key: `epub/${book.title}.epub`,
-			// 		Body: epubBuffer,
-			// 		ACL: 'public-read',
-			// 		ContentType: 'application/epub+zip' ,
-			// 		ContentDisposition: 'inline'
-			// 	})
-			// )
-			// Сделать выбор emoji для всех жанров
-			const allGenres = await prisma.genre.findMany({ select: { name: true } }).then((genres) => genres.map((genre) => genre.name))
+			
+			const epubFile = await fetch(typeof epub === 'string' ? epub : epub.link)
+			const imageFile = await fetch(typeof epub === 'string' ? book.coverImg : epub.picture)
+			const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
+			const epubBuffer = Buffer.from(await epubFile.arrayBuffer())
+			
+			const s3 = new S3Client({
+				endpoint: process.env.AWS_ENDPOINT,
+				region: process.env.AWS_REGION,
+				credentials: {
+					accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+					secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+				}
+			})
+			await s3.send(
+				new PutObjectCommand({
+					Bucket: process.env.AWS_BUCKET,
+					Key: `epubs/${typeof epub === 'string' ? book.title : epub.title}.epub`,
+					Body: epubBuffer,
+					ACL: 'public-read',
+					ContentType: 'application/epub+zip',
+					ContentDisposition: 'inline'
+				})
+			)
+			await s3.send(
+				new PutObjectCommand({
+					Bucket: process.env.AWS_BUCKET,
+					Key: `books-covers/${typeof epub === 'string' ? book.title : epub.title}.jpg`,
+					Body: imageBuffer,
+					ACL: 'public-read',
+					ContentDisposition: 'inline'
+				})
+			)
+			const allGenres = await prisma.genre.findMany({ select: { name: true }, orderBy: {
+				books: {
+					// eslint-disable-next-line @typescript-eslint/naming-convention
+					_count: 'desc'
+				}
+				} }).then((genres) => genres.map((genre) => genre.name))
 	  const genreWithEmoji = []
 			for (const genre of book.genres.split(',').map((genre) => genre.replace(/[\[\]']/g, '').trim()).filter((genre) => !allGenres.map((genre) => removeEmoji(genre).trim()
 			).includes(genre
@@ -168,25 +213,20 @@ export const seeder = async () => {
 			const filteredGenres = book.genres.split(',').map((genre) => genre.replace(/[\[\]']/g, '').trim()).filter((genre) => !trashGenres.includes(genre));
 			const majorGenres = await prisma.genre.findMany({
 				select: { name: true },
+				orderBy: {
+					majorBooks: {
+						// eslint-disable-next-line @typescript-eslint/naming-convention
+						_count: 'desc'
+					}
+				},
 				where: {
 					OR: filteredGenres.map(genre => ({ name: { contains: genre } }))
 				}
 			});
 
-			const selectMajorGenre = await prompts({
-				type: 'select',
-				name: 'value',
-				message: `Select major genre for ${book.title}:`,
-				choices:
-					[
-						...genreWithEmoji,
-					...majorGenres.map((genre) => genre.name)
-					]
-				.map((genre) => ({
-					title: genre,
-					value: genre
-				})),
-			})
+const randomMajorGenre =
+	majorGenres[Math.floor(Math.random() * majorGenres.length)] ||
+	genreWithEmoji[Math.floor(Math.random() * genreWithEmoji.length)]
 
 			await prisma.book.create({
 				data: {
@@ -199,10 +239,10 @@ export const seeder = async () => {
 					majorGenre: {
 							connectOrCreate: {
 								where: {
-								 name: await  selectMajorGenre.value,
+								 name: randomMajorGenre.name
 								},
 								create: {
-									name: await selectMajorGenre.value,
+									name: randomMajorGenre.name
 								}
 							}
 					},
@@ -214,10 +254,10 @@ export const seeder = async () => {
 							};
 						}),
 					},
-				image: typeof epub === 'string' ? book.coverImg : epub.picture,
-				pages: typeof epub === 'string' || !epub.pages ? book.pages : epub.pages,
+				image: `books-covers/${book.title}.jpg`,
+				pages: typeof epub === 'string' || !epub.pages ? Number(book.pages) : Number(epub.pages),
 				likedPercent: book.likedPercent,
-				epub: typeof epub === 'string' ? epub : epub.link,
+				epub: `epubs/${book.title}.epub`,
 					},
 				})
 			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))

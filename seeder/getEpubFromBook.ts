@@ -26,7 +26,6 @@ export const getEpubFromBook = async (
 		const error = document.querySelector('.books-list .top-filter > div > span')
 		return error.innerHTML.includes('0 books')
 	})
-	console.log('before error')
 	if (isError) {
 		if (numRating < 300000)
 			return console.log(yellow(`❌ No result for ${betterName} by ${author}`))
@@ -35,11 +34,9 @@ export const getEpubFromBook = async (
 			author: author.replace(/,.*|\(.*?\)/g, '').trim()
 		})
 	}
-	console.log('after error')
 	await page.waitForSelector(
 		'div.row div.col-md-12.col-sm-12.col-xs-12.books-listing div.books-list div.row.book-grid div.col-sm-12.col-md-6.col-lg-4.book-3-row'
 	)
-	console.log('after selector')
 	const bookArray = await page.evaluate(() => {
 		const quotes = document.querySelectorAll(
 			'div.books-list div.row.book-grid div.col-sm-12.col-md-6.col-lg-4.book-3-row'
@@ -73,7 +70,6 @@ export const getEpubFromBook = async (
 			}
 		})
 	})
-	console.log('after filterArray')
 
 	const filterArray = bookArray
 		.sort((a, b) => +b.year - +a.year)
@@ -120,7 +116,6 @@ export const getEpubFromBook = async (
 			return customResponse.value
 		}
 		if (!response.value) return
-		console.log(response.value.link, 'response.value.link')
 		return await getBookFromList(
 			page,
 			response.value.link,
@@ -128,6 +123,5 @@ export const getEpubFromBook = async (
 			betterName
 		)
 	}
-	console.log(filterArray.link, 'filterArray.link')
 	return await getBookFromList(page, filterArray.link, bookPages, betterName)
 }
