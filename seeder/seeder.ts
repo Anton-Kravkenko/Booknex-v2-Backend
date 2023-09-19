@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client'
-import { gray, green, magenta, rainbow, red, yellow } from 'colors'
+import { bgRed, gray, green, rainbow, yellow } from 'colors'
 import { getAverageColor } from 'fast-average-color-node'
 import * as process from 'process'
 import prompts from 'prompts'
 import puppeteer from 'puppeteer-extra'
 import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
 import { removeEmoji } from '../src/utils/removeEmoji'
+import { customLinkSelect } from './aditionalFunc'
 import JsonBooks from './books_1.Best_Books_Ever.json'
 import { getEpubFromBook } from './getEpubFromBook'
 
@@ -54,6 +55,11 @@ export const seeder = async () => {
 		"Contemporary",
 		"Historical Fiction",
 		"American",
+		"Paranormal",
+		"Adult Fiction",
+		"Chick Lit",
+		"Book Club",
+		
 		
 	]
 	const books = JSON.parse(JSON.stringify(
@@ -101,64 +107,23 @@ export const seeder = async () => {
 						gray(`⚠️ ${book.title} by ${book.author} already exists`))
 				continue
 			}
-			let isError = false
-		let epub = await getEpubFromBook(
-			book.title, book.author.replace(/,.*|\(.*?\)/g, '').trim(), 	book.numRatings, page).catch(() => {
-			isError = true
+		const epub: string | {
+			title :string,
+			author: string,
+			link: string,
+			isbn: string | null,
+			picture: string,
+			pages: number | null,
+		} = await getEpubFromBook(
+			book.title, book.author.replace(/,.*|\(.*?\)/g, '').trim(), Number(book.pages),	book.numRatings, page).catch((reason) => {
+				console.log(bgRed(reason))
 				if (book.numRatings < 100000) return console.log(yellow(`❌ No result for ${book.title}`))
-				const typeLastLink =  prompts({
-					type: 'select',
-					name: 'value',
-					message: `epub for ${magenta(book.title)} by ${yellow(book.author.replace(/,.*|\(.*?\)/g, '').trim())}  not found, enter your link to book:`,
-					choices: [
-						{
-							title: '❌  None',
-							value: null
-						},
-						{
-							title: '🔧 Custom',
-							value: 'custom'
-						}
-					]
-				})
-			if (typeLastLink.value === null) return console.log(red(`❌ book ${book.title} is not found`))
-				if (typeLastLink.value === 'custom') {
-					const customResponse = prompts({
-						type: 'text',
-						name: 'value',
-						message: `Your link:`
-					})
-					return customResponse.value
-				}
+			const customLink =	customLinkSelect({
+				title: book.title, author: book.author.replace(/,.*|\(.*?\)/g, '').trim()})
+			if (!customLink) return
 		})
-			if (typeof epub !== 'string' || !epub.startsWith('http')) {
-				if (isError) continue
-				if (book.numRatings < 100000) return console.log(yellow(`❌ No result for ${book.title}`))
-				const typeLastLink =  await prompts({
-					type: 'select',
-					name: 'value',
-					message: `epub for ${magenta(book.title)} by ${yellow(book.author.replace(/,.*|\(.*?\)/g, '').trim())} not found your link to book:`,
-					choices: [
-						{
-							title: '❌  None',
-							value: null
-						},
-						{
-							title: '🔧 Custom',
-							value: 'custom'
-						}
-					]
-				})
-				if (typeLastLink.value === null) continue
-				if (typeLastLink.value === 'custom') {
-					const customResponse = await prompts({
-						type: 'text',
-						name: 'value',
-						message: `Your own link:`
-					})
-					epub = customResponse.value
-				}
-			}
+			if ((typeof epub === 'string' && !epub) || !epub.link) continue
+	
 			// const epubFile = await fetch(epub)
 			// const arrayBuffer = await epubFile.arrayBuffer()
 			// const epubBuffer = Buffer.from(arrayBuffer)
@@ -181,14 +146,17 @@ export const seeder = async () => {
 			// 	})
 			// )
 			// Сделать выбор emoji для всех жанров
-			const allGenres = await prisma.genre.findMany({ select: { name: true } }).then((genres) => genres.map((genre) => removeEmoji(genre.name)))
+			const allGenres = await prisma.genre.findMany({ select: { name: true } }).then((genres) => genres.map((genre) => genre.name))
 	  const genreWithEmoji = []
-			for (const genre of book.genres.split(',').map((genre) => genre.replace(/[\[\]']/g, '').trim()).filter((genre) => !allGenres.includes(genre
+			for (const genre of book.genres.split(',').map((genre) => genre.replace(/[\[\]']/g, '').trim()).filter((genre) => !allGenres.map((genre) => removeEmoji(genre).trim()
+			).includes(genre
 			)).filter((genre) => !trashGenres.includes(genre))) {
 						const selectGenre = await prompts({
 							type: 'text',
 							name: 'value',
 							message: `Select emoji for ${genre}:`,
+							validate: (value) =>  allGenres.includes(value) ? `Genre ${value} already exists` : true
+							
 						})
 				if (!selectGenre.value) {
 					trashGenres.push(genre)
@@ -217,18 +185,16 @@ export const seeder = async () => {
 				.map((genre) => ({
 					title: genre,
 					value: genre
-				}))
+				})),
 			})
-	
+
 			await prisma.book.create({
 				data: {
-				title: book.title,
-				author: book.author.replace(/,.*|\(.*?\)/g, '').trim(),
+				title: typeof epub === 'string' ? book.title : epub.title,
+				author: typeof epub === 'string' ? book.author.replace(/,.*|\(.*?\)/g, '').trim() : epub.author,
 				description: book.description,
 				popularity: book.numRatings,
-				readingTime: 0,
-				shortRetelling: '',
-				isbn: book.isbn,
+				isbn: typeof epub === 'string' || !epub.isbn ? book.isbn : epub.isbn,
 				color: await  getAverageColor(book.coverImg).then((color) => color.hex),
 					majorGenre: {
 							connectOrCreate: {
@@ -248,12 +214,10 @@ export const seeder = async () => {
 							};
 						}),
 					},
-				image: book.coverImg,
-				pages: Number(book.pages),
+				image: typeof epub === 'string' ? book.coverImg : epub.picture,
+				pages: typeof epub === 'string' || !epub.pages ? book.pages : epub.pages,
 				likedPercent: book.likedPercent,
-					//`epub/${book.title}.epub`
-					// TODO: сделать очистку epub от шлака
-				epub: epub,
+				epub: typeof epub === 'string' ? epub : epub.link,
 					},
 				})
 			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))

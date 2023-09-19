@@ -15,31 +15,28 @@ datasource db {
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  title       String
-  author      String
-  description String
-  isbn        String
-  image       String
-  epub        String
-  color       String   @default("#fff")
-  pages       Int
-
-  readingTime    Int       @default(0)
-  likedPercent   Int
-  popularity     Int       @default(0)
-  mainGenreId    Int
-  shortRetelling String
-  majorGenre     Genre     @relation("BookMajorGenre", fields: [mainGenreId], references: [id])
-  histories      History[]
-  genres         Genre[]   @relation("BookGenre")
-  reviews        Review[]
-  shelves        Shelves[]
-  likedBy        User[]    @relation("LikedBooks")
-  finishBy       User[]    @relation("FinishBooks")
-  readingBy      User[]    @relation("ReadingBooks")
+  id           Int       @id @default(autoincrement())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  title        String
+  author       String
+  description  String
+  isbn         String
+  image        String
+  epub         String
+  color        String    @default("#fff")
+  pages        Int
+  likedPercent Int
+  popularity   Int       @default(0)
+  mainGenreId  Int
+  majorGenre   Genre     @relation("BookMajorGenre", fields: [mainGenreId], references: [id])
+  histories    History[]
+  genres       Genre[]   @relation("BookGenre")
+  reviews      Review[]
+  shelves      Shelves[]
+  likedBy      User[]    @relation("LikedBooks")
+  finishBy     User[]    @relation("FinishBooks")
+  readingBy    User[]    @relation("ReadingBooks")
 }
 
 model Genre {

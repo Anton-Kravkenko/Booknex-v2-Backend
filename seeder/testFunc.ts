@@ -1,12 +1,25 @@
+import puppeteer from 'puppeteer-extra'
+import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
+import { getEpubFromBook } from './getEpubFromBook'
+
 export const testFunc = async () => {
-	const randomElement = ["Lily", "Boo", 'Boots', 'Lucky', "Harley",
-		"Bear", "Chester", "Luna", "Bob", "Maggie"
-	]
-	
-	const randomIndex = Math.floor(Math.random() * randomElement.length)
-	const randomName = randomElement[randomIndex]
-	
-	return `https://api.dicebear.com/7.x/notionists-neutral/png?seed=${randomName}&backgroundColor=transparent`
+	const adblocker = AdblockerPlugin({
+		blockTrackers: true
+	})
+	puppeteer.use(adblocker)
+	const browser = await puppeteer.launch({
+		headless: false,
+		ignoreHTTPSErrors: true
+	})
+	const page = await browser.newPage()
+	const epub = await getEpubFromBook(
+		'Animal Farm',
+		'George Orwell',
+		112,
+		300000,
+		page
+	)
+	return epub
 }
 
 testFunc().then((value) => {
