@@ -28,7 +28,16 @@ export class AuthService {
 			...tokens
 		}
 	}
-
+	async checkEmail(email: string) {
+		const user = await this.prisma.user.findUnique({
+			where: {
+				email
+			}
+		})
+		return {
+			isExist: !!user
+		}
+	}
 	async register(dto: AuthDto) {
 		const oldUser = await this.prisma.user.findUnique({
 			where: {

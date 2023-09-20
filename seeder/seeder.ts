@@ -5,10 +5,8 @@ import { getAverageColor } from 'fast-average-color-node'
 import * as process from 'process'
 import prompts from 'prompts'
 import puppeteer from 'puppeteer-extra'
-import AdblockerPlugin from 'puppeteer-extra-plugin-adblocker'
 import { removeEmoji } from '../src/utils/removeEmoji'
 import { customLinkSelect } from './aditionalFunc'
-import JsonBooks from './books_1.Best_Books_Ever.json'
 import { getEpubFromBook } from './getEpubFromBook'
 
 interface Book {
@@ -40,60 +38,23 @@ interface Book {
 }
 const prisma = new PrismaClient()
 export const seeder = async () => {
-	const trashGenres = [
-		"Read For School",
-		"Literature",
-		"Audiobook",
-		"Middle Grade",
-		"Science Fiction Fantasy",
-		"High School",
-		"Plays",
-		"Russia",
-		"19th Century",
-		"Russian Literature",
-		"LGBT",
-		"Mental Health",
-		"Contemporary",
-		"Historical Fiction",
-		"American",
-		"Paranormal",
-		"Adult Fiction",
-		"Chick Lit",
-		"Book Club",
-		"Childrens",
-		"Animals",
-		"Canada",
-		"Historical Romance",
-		"Classic Literature",
-		"Holocaust",
-		"World War II",
-		"European Literature",
-		"British Literature",
-		"British",
-		"Food",
-		"India",
-		"Books About Books",
-		"Comedy",
-		"Realistic Fiction",
-		"Picture Books",
-		"Juvenile",
-		"Kids",
-			"Short Stories",
-		"Supernatural",
-		"Magical Realism",
-		"Spanish Literature",
-		'Literary Fiction',
-		"Latin American",
-		"Mythology",
-		"Urban Fantasy",
-		"Greek Mythology",
-		"20th Century",
-		"Unfinished",
-		"Space Opera",
-		"Medieval"
+	const selectGenres = [
+		"Fantasy",
+		"Young Adult",
+		"Fiction",
+		"Adventure",
+		"Classics",
+		"School",
+		"Historical",
+		"Romance",
+		"Adult",
+		"War",
+		"Philosophy",
+		"Thriller"
 	]
 	const books = JSON.parse(JSON.stringify(
-		JsonBooks
+		// JsonBooks
+		[]
 	))
 	const lastBook = await prisma.book.findFirst({
 		orderBy: {
@@ -101,19 +62,39 @@ export const seeder = async () => {
 		},
 		take: 1,
 		select: {
-			id: true
+		id: true,
+		description: true,
 		}
-	}) || { id: 0 }
-	console.log(rainbow(`Last book index: ${lastBook.id}`))
+	}) || { id: 0, description: '' }
+	const lastBookIndex = books.findIndex((book) => book.description === lastBook.description)
+	console.log(rainbow(`Last book index: ${lastBookIndex}`))
 	books.filter((book: Book) => book.language === 'English')
-		.slice(lastBook.id + 1, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 20000)
-	const adblocker = AdblockerPlugin({
-		blockTrackers: true,
-	})
-	puppeteer.use(adblocker)
+		.slice(lastBookIndex + 1, 1000).sort((a: Book, b: Book) => b.numRatings - a.numRatings).filter((book: Book) => book.numRatings > 20000)
 	const browser = await puppeteer.launch({
-		headless: true,
-		ignoreHTTPSErrors: true
+		headless: false,
+	  args: [
+			'--headless',
+			'--hide-scrollbars',
+			'--mute-audio',
+			'--no-sandbox',
+			'--disable-canvas-aa', // Disable antialiasing on 2d canvas
+			'--disable-2d-canvas-clip-aa', // Disable antialiasing on 2d canvas clips
+			'--disable-dev-shm-usage', // ???
+			'--no-zygote', // wtf does that mean ?
+			'--use-gl=swiftshader', // better cpu usage with --use-gl=desktop rather than --use-gl=swiftshader, still needs more testing.
+			'--enable-webgl',
+			'--hide-scrollbars',
+			'--mute-audio',
+			'--no-first-run',
+			'--disable-infobars',
+			'--disable-breakpad',
+			'--window-size=1280,1024',
+			'--user-data-dir=./chromeData',
+			'--no-sandbox',
+			'--disable-setuid-sandbox'],
+		
+		ignoreHTTPSErrors: true,
+		ignoreDefaultArgs: ['--disable-extensions'],
 	})
 	const page = await browser.newPage()
 	await page.setRequestInterception(true)
@@ -124,7 +105,7 @@ export const seeder = async () => {
 			req.continue()
 		}
 	})
-	for (let i = lastBook.id + 1; i < books.length; i++) {
+	for (let i = lastBookIndex + 1; i < books.length; i++) {
 		const book = books[i]
 		try {
 			const oldBook = await prisma.book.findFirst({
@@ -192,10 +173,10 @@ export const seeder = async () => {
 					_count: 'desc'
 				}
 				} }).then((genres) => genres.map((genre) => genre.name))
-	  const genreWithEmoji = []
+	  const genreWithEmoji: string[] = []
 			for (const genre of book.genres.split(',').map((genre) => genre.replace(/[\[\]']/g, '').trim()).filter((genre) => !allGenres.map((genre) => removeEmoji(genre).trim()
 			).includes(genre
-			)).filter((genre) => !trashGenres.includes(genre))) {
+			)).filter((genre) => selectGenres.includes(genre))) {
 						const selectGenre = await prompts({
 							type: 'text',
 							name: 'value',
@@ -203,15 +184,11 @@ export const seeder = async () => {
 							validate: (value) =>  allGenres.includes(value) ? `Genre ${value} already exists` : true
 							
 						})
-				if (!selectGenre.value) {
-					trashGenres.push(genre)
-					continue
-				}
 			 selectGenre &&	genreWithEmoji.push(`${selectGenre.value} ${genre.replace(/[\[\]']/g, '').trim()}`)
 			}
 
-			const filteredGenres = book.genres.split(',').map((genre) => genre.replace(/[\[\]']/g, '').trim()).filter((genre) => !trashGenres.includes(genre));
-			const majorGenres = await prisma.genre.findMany({
+			const filteredGenres = book.genres.split(',').map((genre) => genre.replace(/[\[\]']/g, '').trim()).filter((genre) => selectGenres.includes(genre));
+			const BookGenres = await prisma.genre.findMany({
 				select: { name: true },
 				orderBy: {
 					majorBooks: {
@@ -225,9 +202,13 @@ export const seeder = async () => {
 			});
 
 const randomMajorGenre =
-	majorGenres[Math.floor(Math.random() * majorGenres.length)] ||
+	BookGenres.length > 0 ? BookGenres[Math.floor(Math.random() * BookGenres.length)].name :
 	genreWithEmoji[Math.floor(Math.random() * genreWithEmoji.length)]
-
+			console.log(randomMajorGenre)
+			console.log( [
+				BookGenres.map((genre) => genre.name),
+				genreWithEmoji.map((genre) => genre.replace(/[\[\]']/g, '').trim())
+			])
 			await prisma.book.create({
 				data: {
 				title: typeof epub === 'string' ? book.title : epub.title,
@@ -239,28 +220,40 @@ const randomMajorGenre =
 					majorGenre: {
 							connectOrCreate: {
 								where: {
-								 name: randomMajorGenre.name
+								 name: randomMajorGenre
 								},
 								create: {
-									name: randomMajorGenre.name
+									name: randomMajorGenre
 								}
 							}
 					},
 					genres: {
-						connectOrCreate: genreWithEmoji.map((genre) => {
-							return {
-								where: { name: genre.replace(/[\[\]']/g, '').trim()  },
-								create: { name: genre.replace(/[\[\]']/g, '').trim()},
-							};
-						}),
+						connectOrCreate: [
+							...BookGenres.map((genre) => genre.name),
+							...genreWithEmoji.map((genre) => genre.replace(/[\[\]']/g, '').trim())
+						]
+							.map((genre) => ({
+							where: {
+								name: genre
+							},
+							create: {
+								name: genre
+							}
+						}))
 					},
-				image: `books-covers/${book.title}.jpg`,
+				image: `books-covers/${
+					typeof epub === 'string' ? book.title : epub.title
+				}.jpg`,
 				pages: typeof epub === 'string' || !epub.pages ? Number(book.pages) : Number(epub.pages),
 				likedPercent: book.likedPercent,
-				epub: `epubs/${book.title}.epub`,
+				epub: `epubs/${
+					typeof epub === 'string' ? book.title : epub.title
+				}.epub`,
 					},
 				})
-			console.log(green(`✅ ${i}: ${book.title} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))
+			console.log(green(`✅ ${i}: ${
+				typeof epub === 'string' ? book.title : epub.title
+			} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))
 		} catch (error) {
 			console.error(
 				`❌ Failed to generate ePub for ${book.title} by ${book.author}: ${error.message}`
@@ -268,7 +261,7 @@ const randomMajorGenre =
 		}
 	}
 	await browser.close()
-return trashGenres
+
 }
 
 seeder().then((value) => {
