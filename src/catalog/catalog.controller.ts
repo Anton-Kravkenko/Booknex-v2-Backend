@@ -11,6 +11,10 @@ export class CatalogController {
 	async search(@Param('query') query: string) {
 		return this.catalogService.search(query)
 	}
+	@Get('/topSearchers')
+	async getTopSearchers() {
+		return this.catalogService.getTopSearchers()
+	}
 
 	@Get('/')
 	@Auth()

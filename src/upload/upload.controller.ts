@@ -26,7 +26,7 @@ export class UploadController {
 			})
 		)
 		file: Express.Multer.File,
-		@Param('folder') folder: 'epub' | 'image'
+		@Param('folder') folder: 'epubs' | 'books-covers' | 'user-pictures'
 	) {
 		return this.uploadService.upload(file.buffer, file.originalname, folder)
 	}

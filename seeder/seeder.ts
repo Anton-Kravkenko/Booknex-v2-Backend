@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { PrismaClient } from '@prisma/client'
-import { bgRed, gray, green, rainbow, yellow } from 'colors'
+import { bgBlue, gray, green, rainbow, yellow } from 'colors'
 import { getAverageColor } from 'fast-average-color-node'
 import * as process from 'process'
 import prompts from 'prompts'
@@ -127,8 +127,7 @@ export const seeder = async () => {
 			pages: number | null,
 		} = await getEpubFromBook(
 			book.title, book.author.replace(/,.*|\(.*?\)/g, '').trim(), Number(book.pages),	book.numRatings, page).catch((reason) => {
-				console.log(bgRed(reason))
-				if (book.numRatings < 100000) return console.log(yellow(`❌ No result for ${book.title}`))
+				if (book.numRatings < 200000) return console.log(yellow(`❌ No result for ${book.title}`))
 			const customLink =	customLinkSelect({
 				title: book.title, author: book.author.replace(/,.*|\(.*?\)/g, '').trim()})
 			if (!customLink) return
@@ -189,26 +188,26 @@ export const seeder = async () => {
 
 			const filteredGenres = book.genres.split(',').map((genre) => genre.replace(/[\[\]']/g, '').trim()).filter((genre) => selectGenres.includes(genre));
 			const BookGenres = await prisma.genre.findMany({
-				select: { name: true },
-				orderBy: {
-					majorBooks: {
-						// eslint-disable-next-line @typescript-eslint/naming-convention
-						_count: 'desc'
-					}
-				},
+				select: { name: true, majorBooks: true },
 				where: {
 					OR: filteredGenres.map(genre => ({ name: { contains: genre } }))
 				}
 			});
-
+		 console.log(
+			 bgBlue('Major genre: ')
+			 ,
+			 BookGenres.
+		 sort((a, b) => a.majorBooks.length - b.majorBooks.length)[0].name
+		  ? BookGenres.sort((a, b) => a.majorBooks.length - b.majorBooks.length)[0].name : genreWithEmoji[Math.floor(Math.random() * genreWithEmoji.length)],
+			 bgBlue('Genres: '), BookGenres. sort((a, b) => a.majorBooks.length - b.majorBooks.length).map((genre) =>
+				 genre.name
+			 ).join(', ')
+			 ,
+		 )
 const randomMajorGenre =
-	BookGenres.length > 0 ? BookGenres[Math.floor(Math.random() * BookGenres.length)].name :
+	BookGenres.length > 0 ? BookGenres.
+		sort((a, b) => a.majorBooks.length - b.majorBooks.length)[0].name :
 	genreWithEmoji[Math.floor(Math.random() * genreWithEmoji.length)]
-			console.log(randomMajorGenre)
-			console.log( [
-				BookGenres.map((genre) => genre.name),
-				genreWithEmoji.map((genre) => genre.replace(/[\[\]']/g, '').trim())
-			])
 			await prisma.book.create({
 				data: {
 				title: typeof epub === 'string' ? book.title : epub.title,
@@ -255,9 +254,7 @@ const randomMajorGenre =
 				typeof epub === 'string' ? book.title : epub.title
 			} by ${book.author.replace(/,.*|\(.*?\)/g, '').trim()}`))
 		} catch (error) {
-			console.error(
-				`❌ Failed to generate ePub for ${book.title} by ${book.author}: ${error.message}`
-			)
+	
 		}
 	}
 	await browser.close()

@@ -1,4 +1,4 @@
-import { magenta, yellow } from 'colors'
+import { bgGreen, magenta, yellow } from 'colors'
 import prompts from 'prompts'
 import { Page } from 'puppeteer'
 
@@ -74,7 +74,7 @@ export const getBookFromList = async (page: Page, link: string, numbPages: numbe
 			const customResponse = await prompts({
 				type: 'text',
 				name: 'value',
-				message: `Your link:`
+				message: `Your link to ${bgGreen('Z-epub')}:`
 			})
 			return getBookFromList(page, customResponse.value, numbPages, bookTitle)
 		}
@@ -83,7 +83,7 @@ export const getBookFromList = async (page: Page, link: string, numbPages: numbe
 		const customResponse = await prompts({
 			type: 'text',
 			name: 'value',
-			message: 'Book is not in English, enter your own link to epub:'
+			message: `Book is not in English, enter your own link to ${bgGreen('Z-epub')}:`
 		})
 		return getBookFromList(page, customResponse.value, numbPages, bookTitle)
 	}

@@ -21,4 +21,6 @@ export class BookController {
 	async getBookInfoById(@Param('id') bookId: string) {
 		return this.bookService.getBookInfoById(+bookId)
 	}
+	// TODO: update
+	//TODO: create book
 }

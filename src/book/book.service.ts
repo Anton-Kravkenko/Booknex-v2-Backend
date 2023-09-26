@@ -51,6 +51,7 @@ export class BookService {
 		const book = await this.prisma.book.findUnique({
 			where: { id: +id },
 			include: {
+				majorGenre: false,
 				genres: { select: GenreReturnObject }
 			}
 		})
@@ -69,13 +70,12 @@ export class BookService {
 
 		return {
 			...book,
-			similarBook: similarBooks
+			similarBooks: similarBooks
 				.sort(
 					(a, b) =>
 						b.genres.filter(g => genreIds.includes(g.id)).length -
 						a.genres.filter(g => genreIds.includes(g.id)).length
 				)
-				// no genre field
 				.slice(0, 10)
 				.map(({ genres, ...rest }) => ({ ...rest }))
 		}

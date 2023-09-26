@@ -6,97 +6,58 @@ import { defaultReturnObject } from '../utils/return-object/return.default.objec
 @Injectable()
 export class CatalogService {
 	constructor(private readonly prisma: PrismaService) {}
+
 	async getCatalog(userId: number) {
 		return {
-			//TODO: Сделать тут жанры которые пользователь выбрал при регистрации и те, которые в реках
-			mostRelatedGenres: await this.prisma.genre
-				.findMany({
-					select: {
-						...defaultReturnObject,
-						name: true
-					},
-					where: {
-						OR: [
-							{
-								books: {
-									some: {
-										likedBy: {
-											some: {
-												id: userId
-											}
-										}
-									}
-								}
-							},
-							{
-								name: {
-									in: ['Fantasy', 'Romance', 'Horror', 'Thriller', 'Sci-Fi']
-								}
-							}
-						]
-					}
-				})
-				.then(genres =>
-					genres
-						.sort(
-							(a, b) =>
-								genres.filter(genre => genre.name === a.name).length -
-								genres.filter(genre => genre.name === b.name).length
-						)
-						.slice(0, 5)
-				),
+			mostRelatedGenres: await this.getMostRelatedGenres(userId),
 			recommendations: await this.getRecommendations(userId),
-			popularNow: await this.prisma.book.findMany({
-				take: 10,
-				orderBy: {
-					popularity: 'desc'
-				},
-				select: {
-					...returnBookObject,
-					description: true
-				},
-				where: {
-					histories: {
-						some: {
-							createdAt: {
-								gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-							}
-						}
-					}
-				}
-			}),
-			bestSellers: await this.prisma.book.findMany({
-				take: 10,
-				orderBy: {
-					popularity: 'desc'
-				},
-				select: returnBookObject
-			}),
-			newReleases: await this.prisma.book.findMany({
-				take: 10,
-				orderBy: {
-					createdAt: 'desc'
-				},
-				select: returnBookObject
-			}),
-			genres: await this.prisma.genre.findMany({
-				take: 5,
-				select: {
-					name: true,
-					majorBooks: {
-						orderBy: {
-							createdAt: 'desc'
-						},
-						take: 10,
-						select: returnBookObject
-					}
-				}
-			})
+			popularNow: await this.getPopularBooks(),
+			bestSellers: await this.getBestSellingBooks(),
+			newReleases: await this.getNewReleases(),
+			sameBreath: await this.getSameBreathBooks(),
+			genres: await this.getGenres()
 		}
+	}
+	async getTopSearchers() {
+		const topGenres = await this.prisma.genre.findMany({
+			take: 5,
+			select: {
+				id: true,
+				name: true
+			},
+			orderBy: {
+				books: {
+					/* eslint-disable */
+					_count: 'desc'
+					/* eslint-enable */
+				}
+			}
+		})
+		const topBooks = await this.prisma.book.findMany({
+			take: 6,
+			select: {
+				id: true,
+				title: true
+			},
+			orderBy: {
+				popularity: 'desc'
+			}
+		})
+		return [
+			...topGenres.slice(0, 2),
+			...topBooks.slice(0, 3),
+			...topGenres.slice(2, 3),
+			...topBooks.slice(3, 5),
+			...topGenres.slice(3, 5)
+		]
 	}
 	search(query: string) {
 		return this.prisma.book.findMany({
-			select: returnBookObject,
+			select: {
+				...returnBookObject,
+				likedPercent: true,
+				pages: true
+			},
 			where: {
 				OR: [
 					{
@@ -119,7 +80,145 @@ export class CatalogService {
 		})
 	}
 
-	async getRecommendations(userId: number) {
+	private async getMostRelatedGenres(userId: number) {
+		const genres = await this.prisma.genre.findMany({
+			select: {
+				...defaultReturnObject,
+				name: true
+			},
+			where: {
+				OR: [
+					{
+						books: {
+							some: {
+								likedBy: {
+									some: {
+										id: userId
+									}
+								}
+							}
+						}
+					},
+					{
+						name: {
+							in: await this.getUserInitialGenres(userId)
+						}
+					}
+				]
+			}
+		})
+
+		return this.sortAndSliceGenres(genres)
+	}
+
+	private async getUserInitialGenres(userId: number) {
+		return this.prisma.user
+			.findUnique({
+				where: {
+					id: userId
+				},
+				select: {
+					inititalGenre: {
+						select: {
+							name: true
+						}
+					}
+				}
+			})
+			.inititalGenre()
+			.then(genres => genres.map(genre => genre.name))
+	}
+
+	private sortAndSliceGenres(
+		genres: { id: number; createdAt: Date; updatedAt: Date; name: string }[]
+	) {
+		return genres
+			.sort(
+				(a, b) =>
+					genres.filter(genre => genre.name === a.name).length -
+					genres.filter(genre => genre.name === b.name).length
+			)
+			.slice(0, 5)
+	}
+
+	private getPopularBooks() {
+		return this.prisma.book.findMany({
+			take: 10,
+			orderBy: {
+				popularity: 'desc'
+			},
+			select: {
+				...returnBookObject,
+				description: true,
+				color: true
+			},
+			where: {
+				histories: {
+					some: {
+						createdAt: {
+							gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+						}
+					}
+				}
+			}
+		})
+	}
+
+	private getBestSellingBooks() {
+		return this.prisma.book.findMany({
+			take: 10,
+			orderBy: {
+				popularity: 'desc'
+			},
+			select: returnBookObject
+		})
+	}
+
+	private getNewReleases() {
+		return this.prisma.book.findMany({
+			take: 10,
+			orderBy: {
+				createdAt: 'desc'
+			},
+			select: returnBookObject
+		})
+	}
+
+	private getSameBreathBooks() {
+		return this.prisma.book.findMany({
+			take: 10,
+			orderBy: {
+				popularity: 'desc'
+			},
+			select: {
+				...returnBookObject,
+				pages: true
+			},
+			where: {
+				pages: {
+					lte: 160
+				}
+			}
+		})
+	}
+
+	private getGenres() {
+		return this.prisma.genre.findMany({
+			take: 5,
+			select: {
+				name: true,
+				majorBooks: {
+					orderBy: {
+						createdAt: 'desc'
+					},
+					take: 10,
+					select: returnBookObject
+				}
+			}
+		})
+	}
+
+	private async getRecommendations(userId: number) {
 		const likedGenres = await this.prisma.genre.findMany({
 			select: {
 				name: true
@@ -136,20 +235,15 @@ export class CatalogService {
 				}
 			}
 		})
-		//TODO: сделать это короче
-		const genres = Object.entries(
-			likedGenres.reduce((acc, book) => {
-				book.name.split(',').forEach(genre => {
-					if (acc[genre]) acc[genre]++
-					else acc[genre] = 1
-				})
-				return acc
-			}, {})
-		)
-			.sort((a, b) => Number(b[1]) - Number(a[1]))
+		const genres = likedGenres
+			.sort((a, b) => {
+				return (
+					likedGenres.filter(genre => genre.name === a.name).length -
+					likedGenres.filter(genre => genre.name === b.name).length
+				)
+			})
 			.slice(0, 5)
-			.map(item => item[0])
-		console.log(genres)
+			.map(genre => genre.name)
 		return this.prisma.book.findMany({
 			take: 10,
 			orderBy: { popularity: 'desc' },
@@ -158,8 +252,23 @@ export class CatalogService {
 				genres: {
 					some: {
 						name: {
-							// TODO: fix this: add user likes genre in first
-							in: genres.length ? genres : ['Fantasy', 'Romance']
+							in: genres.length
+								? genres
+								: await this.prisma.user
+										.findUnique({
+											where: {
+												id: userId
+											},
+											select: {
+												inititalGenre: {
+													select: {
+														name: true
+													}
+												}
+											}
+										})
+										.inititalGenre()
+										.then(genres => genres.map(genre => genre.name))
 						}
 					}
 				},

@@ -8,7 +8,7 @@ import { User } from '@prisma/client'
 import { hash, verify } from 'argon2'
 import { PrismaService } from '../prisma.service'
 import { UsersService } from '../users/users.service'
-import { AuthDto } from './dto/auth.dto'
+import { AuthDto, RegisterDto } from './dto/auth.dto'
 import { getRandomPicture } from './utils/getRandomPicture'
 
 @Injectable()
@@ -38,7 +38,7 @@ export class AuthService {
 			isExist: !!user
 		}
 	}
-	async register(dto: AuthDto) {
+	async register(dto: RegisterDto) {
 		const oldUser = await this.prisma.user.findUnique({
 			where: {
 				email: dto.email
@@ -46,13 +46,23 @@ export class AuthService {
 		})
 		if (oldUser)
 			throw new BadRequestException('User already exists').getResponse()
-		const userPicture = await getRandomPicture()
+		const fainBackPicture = await getRandomPicture()
 		const user = await this.prisma.user.create({
 			data: {
 				email: dto.email,
 				password: await hash(dto.password),
-				name: dto.email.split('@')[0],
-				picture: userPicture
+				name: dto.name ? dto.name : dto.email.split('@')[0],
+				picture: fainBackPicture,
+				inititalGenre: {
+					connectOrCreate: dto.genres.map(genre => ({
+						where: {
+							name: genre
+						},
+						create: {
+							name: genre
+						}
+					}))
+				}
 			}
 		})
 		const tokens = await this.issueToken(user.id)

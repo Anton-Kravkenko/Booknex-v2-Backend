@@ -12,6 +12,7 @@ import { GenreModule } from './genre/genre.module'
 import { HistoryModule } from './history/history.module'
 import { UploadModule } from './upload/upload.module'
 import { UsersModule } from './users/users.module'
+import { ShelvesModule } from './shelves/shelves.module';
 
 @Module({
 	imports: [
@@ -33,7 +34,8 @@ import { UsersModule } from './users/users.module'
 			ttl: 5000,
 			max: 1000
 		}),
-		AdminModule
+		AdminModule,
+		ShelvesModule
 	],
 	controllers: [AppController],
 	providers: [AppService, ConfigService]
