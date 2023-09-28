@@ -168,7 +168,7 @@ export const seeder = async () => {
 			)
 			const allGenres = await prisma.genre.findMany({ select: { name: true }, orderBy: {
 				books: {
-					// eslint-disable-next-line @typescript-eslint/naming-convention
+					// eslint-disable-next-line
 					_count: 'desc'
 				}
 				} }).then((genres) => genres.map((genre) => genre.name))

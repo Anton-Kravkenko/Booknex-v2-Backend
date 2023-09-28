@@ -27,9 +27,8 @@ export class CatalogService {
 			},
 			orderBy: {
 				books: {
-					/* eslint-disable */
+					// eslint-disable-next-line
 					_count: 'desc'
-					/* eslint-enable */
 				}
 			}
 		})
@@ -155,7 +154,7 @@ export class CatalogService {
 			where: {
 				histories: {
 					some: {
-						createdAt: {
+						updatedAt: {
 							gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 						}
 					}
@@ -178,7 +177,7 @@ export class CatalogService {
 		return this.prisma.book.findMany({
 			take: 10,
 			orderBy: {
-				createdAt: 'desc'
+				updatedAt: 'desc'
 			},
 			select: returnBookObject
 		})
@@ -209,7 +208,7 @@ export class CatalogService {
 				name: true,
 				majorBooks: {
 					orderBy: {
-						createdAt: 'desc'
+						updatedAt: 'desc'
 					},
 					take: 10,
 					select: returnBookObject

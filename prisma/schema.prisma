@@ -40,14 +40,13 @@ model Book {
 }
 
 model Genre {
-  id         Int       @id @default(autoincrement())
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  name       String    @unique
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  name       String   @unique
   users      User[]
-  shelves    Shelves[]
-  books      Book[]    @relation("BookGenre")
-  majorBooks Book[]    @relation("BookMajorGenre")
+  books      Book[]   @relation("BookGenre")
+  majorBooks Book[]   @relation("BookMajorGenre")
 }
 
 model Review {
@@ -90,6 +89,8 @@ model User {
   likedBooks    Book[]    @relation("LikedBooks")
   finishBooks   Book[]    @relation("FinishBooks")
   readingBooks  Book[]    @relation("ReadingBooks")
+  likeShelves   Shelves[] @relation("LikedShelves")
+  unWacthed     Shelves[] @relation("UnWacthedShelves")
 }
 
 model Shelves {
@@ -97,8 +98,8 @@ model Shelves {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String
-  like      Int      @default(0)
+  like      User[]   @relation("LikedShelves")
+  unWacthed User[]   @relation("UnWacthedShelves")
   color     String   @default("#fff")
-  genres    Genre[]
   books     Book[]
 }
