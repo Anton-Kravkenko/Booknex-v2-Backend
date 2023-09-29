@@ -33,7 +33,7 @@ model Book {
   histories    History[]
   genres       Genre[]   @relation("BookGenre")
   reviews      Review[]
-  shelves      Shelves[]
+  shelves      Shelve[]
   likedBy      User[]    @relation("LikedBooks")
   finishBy     User[]    @relation("FinishBooks")
   readingBy    User[]    @relation("ReadingBooks")
@@ -44,9 +44,12 @@ model Genre {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   name       String   @unique
+  picture    String   @default("")
   users      User[]
   books      Book[]   @relation("BookGenre")
   majorBooks Book[]   @relation("BookMajorGenre")
+  similarBy  Genre[]  @relation("Similar")
+  similar    Genre[]  @relation("Similar")
 }
 
 model Review {
@@ -75,25 +78,25 @@ model History {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  email         String    @unique
-  name          String?
-  picture       String?
-  password      String
-  isAdmin       Boolean   @default(false)
-  history       History[]
-  review        Review[]
-  inititalGenre Genre[]
-  likedBooks    Book[]    @relation("LikedBooks")
-  finishBooks   Book[]    @relation("FinishBooks")
-  readingBooks  Book[]    @relation("ReadingBooks")
-  likeShelves   Shelves[] @relation("LikedShelves")
-  unWacthed     Shelves[] @relation("UnWacthedShelves")
+  id               Int       @id @default(autoincrement())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  email            String    @unique
+  name             String?
+  picture          String?
+  password         String
+  isAdmin          Boolean   @default(false)
+  history          History[]
+  review           Review[]
+  inititalGenre    Genre[]
+  likedBooks       Book[]    @relation("LikedBooks")
+  finishBooks      Book[]    @relation("FinishBooks")
+  readingBooks     Book[]    @relation("ReadingBooks")
+  likeShelves      Shelve[]  @relation("LikedShelves")
+  unWatchedShelves Shelve[]  @relation("UnWacthedShelves")
 }
 
-model Shelves {
+model Shelve {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -101,5 +104,6 @@ model Shelves {
   like      User[]   @relation("LikedShelves")
   unWacthed User[]   @relation("UnWacthedShelves")
   color     String   @default("#fff")
+  picture   String   @default("")
   books     Book[]
 }

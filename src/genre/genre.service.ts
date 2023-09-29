@@ -17,7 +17,12 @@ export class GenreService {
 			},
 			select: {
 				...defaultReturnObject,
-				name: true
+				name: true,
+				similar: {
+					select: {
+						id: true
+					}
+				}
 			}
 		})
 		if (!genre) throw new NotFoundException('Genre not found').getResponse()
@@ -49,10 +54,29 @@ export class GenreService {
 			}
 		})
 
+		const bestSellersFromSimilar = await this.prisma.genre.findMany({
+			where: {
+				id: {
+					in: genre.similar.map(g => g.id)
+				}
+			},
+			select: {
+				...defaultReturnObject,
+				name: true,
+				books: {
+					take: 10,
+					orderBy: {
+						popularity: 'desc'
+					}
+				}
+			}
+		})
+
 		return {
-			...genre,
+			...{ ...genre, similar: undefined },
 			newestBooks,
-			bestSellers
+			bestSellers,
+			bestSellersFromSimilar
 		}
 	}
 }

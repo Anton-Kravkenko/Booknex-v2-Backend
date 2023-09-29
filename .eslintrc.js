@@ -21,6 +21,10 @@ module.exports = {
        {
             selector: "default",
             format: ["camelCase", 'PascalCase'],
+         filter: {
+           regex: '^(count)$',
+           match: true,
+         }
        },
        {
          selector: "variable",

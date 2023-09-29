@@ -61,16 +61,19 @@ export class CatalogService {
 				OR: [
 					{
 						title: {
+							mode: 'insensitive',
 							contains: query
 						}
 					},
 					{
 						author: {
+							mode: 'insensitive',
 							contains: query
 						}
 					},
 					{
 						isbn: {
+							mode: 'insensitive',
 							contains: query
 						}
 					}

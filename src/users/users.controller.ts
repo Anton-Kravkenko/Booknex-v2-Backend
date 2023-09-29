@@ -2,26 +2,33 @@ import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { UserUpdateDto } from './dto/user.update.dto'
+import { UserLibraryType } from './user-types'
 import { UsersService } from './users.service'
 
 @Controller('users')
 export class UsersController {
 	constructor(private readonly usersService: UsersService) {}
-
+	// TODO: сделать статиску для пользователя, сделать библиотеку и чтобы можно было посмотреть всё поля в ней
 	@Auth()
 	@Get('/get-profile')
 	async getProfile(@CurrentUser('id') id: number) {
-		return this.usersService.getUserById(id, {
-			email: true,
-			isAdmin: true,
-			name: true,
-			picture: true,
-			likedBooks: true,
-			finishBooks: true,
-			readingBooks: true
-		})
+		return this.usersService.getProfile(+id)
+	}
+	@Auth()
+	@Get('/get-library')
+	async getLibrary(@CurrentUser('id') id: number) {
+		return this.usersService.getLibrary(+id)
 	}
 
+	@Auth()
+	@Get('/library/:type')
+	async getLibraryByType(
+		@CurrentUser('id') id: number,
+		@Param('type')
+		type: UserLibraryType
+	) {
+		return this.usersService.getLibraryByType(+id, type)
+	}
 	@Auth()
 	@Post('/update-user')
 	async updateUser(@CurrentUser('id') id: number, @Body() dto: UserUpdateDto) {
@@ -33,7 +40,8 @@ export class UsersController {
 	async toggle(
 		@CurrentUser('id') userId: number,
 		@Param('id') id: string,
-		@Param('type') type: 'reading' | 'like' | 'finish'
+		@Param('type')
+		type: UserLibraryType
 	) {
 		return this.usersService.toggle(userId, +id, type)
 	}
