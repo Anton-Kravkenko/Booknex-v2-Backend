@@ -124,6 +124,33 @@ export class UsersService {
 		return this.getUserById(userId)
 	}
 
+	async getAllUsers() {
+		return this.prisma.user.findMany({
+			select: {
+				...returnUserObject,
+				_count: {
+					select: {
+						finishedBooks: true,
+						likedBooks: true,
+						readingBooks: true,
+						likedShelves: true,
+						unwatchedShelves: true
+					}
+				}
+			}
+		})
+	}
+
+	async deleteUser(id: number) {
+		const user = await this.getUserById(id)
+		await this.prisma.user.delete({
+			where: { id: user.id }
+		})
+		return {
+			message: 'User deleted'
+		}
+	}
+
 	async toggle(userId: number, id: number, type: UserLibraryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()

@@ -5,5 +5,5 @@ export const returnBookObject = {
 	title: true,
 	author: true,
 	image: true,
-	likedPercent: true
+	likedPercentage: true
 }

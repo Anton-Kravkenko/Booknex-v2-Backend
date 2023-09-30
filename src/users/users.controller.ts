@@ -46,4 +46,18 @@ export class UsersController {
 	) {
 		return this.usersService.toggle(userId, +id, type)
 	}
+
+	// admin
+
+	@Auth('admin')
+	@Get('/get-all-users')
+	async getAllUsers() {
+		return this.usersService.getAllUsers()
+	}
+
+	@Auth('admin')
+	@Get('/delete/:id')
+	async deleteUser(@Param('id') id: string) {
+		return this.usersService.deleteUser(+id)
+	}
 }

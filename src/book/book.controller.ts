@@ -8,6 +8,10 @@ import { ReviewBookDto } from './dto/review-book.dto'
 @Controller('book')
 export class BookController {
 	constructor(private readonly bookService: BookService) {}
+	@Get('/emotions')
+	async getEmotions() {
+		return this.bookService.getEmotions()
+	}
 	@Post('/review/:id')
 	@Auth()
 	async reviewBook(
@@ -23,20 +27,26 @@ export class BookController {
 	async getBookInfoById(@Param('id') bookId: string) {
 		return this.bookService.getBookInfoById(+bookId)
 	}
+	// admin
+	@Auth('admin')
+	@Get('/get-all-books')
+	async getAllBooks() {
+		return this.bookService.getAllBooks()
+	}
 
-	@Auth()
+	@Auth('admin')
 	@Get('/create')
 	async createBook(@Body() dto: CreateBookDto) {
 		return this.bookService.createBook(dto)
 	}
 
-	@Auth()
+	@Auth('admin')
 	@Get('/update/:id')
 	async updateBook(@Param('id') bookId: string, @Body() dto: EditBookDto) {
 		return this.bookService.updateBook(+bookId, dto)
 	}
 
-	@Auth()
+	@Auth('admin')
 	@Get('/delete/:id')
 	async deleteBook(@Param('id') bookId: string) {
 		return this.bookService.deleteBook(+bookId)

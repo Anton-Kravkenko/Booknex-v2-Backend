@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import { getAverageColor } from 'fast-average-color-node'
 import { PrismaService } from '../prisma.service'
 import { UsersService } from '../users/users.service'
+import { randomColor } from '../utils/randomColor'
 import { returnBookObject } from '../utils/return-object/return.book.object'
 import { GenreReturnObject } from '../utils/return-object/return.genre.object'
 import { shadeRGBColor } from '../utils/shadeColor'
@@ -28,6 +29,13 @@ export class BookService {
 		return book
 	}
 
+	async getAllBooks() {
+		return this.prisma.book.findMany({
+			select: {
+				...returnBookObject
+			}
+		})
+	}
 	async createBook(dto: CreateBookDto) {
 		await this.prisma.book.create({
 			data: {
@@ -78,6 +86,15 @@ export class BookService {
 			data: {
 				title: dto.title || book.title,
 				likedPercentage: dto.likedPercentage
+			}
+		})
+	}
+
+	getEmotions() {
+		return this.prisma.emotion.findMany({
+			select: {
+				name: true,
+				path: true
 			}
 		})
 	}
