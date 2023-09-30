@@ -1,7 +1,7 @@
 import { blue, magenta, yellow } from 'colors'
 import prompts from 'prompts'
 import { Page } from 'puppeteer'
-import { customLinkSelect, getBookFromList } from './aditional-func'
+import { customLinkSelect, getBookFromList } from './aditionalFunction'
 
 export const getEpubFromBook = async (
 	name: string,

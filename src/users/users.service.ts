@@ -41,27 +41,41 @@ export class UsersService {
 			updatedAt: false,
 			_count: {
 				select: {
-					finishBooks: true,
+					finishedBooks: true,
 					likedBooks: true,
 					readingBooks: true,
-					likeShelves: true,
-					unWatchedShelves: true
+					likedShelves: true,
+					unwatchedShelves: true
 				}
 			}
 		})
-		return {
-			'Finished books': library._count.finishBooks,
-			'Liked books': library._count.likedBooks,
-			'Reading Books': library._count.readingBooks,
-			'Liked Shelves': library._count.likeShelves,
-			'UnWatched Shelves': library._count.unWatchedShelves
-		}
+		return [
+			{
+				name: 'Finished books',
+				count: library._count.finishedBooks
+			},
+			{
+				name: 'Liked books',
+				count: library._count.likedBooks
+			},
+			{
+				name: 'Reading Books',
+				count: library._count.readingBooks
+			},
+			{
+				name: 'Liked Shelves',
+				count: library._count.likedShelves
+			},
+			{
+				name: 'UnWatched Shelves',
+				count: library._count.unwatchedShelves
+			}
+		]
 	}
 
 	async getLibraryByType(id: number, type: UserLibraryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()
-		// TODO: сделать более адаптивно эту тему, а то щас может крашнуться в любой момент
 		const books = await this.getUserById(id, {
 			[type]: {
 				select:
@@ -101,10 +115,10 @@ export class UsersService {
 		await this.prisma.user.update({
 			where: { id: userId },
 			data: {
-				email: dto.email ? dto.email : user.email,
+				email: dto.email ?? user.email,
 				password: dto.password ? await hash(dto.password) : user.password,
-				name: dto.name ? dto.name : user.name,
-				picture: dto.picture ? dto.picture : user.picture
+				name: dto.name ?? user.name,
+				picture: dto.picture ?? user.picture
 			}
 		})
 		return this.getUserById(userId)
@@ -113,6 +127,7 @@ export class UsersService {
 	async toggle(userId: number, id: number, type: UserLibraryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
 		const existBookOrShelf = await this.prisma[DesignationType[type]].findFirst(
 			{
 				where: { id },
@@ -125,9 +140,9 @@ export class UsersService {
 		const user = await this.getUserById(+userId, {
 			likedBooks: true,
 			readingBooks: true,
-			finishBooks: true,
-			likeShelves: true,
-			unWatchedShelves: true
+			finishedBooks: true,
+			likedShelves: true,
+			unwatchedShelves: true
 		})
 
 		const isExist = user[type].some(book => book.id === id)

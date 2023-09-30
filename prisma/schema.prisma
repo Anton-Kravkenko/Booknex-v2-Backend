@@ -19,7 +19,7 @@ model Genre {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   name       String   @unique
-  picture    String   @default("")
+  color      String   @default("#fff")
   users      User[]
   books      Book[]   @relation("BookGenre")
   majorBooks Book[]   @relation("BookMajorGenre")
@@ -31,14 +31,23 @@ model Review {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  dislike   Int      @default(0)
-  like      Int      @default(0)
   bookId    Int
   userId    Int
+  emotionId Int
   text      String
+  tags      String[]
+  emotion   Emotion? @relation(fields: [emotionId], references: [id])
   book      Book     @relation(fields: [bookId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
-  emotion   String[]
+}
+
+model Emotion {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  path      String
+  Review    Review[]
 }
 
 model History {

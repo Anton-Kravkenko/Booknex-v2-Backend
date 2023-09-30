@@ -8,7 +8,6 @@ import { UsersService } from './users.service'
 @Controller('users')
 export class UsersController {
 	constructor(private readonly usersService: UsersService) {}
-	// TODO: сделать статиску для пользователя, сделать библиотеку и чтобы можно было посмотреть всё поля в ней
 	@Auth()
 	@Get('/get-profile')
 	async getProfile(@CurrentUser('id') id: number) {

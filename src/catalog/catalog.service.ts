@@ -55,7 +55,7 @@ export class CatalogService {
 		return this.prisma.book.findMany({
 			select: {
 				...returnBookObject,
-				likedPercent: true,
+				likedPercentage: true,
 				pages: true
 			},
 			where: {
@@ -121,14 +121,14 @@ export class CatalogService {
 					id: userId
 				},
 				select: {
-					inititalGenre: {
+					initialGenre: {
 						select: {
 							name: true
 						}
 					}
 				}
 			})
-			.inititalGenre()
+			.initialGenre()
 			.then(genres => genres.map(genre => genre.name))
 	}
 
@@ -264,15 +264,17 @@ export class CatalogService {
 													id: userId
 												},
 												select: {
-													inititalGenre: {
+													initialGenre: {
 														select: {
 															name: true
 														}
 													}
 												}
 											})
-											.inititalGenre()
-											.then(genres => genres.map(genre => genre.name))
+											.initialGenre()
+											.then(initialGenres =>
+												initialGenres.map(genre => genre.name)
+											)
 						}
 					}
 				},

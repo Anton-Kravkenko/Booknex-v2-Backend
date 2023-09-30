@@ -6,8 +6,9 @@ import * as process from 'node:process'
 import prompts from 'prompts'
 import puppeteer from 'puppeteer-extra'
 import { removeEmoji } from '../src/utils/removeEmoji'
-import { customLinkSelect } from './aditional-func'
-import { getEpubFromBook } from './get-epub-from-book'
+import { shadeRGBColor } from '../src/utils/shadeColor'
+import { customLinkSelect } from './aditionalFunction'
+import { getEpubFromBook } from './getEpubFromBook'
 
 interface Book {
 	bookId: string
@@ -262,7 +263,10 @@ export const seeder = async () => {
 					description: book.description,
 					popularity: book.numRatings,
 					isbn: typeof epub === 'string' || !epub.isbn ? book.isbn : epub.isbn,
-					color: await getAverageColor(book.coverImg).then(color => color.hex),
+					color: shadeRGBColor(
+						await getAverageColor(book.coverImg).then(color => color.hex),
+						-25
+					),
 					majorGenre: {
 						connectOrCreate: {
 							where: {
@@ -295,7 +299,7 @@ export const seeder = async () => {
 						typeof epub === 'string' || !epub.pages
 							? Number(book.pages)
 							: Number(epub.pages),
-					likedPercent: book.likedPercent,
+					likedPercentage: book.likedPercent,
 					epub: `epubs/${
 						typeof epub === 'string' ? book.title : epub.title
 					}.epub`

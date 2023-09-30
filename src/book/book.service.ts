@@ -1,10 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
+import { getAverageColor } from 'fast-average-color-node'
 import { PrismaService } from '../prisma.service'
 import { UsersService } from '../users/users.service'
 import { returnBookObject } from '../utils/return-object/return.book.object'
 import { GenreReturnObject } from '../utils/return-object/return.genre.object'
-import { ReviewBookDto } from './dto/book.dto'
+import { shadeRGBColor } from '../utils/shadeColor'
+import { CreateBookDto, EditBookDto } from './dto/manipulation-book.dto'
+import { ReviewBookDto } from './dto/review-book.dto'
 
 @Injectable()
 export class BookService {
@@ -25,6 +28,60 @@ export class BookService {
 		return book
 	}
 
+	async createBook(dto: CreateBookDto) {
+		await this.prisma.book.create({
+			data: {
+				title: dto.title,
+				likedPercentage: dto.likedPercentage,
+				popularity: dto.popularity,
+				pages: dto.pages,
+				description: dto.description,
+				image: dto.image,
+				epub: dto.epub,
+				isbn: dto.isbn,
+				author: dto.author,
+				majorGenre: {
+					connectOrCreate: {
+						where: { name: dto.majorGenre },
+						create: {
+							name: dto.majorGenre,
+							color: shadeRGBColor(randomColor(), -25)
+						}
+					}
+				},
+				color: shadeRGBColor(
+					await getAverageColor(dto.image).then(color => color.hex),
+					-25
+				),
+				genres: {
+					connectOrCreate: dto.genres.map(g => ({
+						where: { name: g },
+						create: { name: g, color: shadeRGBColor(randomColor(), -25) }
+					}))
+				}
+			}
+		})
+	}
+
+	async deleteBook(id: number) {
+		const book = await this.getBookById(id)
+		await this.prisma.book.delete({ where: { id: book.id } })
+		return {
+			message: 'Book deleted'
+		}
+	}
+
+	async updateBook(id: number, dto: EditBookDto) {
+		const book = await this.getBookById(id)
+		await this.prisma.book.update({
+			where: { id: book.id },
+			data: {
+				title: dto.title || book.title,
+				likedPercentage: dto.likedPercentage
+			}
+		})
+	}
+
 	async reviewBook(userId: number, bookId: number, dto: ReviewBookDto) {
 		await this.usersService.getUserById(userId)
 		await this.getBookById(bookId)
@@ -40,7 +97,12 @@ export class BookService {
 						id: bookId
 					}
 				},
-				emotion: dto.emotion,
+				tags: dto.tags,
+				emotion: {
+					connect: {
+						name: dto.emotion
+					}
+				},
 				text: dto.comment
 			}
 		})

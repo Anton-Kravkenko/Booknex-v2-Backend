@@ -2,23 +2,23 @@ import { Prisma } from '@prisma/client'
 
 export type UserLibraryType = keyof Pick<
 	Prisma.UserSelect,
-	| 'finishBooks'
+	| 'finishedBooks'
 	| 'likedBooks'
 	| 'readingBooks'
-	| 'likeShelves'
-	| 'unWatchedShelves'
+	| 'likedShelves'
+	| 'unwatchedShelves'
 >
 export const DesignationType = {
-	finishBooks: 'Book',
+	finishedBooks: 'Book',
 	likedBooks: 'Book',
 	readingBooks: 'Book',
-	likeShelves: 'Shelves',
-	unWatchedShelves: 'Shelves'
+	likedShelves: 'Shelves',
+	unwatchedShelves: 'Shelves'
 }
 export const userLibraryFields: UserLibraryType[] = [
-	'finishBooks',
+	'finishedBooks',
 	'likedBooks',
 	'readingBooks',
-	'likeShelves',
-	'unWatchedShelves'
+	'likedShelves',
+	'unwatchedShelves'
 ]

@@ -24,7 +24,7 @@ export const royalParser = async ({
 			'.content > table:nth-child(8) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(1)'
 		)
 		if (error) return error.textContent === 'Не найдено'
-		return null
+		return false
 	})
 	if (isError) {
 		console.log(red(`❌ books ${name} is not found`))
@@ -67,7 +67,7 @@ export const royalParser = async ({
 						.includes(book.title.toLowerCase().trim())
 			).length === 0
 		)
-			return null
+			return false
 		return bookArray.filter(
 			book =>
 				book.title
@@ -110,7 +110,7 @@ export const royalParser = async ({
 			choices: [
 				{
 					title: `❌ None`,
-					value: null
+					value: false
 				},
 				{
 					title: '🔍 Write your own link',
@@ -143,7 +143,7 @@ export const royalParser = async ({
 
 			return customResponse.value
 		}
-		if (response.value === null) return
+		if (response.value === false) return
 		await page.goto(`http:${response.value}`)
 		const isError3 = await page.evaluate(() => {
 			const error = document.querySelector(
