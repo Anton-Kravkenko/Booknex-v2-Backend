@@ -12,6 +12,7 @@ export class BookService {
 		private readonly usersService: UsersService,
 		private readonly prisma: PrismaService
 	) {}
+
 	async getBookById(id: number, selectObject: Prisma.BookSelect = {}) {
 		const book = await this.prisma.book.findUnique({
 			where: { id },
@@ -23,6 +24,7 @@ export class BookService {
 		if (!book) throw new NotFoundException('Book not found').getResponse()
 		return book
 	}
+
 	async reviewBook(userId: number, bookId: number, dto: ReviewBookDto) {
 		await this.usersService.getUserById(userId)
 		await this.getBookById(bookId)
@@ -47,6 +49,7 @@ export class BookService {
 			message: 'Review added'
 		}
 	}
+
 	async getBookInfoById(id: number) {
 		const book = await this.prisma.book.findUnique({
 			where: { id: +id },

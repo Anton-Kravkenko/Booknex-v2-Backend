@@ -7,4 +7,3 @@ export class ReviewBookDto {
 	@IsString()
 	comment: string
 }
-

@@ -22,5 +22,5 @@ export class BookController {
 		return this.bookService.getBookInfoById(+bookId)
 	}
 	// TODO: update
-	//TODO: create book
+	// TODO: create book
 }

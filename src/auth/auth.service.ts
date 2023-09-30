@@ -21,13 +21,14 @@ export class AuthService {
 
 	async login(dto: AuthDto) {
 		const user = await this.validateUser(dto)
-		const tokens = await this.issueToken(user.id)
+		const tokens = this.issueToken(user.id)
 
 		return {
 			user: this.userFields(user),
 			...tokens
 		}
 	}
+
 	async checkEmail(email: string) {
 		const user = await this.prisma.user.findUnique({
 			where: {
@@ -38,6 +39,7 @@ export class AuthService {
 			isExist: !!user
 		}
 	}
+
 	async register(dto: RegisterDto) {
 		const oldUser = await this.prisma.user.findUnique({
 			where: {
@@ -46,12 +48,12 @@ export class AuthService {
 		})
 		if (oldUser)
 			throw new BadRequestException('User already exists').getResponse()
-		const fainBackPicture = await getRandomPicture()
+		const fainBackPicture = getRandomPicture()
 		const user = await this.prisma.user.create({
 			data: {
 				email: dto.email,
 				password: await hash(dto.password),
-				name: dto.name ? dto.name : dto.email.split('@')[0],
+				name: dto.name ?? dto.email.split('@')[0],
 				picture: fainBackPicture,
 				inititalGenre: {
 					connectOrCreate: dto.genres.map(genre => ({
@@ -65,7 +67,7 @@ export class AuthService {
 				}
 			}
 		})
-		const tokens = await this.issueToken(user.id)
+		const tokens = this.issueToken(user.id)
 		return {
 			user: this.userFields(user),
 			...tokens
@@ -73,21 +75,21 @@ export class AuthService {
 	}
 
 	async refresh(refreshToken: string) {
-		const result = await this.jwt.verifyAsync(refreshToken)
+		const result: { id: number } = await this.jwt.verifyAsync(refreshToken)
 		if (!result) throw new BadRequestException('Invalid token').getResponse()
 		const user = await this.usersService.getUserById(result.id, {
 			email: true,
 			id: true
 		})
 
-		const tokens = await this.issueToken(user.id)
+		const tokens = this.issueToken(user.id)
 		return {
 			user,
 			...tokens
 		}
 	}
 
-	private async issueToken(userId: number) {
+	private issueToken(userId: number) {
 		const data = { id: userId }
 		return {
 			accessToken: this.jwt.sign(data, {

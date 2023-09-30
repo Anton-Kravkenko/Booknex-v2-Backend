@@ -14,31 +14,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Book {
-  id           Int       @id @default(autoincrement())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  title        String
-  author       String
-  description  String
-  isbn         String
-  image        String
-  epub         String
-  color        String    @default("#fff")
-  pages        Int
-  likedPercent Int
-  popularity   Int       @default(0)
-  mainGenreId  Int
-  majorGenre   Genre     @relation("BookMajorGenre", fields: [mainGenreId], references: [id])
-  histories    History[]
-  genres       Genre[]   @relation("BookGenre")
-  reviews      Review[]
-  shelves      Shelve[]
-  likedBy      User[]    @relation("LikedBooks")
-  finishBy     User[]    @relation("FinishBooks")
-  readingBy    User[]    @relation("ReadingBooks")
-}
-
 model Genre {
   id         Int      @id @default(autoincrement())
   createdAt  DateTime @default(now())
@@ -77,6 +52,31 @@ model History {
   bookId    Int
 }
 
+model Book {
+  id              Int       @id @default(autoincrement())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  title           String
+  author          String
+  description     String
+  isbn            String
+  image           String
+  epub            String
+  color           String    @default("#fff")
+  pages           Int
+  likedPercentage Int
+  popularity      Int       @default(0)
+  mainGenreId     Int
+  majorGenre      Genre     @relation("BookMajorGenre", fields: [mainGenreId], references: [id])
+  histories       History[]
+  genres          Genre[]   @relation("BookGenre")
+  reviews         Review[]
+  shelves         Shelf[]
+  likedBy         User[]    @relation("LikedBooks")
+  finishedBy      User[]    @relation("FinishedBooks")
+  readingBy       User[]    @relation("ReadingBooks")
+}
+
 model User {
   id               Int       @id @default(autoincrement())
   createdAt        DateTime  @default(now())
@@ -88,21 +88,21 @@ model User {
   isAdmin          Boolean   @default(false)
   history          History[]
   review           Review[]
-  inititalGenre    Genre[]
+  initialGenre     Genre[]
   likedBooks       Book[]    @relation("LikedBooks")
-  finishBooks      Book[]    @relation("FinishBooks")
+  finishedBooks    Book[]    @relation("FinishedBooks")
   readingBooks     Book[]    @relation("ReadingBooks")
-  likeShelves      Shelve[]  @relation("LikedShelves")
-  unWatchedShelves Shelve[]  @relation("UnWacthedShelves")
+  likedShelves     Shelf[]   @relation("LikedShelves")
+  unwatchedShelves Shelf[]   @relation("UnwatchedShelves")
 }
 
-model Shelve {
+model Shelf {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String
   like      User[]   @relation("LikedShelves")
-  unWacthed User[]   @relation("UnWacthedShelves")
+  unwatched User[]   @relation("UnwatchedShelves")
   color     String   @default("#fff")
   picture   String   @default("")
   books     Book[]

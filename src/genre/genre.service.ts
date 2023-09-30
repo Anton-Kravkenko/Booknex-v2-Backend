@@ -73,7 +73,8 @@ export class GenreService {
 		})
 
 		return {
-			...{ ...genre, similar: undefined },
+			...genre,
+			similar: undefined,
 			newestBooks,
 			bestSellers,
 			bestSellersFromSimilar

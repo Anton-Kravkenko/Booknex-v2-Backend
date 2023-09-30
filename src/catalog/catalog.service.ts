@@ -18,6 +18,7 @@ export class CatalogService {
 			genres: await this.getGenres()
 		}
 	}
+
 	async getTopSearchers() {
 		const topGenres = await this.prisma.genre.findMany({
 			take: 5,
@@ -27,7 +28,6 @@ export class CatalogService {
 			},
 			orderBy: {
 				books: {
-					// eslint-disable-next-line
 					_count: 'desc'
 				}
 			}
@@ -50,6 +50,7 @@ export class CatalogService {
 			...topGenres.slice(3, 5)
 		]
 	}
+
 	search(query: string) {
 		return this.prisma.book.findMany({
 			select: {
@@ -254,23 +255,24 @@ export class CatalogService {
 				genres: {
 					some: {
 						name: {
-							in: genres.length
-								? genres
-								: await this.prisma.user
-										.findUnique({
-											where: {
-												id: userId
-											},
-											select: {
-												inititalGenre: {
-													select: {
-														name: true
+							in:
+								genres.length > 0
+									? genres
+									: await this.prisma.user
+											.findUnique({
+												where: {
+													id: userId
+												},
+												select: {
+													inititalGenre: {
+														select: {
+															name: true
+														}
 													}
 												}
-											}
-										})
-										.inititalGenre()
-										.then(genres => genres.map(genre => genre.name))
+											})
+											.inititalGenre()
+											.then(genres => genres.map(genre => genre.name))
 						}
 					}
 				},

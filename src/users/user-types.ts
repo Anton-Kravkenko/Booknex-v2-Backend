@@ -8,11 +8,17 @@ export type UserLibraryType = keyof Pick<
 	| 'likeShelves'
 	| 'unWatchedShelves'
 >
-
-export const userLibraryFields: ['finishBooks', 'likedBooks', 'readingBooks', 'likeShelves', 'unWatchedShelves']
-	= [
+export const DesignationType = {
+	finishBooks: 'Book',
+	likedBooks: 'Book',
+	readingBooks: 'Book',
+	likeShelves: 'Shelves',
+	unWatchedShelves: 'Shelves'
+}
+export const userLibraryFields: UserLibraryType[] = [
 	'finishBooks',
 	'likedBooks',
 	'readingBooks',
 	'likeShelves',
-	'unWatchedShelves']
+	'unWatchedShelves'
+]

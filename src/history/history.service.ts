@@ -35,6 +35,7 @@ export class HistoryService {
 			}
 		})
 	}
+
 	async addHistory(userId: number, dto: AddHistoryDto) {
 		await this.prisma.user.update({
 			where: { id: userId },

@@ -9,6 +9,7 @@ export class AuthController {
 	async checkEmail(@Param('email') email: string) {
 		return this.authService.checkEmail(email)
 	}
+
 	@Post('/register')
 	async register(@Body() dto: RegisterDto) {
 		return this.authService.register(dto)

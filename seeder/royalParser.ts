@@ -26,23 +26,24 @@ export const royalParser = async ({
 		if (error) return error.textContent === 'Не найдено'
 		return null
 	})
-	if (isError) return console.log(red(`❌ books ${name} is not found`))
+	if (isError) {
+		console.log(red(`❌ books ${name} is not found`))
+		return
+	}
 	const bookArray = await page.evaluate(() => {
 		const quotes = document.querySelectorAll(
 			'.content > table:nth-child(8) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr'
 		)
-		return Array.from(quotes)
-			.slice(1)
-			.map(q => {
-				const title = q.querySelector('td:nth-child(1) > a').textContent
-				const author = q.querySelector('td:nth-child(3) > a > font').textContent
-				const link = q.querySelector('td:nth-child(1) > a').getAttribute('href')
-				return {
-					title,
-					link,
-					author
-				}
-			})
+		return [...quotes].slice(1).map(q => {
+			const title = q.querySelector('td:nth-child(1) > a').textContent
+			const author = q.querySelector('td:nth-child(3) > a > font').textContent
+			const link = q.querySelector('td:nth-child(1) > a').getAttribute('href')
+			return {
+				title,
+				link,
+				author
+			}
+		})
 	})
 	const filterArray = bookArray.find(
 		book =>
@@ -92,8 +93,10 @@ export const royalParser = async ({
 						.trim()
 						.includes(book.title.toLowerCase().trim())
 			).length === 0
-		)
-			return console.log(red(`❌ book ${name} is not found`))
+		) {
+			console.log(red(`❌ book ${name} is not found`))
+			return
+		}
 		const response = await prompts({
 			type: 'select',
 			name: 'value',
@@ -148,11 +151,14 @@ export const royalParser = async ({
 			)
 			if (!error) return true
 		})
-		if (isError3) return console.log(red(`❌ book ${name} is not available`))
+		if (isError3) {
+			console.log(red(`❌ book ${name} is not available`))
+			return
+		}
 		await page.waitForSelector(
 			'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
 		)
-		return await page.evaluate(() => {
+		return page.evaluate(() => {
 			const epub = document.querySelector(
 				'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
 			)
@@ -166,11 +172,14 @@ export const royalParser = async ({
 		)
 		if (!error) return true
 	})
-	if (isError2) return console.log(red(`❌ book ${name} is not available `))
+	if (isError2) {
+		console.log(red(`❌ book ${name} is not available `))
+		return
+	}
 	await page.waitForSelector(
 		'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
 	)
-	return await page.evaluate(() => {
+	return page.evaluate(() => {
 		const epub = document.querySelector(
 			'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
 		)

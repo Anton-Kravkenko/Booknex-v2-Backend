@@ -10,7 +10,11 @@ import { returnShelvesObject } from '../utils/return-object/return-shelves-objec
 import { returnBookObject } from '../utils/return-object/return.book.object'
 import { returnUserObject } from '../utils/return-object/return.user.object'
 import { UserUpdateDto } from './dto/user.update.dto'
-import { userLibraryFields, UserLibraryType } from './user-types'
+import {
+	DesignationType,
+	userLibraryFields,
+	UserLibraryType
+} from './user-types'
 
 @Injectable()
 export class UsersService {
@@ -27,6 +31,7 @@ export class UsersService {
 		if (!user) throw new NotFoundException('User not found').getResponse()
 		return user
 	}
+
 	async getLibrary(id: number) {
 		const library = await this.getUserById(id, {
 			email: false,
@@ -44,17 +49,25 @@ export class UsersService {
 				}
 			}
 		})
-		return { ...library._count }
+		return {
+			'Finished books': library._count.finishBooks,
+			'Liked books': library._count.likedBooks,
+			'Reading Books': library._count.readingBooks,
+			'Liked Shelves': library._count.likeShelves,
+			'UnWatched Shelves': library._count.unWatchedShelves
+		}
 	}
 
 	async getLibraryByType(id: number, type: UserLibraryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()
 		// TODO: сделать более адаптивно эту тему, а то щас может крашнуться в любой момент
-		const toggleType = type.includes('Books') ? 'Book' : 'Shelves'
 		const books = await this.getUserById(id, {
 			[type]: {
-				select: toggleType === 'Book' ? returnBookObject : returnShelvesObject,
+				select:
+					DesignationType[type] === 'Book'
+						? returnBookObject
+						: returnShelvesObject,
 				orderBy: {
 					createdAt: 'desc'
 				}
@@ -62,12 +75,14 @@ export class UsersService {
 		})
 		return books[type]
 	}
+
 	async getProfile(id: number) {
-		return await this.getUserById(id, {
+		return this.getUserById(id, {
 			...returnUserObject,
 			picture: true
 		})
 	}
+
 	async updateUser(userId: number, dto: UserUpdateDto) {
 		const isSameUser = await this.prisma.user.findUnique({
 			where: { email: dto.email }
@@ -98,13 +113,14 @@ export class UsersService {
 	async toggle(userId: number, id: number, type: UserLibraryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()
-		const toggleType = type.includes('Books') ? 'Book' : 'Shelves'
-		const existBookOrShelf = await this.prisma[toggleType].findFirst({
-			where: { id },
-			select: { id: true }
-		})
+		const existBookOrShelf = await this.prisma[DesignationType[type]].findFirst(
+			{
+				where: { id },
+				select: { id: true }
+			}
+		)
 		if (!existBookOrShelf)
-			throw new NotFoundException(`${toggleType} not found`)
+			throw new NotFoundException(`${DesignationType[type]} not found`)
 
 		const user = await this.getUserById(+userId, {
 			likedBooks: true,
@@ -127,7 +143,9 @@ export class UsersService {
 			}
 		})
 		return {
-			message: `${toggleType} ${isExist ? 'removed from' : 'added to'} ${type}`
+			message: `${DesignationType[type]} ${
+				isExist ? 'removed from' : 'added to'
+			} ${type}`
 		}
 	}
 }

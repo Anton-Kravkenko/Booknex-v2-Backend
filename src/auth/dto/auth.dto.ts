@@ -11,11 +11,12 @@ export class AuthDto {
 	password: string
 }
 export class RegisterDto extends AuthDto {
-		@IsString()
-		@IsOptional()
-		name: string
-		@IsString({ each: true, message: 'Initial genre in user it require' })
-		genres: string[]
+	@IsString()
+	@IsOptional()
+	name: string
+
+	@IsString({ each: true, message: 'Initial genre in user it require' })
+	genres: string[]
 }
 
 export class RefreshDto {

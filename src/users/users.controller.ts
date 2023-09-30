@@ -14,6 +14,7 @@ export class UsersController {
 	async getProfile(@CurrentUser('id') id: number) {
 		return this.usersService.getProfile(+id)
 	}
+
 	@Auth()
 	@Get('/get-library')
 	async getLibrary(@CurrentUser('id') id: number) {
@@ -29,6 +30,7 @@ export class UsersController {
 	) {
 		return this.usersService.getLibraryByType(+id, type)
 	}
+
 	@Auth()
 	@Post('/update-user')
 	async updateUser(@CurrentUser('id') id: number, @Body() dto: UserUpdateDto) {

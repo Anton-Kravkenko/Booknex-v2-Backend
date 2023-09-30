@@ -20,7 +20,7 @@ export class UploadController {
 			new ParseFilePipe({
 				validators: [
 					new MaxFileSizeValidator({
-						maxSize: 10000000
+						maxSize: 10_000_000
 					})
 				]
 			})

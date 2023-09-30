@@ -10,9 +10,9 @@ import { BookModule } from './book/book.module'
 import { CatalogModule } from './catalog/catalog.module'
 import { GenreModule } from './genre/genre.module'
 import { HistoryModule } from './history/history.module'
+import { ShelvesModule } from './shelves/shelves.module'
 import { UploadModule } from './upload/upload.module'
 import { UsersModule } from './users/users.module'
-import { ShelvesModule } from './shelves/shelves.module';
 
 @Module({
 	imports: [

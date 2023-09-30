@@ -1,17 +1,17 @@
 import { blue, magenta, yellow } from 'colors'
 import prompts from 'prompts'
 import { Page } from 'puppeteer'
-import { customLinkSelect, getBookFromList } from './aditionalFunc'
+import { customLinkSelect, getBookFromList } from './aditional-func'
 
 export const getEpubFromBook = async (
 	name: string,
 	author: string,
 	bookPages: number,
-	numRating: number,
+	numberRating: number,
 	page: Page
 ) => {
 	const betterName = name
-		.replace(/(\[|\()(.+?)(\]|\))/g, ' ')
+		.replaceAll(/([([])(.+?)(\)])/g, ' ')
 		.replace('-', ' ')
 		.trim()
 
@@ -27,11 +27,13 @@ export const getEpubFromBook = async (
 		return error.innerHTML.includes('0 books')
 	})
 	if (isError) {
-		if (numRating < 300000)
-			return console.log(yellow(`❌ No result for ${betterName} by ${author}`))
-		return await customLinkSelect({
+		if (numberRating < 300_000) {
+			console.log(yellow(`❌ No result for ${betterName} by ${author}`))
+			return
+		}
+		return customLinkSelect({
 			title: betterName,
-			author: author.replace(/,.*|\(.*?\)/g, '').trim()
+			author: author.replaceAll(/,.*|\(.*?\)/g, '').trim()
 		})
 	}
 	await page.waitForSelector(
@@ -41,7 +43,7 @@ export const getEpubFromBook = async (
 		const quotes = document.querySelectorAll(
 			'div.books-list div.row.book-grid div.col-sm-12.col-md-6.col-lg-4.book-3-row'
 		)
-		return Array.from(quotes).map((q, index) => {
+		return [...quotes].map((q, index) => {
 			const title = q.querySelector(
 				'div.row.book div.book-info.col-lg-9.col-9 div.book-title a'
 			).textContent
@@ -59,9 +61,9 @@ export const getEpubFromBook = async (
 			return {
 				id: index++,
 				title: title
-					.replace(RegExp('epub', 'gi'), '')
-					.replace(RegExp('free', 'gi'), '')
-					.replace(RegExp('download', 'gi'), '')
+					.replaceAll(new RegExp('epub', 'gi'), '')
+					.replaceAll(new RegExp('free', 'gi'), '')
+					.replaceAll(new RegExp('download', 'gi'), '')
 					.split('by')[0]
 					.trim(),
 				author: author.trim(),
@@ -92,7 +94,7 @@ export const getEpubFromBook = async (
 			choices: [
 				{
 					title: '❌  None',
-					value: null
+					value: undefined
 				},
 				{
 					title: '🔧 Custom',
@@ -116,12 +118,7 @@ export const getEpubFromBook = async (
 			return customResponse.value
 		}
 		if (!response.value) return
-		return await getBookFromList(
-			page,
-			response.value.link,
-			bookPages,
-			betterName
-		)
+		return getBookFromList(page, response.value.link, bookPages, betterName)
 	}
-	return await getBookFromList(page, filterArray.link, bookPages, betterName)
+	return getBookFromList(page, filterArray.link, bookPages, betterName)
 }

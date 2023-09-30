@@ -18,6 +18,7 @@ export class HistoryController {
 	async getHistoryByBookId(@Param('id') id: number) {
 		return this.historyService.getHistoryByBookId(id)
 	}
+
 	@Post('/add')
 	@Auth()
 	async addHistory(

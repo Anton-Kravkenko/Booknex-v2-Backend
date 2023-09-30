@@ -5,7 +5,6 @@ import { returnBookObject } from '../utils/return-object/return.book.object'
 @Injectable()
 export class AdminService {
 	constructor(private readonly prisma: PrismaService) {}
-	/* eslint-disable */
 	async getStats() {
 		const totalTimeRead = await this.prisma.history.aggregate({
 			_sum: {
@@ -26,5 +25,4 @@ export class AdminService {
 			})
 		}
 	}
-	/* eslint-enable */
 }
