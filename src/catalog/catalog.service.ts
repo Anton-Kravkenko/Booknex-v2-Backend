@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
+import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
-import { returnBookObject } from '../utils/return-object/return.book.object'
-import { defaultReturnObject } from '../utils/return-object/return.default.object'
+import { defaultReturnObject } from '../utils/return.default.object'
 
 @Injectable()
 export class CatalogService {

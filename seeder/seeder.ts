@@ -5,10 +5,10 @@ import { getAverageColor } from 'fast-average-color-node'
 import * as process from 'node:process'
 import prompts from 'prompts'
 import puppeteer from 'puppeteer-extra'
-import { simplifyString } from '../src/utils/filterString'
-import { shadeRGBColor } from '../src/utils/shadeColor'
-import { customLinkSelect } from './aditionalFunction'
-import { getEpubFromBook } from './getEpubFromBook'
+import { randomColor, shadeRGBColor } from '../src/utils/color.functions'
+import { simplifyString } from '../src/utils/string.functions'
+import { customLinkSelect } from './aditional.functions'
+import { ZEpubParser } from './z-epub.parser'
 
 interface Book {
 	bookId: string
@@ -164,7 +164,7 @@ export const seeder = async () => {
 						isbn: string | null
 						picture: string
 						pages: number | null
-				  } = await getEpubFromBook(
+				  } = await ZEpubParser(
 				book.title,
 				book.author.replaceAll(/,.*|\(.*?\)/g, '').trim(),
 				Number(book.pages),
@@ -314,7 +314,8 @@ export const seeder = async () => {
 								name: genre
 							},
 							create: {
-								name: genre
+								name: genre,
+								color: shadeRGBColor(randomColor(), -20)
 							}
 						}))
 					},

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
-import { defaultReturnObject } from '../utils/return-object/return.default.object'
+import { defaultReturnObject } from '../utils/return.default.object'
 
 @Injectable()
 export class GenreService {

@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { getAverageColor } from 'fast-average-color-node'
+import { GenreReturnObject } from '../genre/return.genre.object'
 import { PrismaService } from '../prisma.service'
 import { UsersService } from '../users/users.service'
-import { randomColor } from '../utils/randomColor'
-import { returnBookObject } from '../utils/return-object/return.book.object'
-import { GenreReturnObject } from '../utils/return-object/return.genre.object'
-import { shadeRGBColor } from '../utils/shadeColor'
-import { CreateBookDto, EditBookDto } from './dto/manipulation-book.dto'
-import { ReviewBookDto } from './dto/review-book.dto'
+import { randomColor, shadeRGBColor } from '../utils/color.functions'
+import { CreateBookDto, EditBookDto } from './dto/manipulation.book.dto'
+import { ReviewBookDto } from './dto/review.book.dto'
+import { returnBookObject } from './return.book.object'
+import { returnReviewsObject } from './return.reviews.object'
 
 @Injectable()
 export class BookService {
@@ -135,7 +135,10 @@ export class BookService {
 			where: { id: +id },
 			include: {
 				majorGenre: false,
-				genres: { select: GenreReturnObject }
+				genres: { select: GenreReturnObject },
+				reviews: {
+					select: returnReviewsObject
+				}
 			}
 		})
 		if (!book) return new NotFoundException('Book not found').getResponse()

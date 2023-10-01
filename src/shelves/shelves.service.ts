@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
-import { CreateShelfDto } from './dto/create-shelf.dto'
-import { UpdateShelfDto } from './dto/update-shelf.dto'
+import { CreateShelfDto } from './dto/create.shelf.dto'
+import { UpdateShelfDto } from './dto/update.shelf.dto'
 
 @Injectable()
 export class ShelvesService {

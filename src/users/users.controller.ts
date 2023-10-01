@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { UserUpdateDto } from './dto/user.update.dto'
-import { UserLibraryType } from './user-types'
+import { UserLibraryType } from './user.types'
 import { UsersService } from './users.service'
 
 @Controller('users')

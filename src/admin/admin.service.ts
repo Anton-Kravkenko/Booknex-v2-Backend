@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
-import { returnBookObject } from '../utils/return-object/return.book.object'
 
 @Injectable()
 export class AdminService {

@@ -2,8 +2,8 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { BookService } from './book.service'
-import { CreateBookDto, EditBookDto } from './dto/manipulation-book.dto'
-import { ReviewBookDto } from './dto/review-book.dto'
+import { CreateBookDto, EditBookDto } from './dto/manipulation.book.dto'
+import { ReviewBookDto } from './dto/review.book.dto'
 
 @Controller('book')
 export class BookController {

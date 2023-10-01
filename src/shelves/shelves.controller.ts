@@ -1,8 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
-import { CreateShelfDto } from './dto/create-shelf.dto'
-import { UpdateShelfDto } from './dto/update-shelf.dto'
+import { CreateShelfDto } from './dto/create.shelf.dto'
+import { UpdateShelfDto } from './dto/update.shelf.dto'
 import { ShelvesService } from './shelves.service'
 
 //  TODO: сделать запросы на получение полок, добавление книги в полку, удаление книги из полки, создание полки, удаление полки, изменение полки

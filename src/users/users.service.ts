@@ -5,16 +5,16 @@ import {
 } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { hash } from 'argon2'
+import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
-import { returnShelvesObject } from '../utils/return-object/return-shelves-object'
-import { returnBookObject } from '../utils/return-object/return.book.object'
-import { returnUserObject } from '../utils/return-object/return.user.object'
+import { returnShelvesObject } from '../shelves/return.shelves.object'
 import { UserUpdateDto } from './dto/user.update.dto'
+import { returnUserObject } from './return.user.object'
 import {
 	DesignationType,
 	userLibraryFields,
 	UserLibraryType
-} from './user-types'
+} from './user.types'
 
 @Injectable()
 export class UsersService {
