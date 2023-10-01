@@ -1,5 +1,4 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
+import { Controller, Get, Param } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { CreateShelfDto } from './dto/create-shelf.dto'
@@ -19,20 +18,10 @@ export class ShelvesController {
 
 	@Get('/get-shelf/:id')
 	@Auth()
-	async getShelfById(@Param('id') shelfId: string) {
-		return this.shelvesService.getShelfById(shelfId)
+	async getShelfById(@Param('id') shelfId: number) {
+		return this.shelvesService.getShelfById(+shelfId)
 	}
 
-	@Patch('/toggle/:type/:id')
-	@Auth()
-	async toggle(
-		@CurrentUser('id') userId: number,
-		@Param('id') id: string,
-		@Param('type')
-		type: keyof Pick<Prisma.UserSelect, 'likedShelves' | 'unwatchedShelves'>
-	) {
-		return this.shelvesService.toggle(+userId, +id, type)
-	}
 	// admin
 
 	@Get('/create-shelf')

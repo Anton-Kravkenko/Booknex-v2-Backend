@@ -1,27 +1,87 @@
 import { Injectable } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
 import { PrismaService } from '../prisma.service'
 import { CreateShelfDto } from './dto/create-shelf.dto'
 import { UpdateShelfDto } from './dto/update-shelf.dto'
 
 @Injectable()
 export class ShelvesService {
-	// TODo: сделать всё эти запросы, дела на 10 мин
 	constructor(private readonly prisma: PrismaService) {}
 
-	async getShelves(userId: number) {}
+	async getShelves(userId: number) {
+		// TODO: Проверить всё запросы и пофиксить (сделать лучше)
+		const likedShelves = await this.prisma.shelf.findMany({
+			where: {
+				like: {
+					some: {
+						id: userId
+					}
+				}
+			}
+		})
+		const otherShelves = await this.prisma.shelf.findMany({
+			orderBy: {
+				like: {
+					_count: 'desc'
+				}
+			},
+			where: {
+				like: {
+					none: {
+						id: userId
+					}
+				},
+				unwatched: {
+					none: {
+						id: userId
+					}
+				}
+			}
+		})
 
-	async getShelfById(shelfId: string) {}
+		return [...likedShelves, ...otherShelves]
+	}
 
-	async toggle(
-		userId: number,
-		id: number,
-		type: keyof Pick<Prisma.UserSelect, 'likedShelves' | 'unwatchedShelves'>
-	) {}
+	async getShelfById(shelfId: number) {
+		return this.prisma.shelf.findUnique({
+			where: {
+				id: +shelfId
+			}
+		})
+	}
 
-	async createShelf(dto: CreateShelfDto) {}
+	async createShelf(dto: CreateShelfDto) {
+		return this.prisma.shelf.create({
+			data: {
+				name: dto.name,
+				picture: dto.picture,
+				books: {
+					connect: dto.books.map(bookId => ({ id: bookId }))
+				}
+			}
+		})
+	}
 
-	async deleteShelf(id: number) {}
+	async deleteShelf(id: number) {
+		return this.prisma.shelf.delete({
+			where: {
+				id: +id
+			}
+		})
+	}
 
-	async updateShelf(id: number, dto: UpdateShelfDto) {}
+	async updateShelf(id: number, dto: UpdateShelfDto) {
+		return this.prisma.shelf.update({
+			where: {
+				id: +id
+			},
+			data: {
+				name: dto.name,
+				picture: dto.picture,
+				//  TODO: по фиксить чтобы устанавливался массив  id где я конекчу елементы
+				books: {
+					set: dto.books.map(bookId => ({ id: bookId }))
+				}
+			}
+		})
+	}
 }

@@ -1,11 +1,11 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { PrismaClient } from '@prisma/client'
-import { bgBlue, gray, green, rainbow, yellow } from 'colors'
+import { bgBlue, gray, green, magenta, rainbow, yellow } from 'colors'
 import { getAverageColor } from 'fast-average-color-node'
 import * as process from 'node:process'
 import prompts from 'prompts'
 import puppeteer from 'puppeteer-extra'
-import { removeEmoji } from '../src/utils/removeEmoji'
+import { simplifyString } from '../src/utils/filterString'
 import { shadeRGBColor } from '../src/utils/shadeColor'
 import { customLinkSelect } from './aditionalFunction'
 import { getEpubFromBook } from './getEpubFromBook'
@@ -53,13 +53,8 @@ export const seeder = async () => {
 		'Philosophy',
 		'Thriller'
 	])
-	const books = JSON.parse(
-		JSON.stringify(
-			// JsonBooks
-			[]
-		)
-	)
-	const lastBook = (await prisma.book.findFirst({
+	const books = JSON.parse(JSON.stringify([]))
+	const lastBook = await prisma.book.findFirst({
 		orderBy: {
 			id: 'desc'
 		},
@@ -68,10 +63,10 @@ export const seeder = async () => {
 			id: true,
 			description: true
 		}
-	})) || { id: 0, description: '' }
-	const lastBookIndex = books.findIndex(
-		book => book.description === lastBook.description
-	)
+	})
+	const lastBookIndex = lastBook
+		? books.findIndex(book => book.description === lastBook.description)
+		: 0
 	console.log(rainbow(`Last book index: ${lastBookIndex}`))
 	books
 		.filter((book: Book) => book.language === 'English')
@@ -81,15 +76,50 @@ export const seeder = async () => {
 	const browser = await puppeteer.launch({
 		headless: false,
 		args: [
+			'--autoplay-policy=user-gesture-required',
+			'--disable-background-networking',
+			'--disable-background-timer-throttling',
+			'--disable-backgrounding-occluded-windows',
+			'--disable-breakpad',
+			'--disable-client-side-phishing-detection',
+			'--disable-component-update',
+			'--disable-default-apps',
+			'--disable-dev-shm-usage',
+			'--disable-domain-reliability',
+			'--disable-extensions',
+			'--disable-features=AudioServiceOutOfProcess',
+			'--disable-hang-monitor',
+			'--disable-ipc-flooding-protection',
+			'--disable-notifications',
+			'--disable-offer-store-unmasked-wallet-cards',
+			'--disable-popup-blocking',
+			'--disable-print-preview',
+			'--disable-prompt-on-repost',
+			'--disable-renderer-backgrounding',
+			'--disable-setuid-sandbox',
+			'--disable-speech-api',
+			'--disable-sync',
+			'--hide-scrollbars',
+			'--ignore-gpu-blacklist',
+			'--metrics-recording-only',
+			'--mute-audio',
+			'--no-default-browser-check',
+			'--no-first-run',
+			'--no-pings',
+			'--no-sandbox',
+			'--no-zygote',
+			'--password-store=basic',
+			'--use-gl=swiftshader',
+			'--use-mock-keychain',
 			'--headless',
 			'--hide-scrollbars',
 			'--mute-audio',
 			'--no-sandbox',
-			'--disable-canvas-aa', // Disable antialiasing on 2d canvas
-			'--disable-2d-canvas-clip-aa', // Disable antialiasing on 2d canvas clips
-			'--disable-dev-shm-usage', // ???
-			'--no-zygote', // wtf does that mean ?
-			'--use-gl=swiftshader', // better cpu usage with --use-gl=desktop rather than --use-gl=swiftshader, still needs more testing.
+			'--disable-canvas-aa',
+			'--disable-2d-canvas-clip-aa',
+			'--disable-dev-shm-usage',
+			'--no-zygote',
+			'--use-gl=swiftshader',
 			'--enable-webgl',
 			'--hide-scrollbars',
 			'--mute-audio',
@@ -101,7 +131,6 @@ export const seeder = async () => {
 			'--no-sandbox',
 			'--disable-setuid-sandbox'
 		],
-
 		ignoreHTTPSErrors: true,
 		ignoreDefaultArgs: ['--disable-extensions']
 	})
@@ -169,12 +198,43 @@ export const seeder = async () => {
 					secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 				}
 			})
+			let BookName: string = typeof epub === 'string' ? book.title : epub.title
+			if (BookName.includes('by ')) {
+				const response = await prompts({
+					type: 'select',
+					name: 'value',
+					message: `${BookName} - ${magenta(
+						BookName.split('by ')[0].trim()
+					)} good?`,
+					choices: [
+						{
+							title: `✅ Yes`,
+							value: false
+						},
+						{
+							title: '🔍 Write your own Text',
+							value: 'custom'
+						}
+					]
+				})
+				if (response.value === false) {
+					BookName = BookName.split('by')[0].trim()
+				}
+				if (response.value === 'custom') {
+					const customResponse = await prompts({
+						type: 'text',
+						name: 'value',
+						message: `Your text to Book name with author:`,
+						initial: BookName
+					})
+					BookName = customResponse.value
+				}
+			}
+			console.log(BookName, `- actual name`)
 			await s3.send(
 				new PutObjectCommand({
 					Bucket: process.env.AWS_BUCKET,
-					Key: `epubs/${
-						typeof epub === 'string' ? book.title : epub.title
-					}.epub`,
+					Key: `epubs/${simplifyString(BookName)}.epub`,
 					Body: epubBuffer,
 					ACL: 'public-read',
 					ContentType: 'application/epub+zip',
@@ -184,45 +244,12 @@ export const seeder = async () => {
 			await s3.send(
 				new PutObjectCommand({
 					Bucket: process.env.AWS_BUCKET,
-					Key: `books-covers/${
-						typeof epub === 'string' ? book.title : epub.title
-					}.jpg`,
+					Key: `books-covers/${simplifyString(BookName)}.jpg`,
 					Body: imageBuffer,
 					ACL: 'public-read',
 					ContentDisposition: 'inline'
 				})
 			)
-			const allGenres = await prisma.genre
-				.findMany({
-					select: { name: true },
-					orderBy: {
-						books: {
-							_count: 'desc'
-						}
-					}
-				})
-				.then(genres => genres.map(genre => genre.name))
-			const genreWithEmoji: string[] = []
-			for (const genre of book.genres
-				.split(',')
-				.map(genre => genre.replaceAll(/['[\]]/g, '').trim())
-				.filter(
-					genre =>
-						!allGenres.map(genre => removeEmoji(genre).trim()).includes(genre)
-				)
-				.filter(genre => selectGenres.has(genre))) {
-				const selectGenre = await prompts({
-					type: 'text',
-					name: 'value',
-					message: `Select emoji for ${genre}:`,
-					validate: value =>
-						allGenres.includes(value) ? `Genre ${value} already exists` : true
-				})
-				selectGenre &&
-					genreWithEmoji.push(
-						`${selectGenre.value} ${genre.replaceAll(/['[\]]/g, '').trim()}`
-					)
-			}
 
 			const filteredGenres = book.genres
 				.split(',')
@@ -237,25 +264,29 @@ export const seeder = async () => {
 			console.log(
 				bgBlue('Major genre: '),
 				BookGenres.sort((a, b) => a.majorBooks.length - b.majorBooks.length)[0]
-					.name
-					? BookGenres.sort(
-							(a, b) => a.majorBooks.length - b.majorBooks.length
-					  )[0].name
-					: genreWithEmoji[Math.floor(Math.random() * genreWithEmoji.length)],
+					.name,
 				bgBlue('Genres: '),
 				BookGenres.sort((a, b) => a.majorBooks.length - b.majorBooks.length)
 					.map(genre => genre.name)
+					.filter(
+						genre =>
+							genre !==
+							BookGenres.sort(
+								(a, b) => a.majorBooks.length - b.majorBooks.length
+							)[0].name
+					)
 					.join(', ')
 			)
-			const randomMajorGenre =
-				BookGenres.length > 0
-					? BookGenres.sort(
-							(a, b) => a.majorBooks.length - b.majorBooks.length
-					  )[0].name
-					: genreWithEmoji[Math.floor(Math.random() * genreWithEmoji.length)]
+			const randomMajorGenre = BookGenres.sort(
+				(a, b) => a.majorBooks.length - b.majorBooks.length
+			)[0].name
+
+			if (BookGenres.length === 0) {
+				console.log(`❌ No book genres for ${BookName}`)
+			}
 			await prisma.book.create({
 				data: {
-					title: typeof epub === 'string' ? book.title : epub.title,
+					title: BookName,
 					author:
 						typeof epub === 'string'
 							? book.author.replaceAll(/,.*|\(.*?\)/g, '').trim()
@@ -278,12 +309,7 @@ export const seeder = async () => {
 						}
 					},
 					genres: {
-						connectOrCreate: [
-							...BookGenres.map(genre => genre.name),
-							...genreWithEmoji.map(genre =>
-								genre.replaceAll(/['[\]]/g, '').trim()
-							)
-						].map(genre => ({
+						connectOrCreate: BookGenres.map(genre => genre.name).map(genre => ({
 							where: {
 								name: genre
 							},
@@ -292,24 +318,20 @@ export const seeder = async () => {
 							}
 						}))
 					},
-					image: `books-covers/${
-						typeof epub === 'string' ? book.title : epub.title
-					}.jpg`,
+					image: `books-covers/${simplifyString(BookName)}.jpg`,
 					pages:
 						typeof epub === 'string' || !epub.pages
 							? Number(book.pages)
 							: Number(epub.pages),
 					likedPercentage: book.likedPercent,
-					epub: `epubs/${
-						typeof epub === 'string' ? book.title : epub.title
-					}.epub`
+					epub: `epubs/${simplifyString(BookName)}.epub`
 				}
 			})
 			console.log(
 				green(
-					`✅ ${index}: ${
-						typeof epub === 'string' ? book.title : epub.title
-					} by ${book.author.replaceAll(/,.*|\(.*?\)/g, '').trim()}`
+					`✅ ${index}: ${BookName} by ${book.author
+						.replaceAll(/,.*|\(.*?\)/g, '')
+						.trim()}`
 				)
 			)
 		} catch {

@@ -15,7 +15,9 @@ export const royalParser = async ({
 	author: string
 	noSelect?: boolean
 }) => {
-	await page.goto('https://royallib.com/book/')
+	await page.goto('https://royallib.com/book/', {
+		waitUntil: 'domcontentloaded'
+	})
 	await page.type('#q', `${name}`)
 	await page.click('.srch-sbm')
 	await page.waitForSelector('.viewbook')
@@ -144,7 +146,7 @@ export const royalParser = async ({
 			return customResponse.value
 		}
 		if (response.value === false) return
-		await page.goto(`http:${response.value}`)
+		await page.goto(`http:${response.value}`, { waitUntil: 'domcontentloaded' })
 		const isError3 = await page.evaluate(() => {
 			const error = document.querySelector(
 				'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'
@@ -165,7 +167,7 @@ export const royalParser = async ({
 			return `http:${epub.getAttribute('href')}`
 		})
 	}
-	await page.goto(`http:${filterArray.link}`)
+	await page.goto(`http:${filterArray.link}`, { waitUntil: 'domcontentloaded' })
 	const isError2 = await page.evaluate(() => {
 		const error = document.querySelector(
 			'.content > table:nth-child(16) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(18)'

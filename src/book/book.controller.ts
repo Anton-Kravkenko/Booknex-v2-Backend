@@ -12,6 +12,7 @@ export class BookController {
 	async getEmotions() {
 		return this.bookService.getEmotions()
 	}
+
 	@Post('/review/:id')
 	@Auth()
 	async reviewBook(
@@ -28,6 +29,7 @@ export class BookController {
 		return this.bookService.getBookInfoById(+bookId)
 	}
 	// admin
+
 	@Auth('admin')
 	@Get('/get-all-books')
 	async getAllBooks() {

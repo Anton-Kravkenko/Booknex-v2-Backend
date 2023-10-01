@@ -36,6 +36,7 @@ export class BookService {
 			}
 		})
 	}
+
 	async createBook(dto: CreateBookDto) {
 		await this.prisma.book.create({
 			data: {

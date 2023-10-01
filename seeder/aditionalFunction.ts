@@ -60,14 +60,14 @@ export const getBookFromList = async (
 		const pages = document.querySelector(
 			'.table > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > span:nth-child(1)'
 		)
-		if (Number(pages.textContent.replace('pages', '')) - numbPages > 160)
+		if (Number(pages.textContent.replace('pages', '')) - numbPages >= 60)
 			return Number(pages.textContent.replace('pages', ''))
 	}, numbPages)
 	if (bookPagesFunction) {
 		const response = await prompts({
 			type: 'select',
 			name: 'value',
-			message: `A large page difference has been recorded for ${bookTitle} | ${bookPagesFunction} of ${numbPages}:`,
+			message: `A large page difference has been recorded for ${bookTitle} | ${bookPagesFunction} -currentEpub of ${numbPages} -goodreads:`,
 			choices: [
 				{
 					title: '❌  Skip',
