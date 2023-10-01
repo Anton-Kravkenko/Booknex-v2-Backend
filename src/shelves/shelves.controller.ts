@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { CreateShelfDto } from './dto/create.shelf.dto'
@@ -24,21 +24,21 @@ export class ShelvesController {
 
 	// admin
 
-	@Get('/create-shelf')
+	@Post('/create')
 	@Auth('admin')
-	async createShelf(dto: CreateShelfDto) {
+	async createShelf(@Body() dto: CreateShelfDto) {
 		return this.shelvesService.createShelf(dto)
 	}
 
-	@Get('/delete-shelf/:id')
+	@Delete('/delete/:id')
 	@Auth('admin')
 	async deleteShelf(@Param('id') id: string) {
 		return this.shelvesService.deleteShelf(+id)
 	}
 
-	@Get('/update-shelf/:id')
+	@Put('/update/:id')
 	@Auth('admin')
-	async updateShelf(@Param('id') id: string, dto: UpdateShelfDto) {
+	async updateShelf(@Param('id') id: string, @Body() dto: UpdateShelfDto) {
 		return this.shelvesService.updateShelf(+id, dto)
 	}
 }

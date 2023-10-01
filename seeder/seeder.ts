@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { PrismaClient } from '@prisma/client'
-import { bgBlue, gray, green, magenta, rainbow, yellow } from 'colors'
+import { gray, green, magenta, rainbow, yellow } from 'colors'
 import { getAverageColor } from 'fast-average-color-node'
 import * as process from 'node:process'
 import prompts from 'prompts'
@@ -230,7 +230,6 @@ export const seeder = async () => {
 					BookName = customResponse.value
 				}
 			}
-			console.log(BookName, `- actual name`)
 			await s3.send(
 				new PutObjectCommand({
 					Bucket: process.env.AWS_BUCKET,
@@ -261,22 +260,7 @@ export const seeder = async () => {
 					OR: filteredGenres.map(genre => ({ name: { contains: genre } }))
 				}
 			})
-			console.log(
-				bgBlue('Major genre: '),
-				BookGenres.sort((a, b) => a.majorBooks.length - b.majorBooks.length)[0]
-					.name,
-				bgBlue('Genres: '),
-				BookGenres.sort((a, b) => a.majorBooks.length - b.majorBooks.length)
-					.map(genre => genre.name)
-					.filter(
-						genre =>
-							genre !==
-							BookGenres.sort(
-								(a, b) => a.majorBooks.length - b.majorBooks.length
-							)[0].name
-					)
-					.join(', ')
-			)
+
 			const randomMajorGenre = BookGenres.sort(
 				(a, b) => a.majorBooks.length - b.majorBooks.length
 			)[0].name
@@ -315,7 +299,7 @@ export const seeder = async () => {
 							},
 							create: {
 								name: genre,
-								color: shadeRGBColor(randomColor(), -20)
+								color: shadeRGBColor(randomColor(), -50)
 							}
 						}))
 					},

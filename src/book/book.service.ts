@@ -31,9 +31,7 @@ export class BookService {
 
 	async getAllBooks() {
 		return this.prisma.book.findMany({
-			select: {
-				...returnBookObject
-			}
+			select: returnBookObject
 		})
 	}
 
@@ -54,7 +52,7 @@ export class BookService {
 						where: { name: dto.majorGenre },
 						create: {
 							name: dto.majorGenre,
-							color: shadeRGBColor(randomColor(), -25)
+							color: shadeRGBColor(randomColor(), -50)
 						}
 					}
 				},
@@ -65,7 +63,7 @@ export class BookService {
 				genres: {
 					connectOrCreate: dto.genres.map(g => ({
 						where: { name: g },
-						create: { name: g, color: shadeRGBColor(randomColor(), -25) }
+						create: { name: g, color: shadeRGBColor(randomColor(), -50) }
 					}))
 				}
 			}
@@ -75,9 +73,6 @@ export class BookService {
 	async deleteBook(id: number) {
 		const book = await this.getBookById(id)
 		await this.prisma.book.delete({ where: { id: book.id } })
-		return {
-			message: 'Book deleted'
-		}
 	}
 
 	async updateBook(id: number, dto: EditBookDto) {
@@ -124,10 +119,6 @@ export class BookService {
 				text: dto.comment
 			}
 		})
-
-		return {
-			message: 'Review added'
-		}
 	}
 
 	async getBookInfoById(id: number) {

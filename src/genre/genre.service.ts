@@ -18,6 +18,7 @@ export class GenreService {
 			select: {
 				...defaultReturnObject,
 				name: true,
+				color: true,
 				similar: {
 					select: {
 						id: true

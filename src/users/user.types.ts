@@ -12,8 +12,8 @@ export const DesignationType = {
 	finishedBooks: 'Book',
 	likedBooks: 'Book',
 	readingBooks: 'Book',
-	likedShelves: 'Shelves',
-	unwatchedShelves: 'Shelves'
+	likedShelves: 'Shelf',
+	unwatchedShelves: 'Shelf'
 }
 export const userLibraryFields: UserLibraryType[] = [
 	'finishedBooks',

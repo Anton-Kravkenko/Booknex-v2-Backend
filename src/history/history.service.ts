@@ -52,8 +52,5 @@ export class HistoryService {
 				}
 			}
 		})
-		return {
-			message: 'History added'
-		}
 	}
 }

@@ -1,15 +1,21 @@
-export const randomColor = (() => {
-	const randomInt = (min: number, max: number): number => {
-		return Math.floor(Math.random() * (max - min + 1)) + min
+export function randomColor() {
+	const h =
+		Math.random() < 0.5
+			? Math.floor(Math.random() * 60)
+			: 90 + Math.floor(Math.random() * 270)
+	const s = 70 + Math.random() * 30
+	let l = 35 + Math.random() * 30
+	l /= 100
+	const a = (s * Math.min(l, 1 - l)) / 100
+	const f = n => {
+		const k = (n + h / 30) % 12
+		const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
+		return Math.round(255 * color)
+			.toString(16)
+			.padStart(2, '0')
 	}
-
-	return () => {
-		const h = randomInt(0, 360)
-		const s = randomInt(42, 98)
-		const l = randomInt(40, 90)
-		return `hsl(${h},${s}%,${l}%)`
-	}
-})()
+	return `#${f(0)}${f(8)}${f(4)}`
+}
 
 export function shadeRGBColor(color: string, percent: number): string {
 	let R = Number.parseInt(color.slice(1, 3), 16)

@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
+import { randomColor, shadeRGBColor } from '../utils/color.functions'
 import { CreateShelfDto } from './dto/create.shelf.dto'
 import { UpdateShelfDto } from './dto/update.shelf.dto'
 
@@ -8,7 +10,6 @@ export class ShelvesService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async getShelves(userId: number) {
-		// TODO: Проверить всё запросы и пофиксить (сделать лучше)
 		const likedShelves = await this.prisma.shelf.findMany({
 			where: {
 				like: {
@@ -42,17 +43,26 @@ export class ShelvesService {
 	}
 
 	async getShelfById(shelfId: number) {
-		return this.prisma.shelf.findUnique({
+		const shelf = await this.prisma.shelf.findUnique({
 			where: {
 				id: +shelfId
+			},
+			include: {
+				books: {
+					select: returnBookObject
+				}
 			}
 		})
+
+		if (!shelf) throw new NotFoundException('Shelf not found').getResponse()
+		return shelf
 	}
 
 	async createShelf(dto: CreateShelfDto) {
 		return this.prisma.shelf.create({
 			data: {
 				name: dto.name,
+				color: shadeRGBColor(randomColor(), -50),
 				picture: dto.picture,
 				books: {
 					connect: dto.books.map(bookId => ({ id: bookId }))
@@ -62,6 +72,7 @@ export class ShelvesService {
 	}
 
 	async deleteShelf(id: number) {
+		await this.getShelfById(+id)
 		return this.prisma.shelf.delete({
 			where: {
 				id: +id
@@ -70,6 +81,17 @@ export class ShelvesService {
 	}
 
 	async updateShelf(id: number, dto: UpdateShelfDto) {
+		await this.getShelfById(+id)
+		const booksExists = await this.prisma.book.findMany({
+			where: {
+				id: {
+					in: dto.books
+				}
+			}
+		})
+		if (booksExists.length !== dto.books.length) {
+			throw new NotFoundException('Some books not found').getResponse()
+		}
 		return this.prisma.shelf.update({
 			where: {
 				id: +id
@@ -77,7 +99,6 @@ export class ShelvesService {
 			data: {
 				name: dto.name,
 				picture: dto.picture,
-				//  TODO: по фиксить чтобы устанавливался массив  id где я конекчу елементы
 				books: {
 					set: dto.books.map(bookId => ({ id: bookId }))
 				}

@@ -146,9 +146,6 @@ export class UsersService {
 		await this.prisma.user.delete({
 			where: { id: user.id }
 		})
-		return {
-			message: 'User deleted'
-		}
 	}
 
 	async toggle(userId: number, id: number, type: UserLibraryType) {
