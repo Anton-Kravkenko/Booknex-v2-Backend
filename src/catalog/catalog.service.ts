@@ -19,7 +19,7 @@ export class CatalogService {
 		}
 	}
 
-	async getTopSearchers() {
+	async getSearchExamples() {
 		const topGenres = await this.prisma.genre.findMany({
 			take: 5,
 			select: {

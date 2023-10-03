@@ -7,7 +7,7 @@ import { Prisma } from '@prisma/client'
 import { hash } from 'argon2'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
-import { returnShelvesObject } from '../shelves/return.shelves.object'
+import { returnShelfObject } from '../shelf/return.shelf.object'
 import { UserUpdateDto } from './dto/user.update.dto'
 import { returnUserObject } from './return.user.object'
 import {
@@ -17,7 +17,7 @@ import {
 } from './user.types'
 
 @Injectable()
-export class UsersService {
+export class UserService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async getUserById(id: number, selectObject: Prisma.UserSelect = {}) {
@@ -81,7 +81,7 @@ export class UsersService {
 				select:
 					DesignationType[type] === 'Book'
 						? returnBookObject
-						: returnShelvesObject,
+						: returnShelfObject,
 				orderBy: {
 					createdAt: 'desc'
 				}
@@ -91,10 +91,51 @@ export class UsersService {
 	}
 
 	async getProfile(id: number) {
-		return this.getUserById(id, {
+		const user = await this.getUserById(id, {
 			...returnUserObject,
 			picture: true
 		})
+
+		const {
+			_sum: { time: totalTime }
+		} = await this.prisma.history.aggregate({
+			where: { userId: id },
+			_sum: { time: true }
+		})
+
+		const {
+			_count: { id: bookCount },
+			_sum: { pages: totalPageCount }
+		} = await this.prisma.book.aggregate({
+			where: { finishedBy: { some: { id } } },
+			_count: { id: true },
+			_sum: { pages: true }
+		})
+		return [
+			user,
+			[
+				{
+					name: 'Books read',
+					count: bookCount
+				},
+				{
+					name: 'Pages read',
+					count: totalPageCount
+				},
+				{
+					name: 'Time in read',
+					count: `${Math.floor(totalTime / 3_600_000)}h ${Math.floor(
+						(totalTime % 3_600_000) / 60_000
+					)}min`
+				},
+				{
+					name: 'Reading speed',
+					count: `${Math.floor(
+						totalPageCount / (totalTime / 3_600_000)
+					)} pages/hour`
+				}
+			]
+		]
 	}
 
 	async updateUser(userId: number, dto: UserUpdateDto) {

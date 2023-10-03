@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client'
 import { getAverageColor } from 'fast-average-color-node'
 import { GenreReturnObject } from '../genre/return.genre.object'
 import { PrismaService } from '../prisma.service'
-import { UsersService } from '../users/users.service'
+import { UserService } from '../user/user.service'
 import { randomColor, shadeRGBColor } from '../utils/color.functions'
 import { CreateBookDto, EditBookDto } from './dto/manipulation.book.dto'
 import { ReviewBookDto } from './dto/review.book.dto'
@@ -13,7 +13,7 @@ import { returnReviewsObject } from './return.reviews.object'
 @Injectable()
 export class BookService {
 	constructor(
-		private readonly usersService: UsersService,
+		private readonly usersService: UserService,
 		private readonly prisma: PrismaService
 	) {}
 

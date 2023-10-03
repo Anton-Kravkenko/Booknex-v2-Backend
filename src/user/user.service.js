@@ -130,7 +130,7 @@ exports.UsersService = void 0;
 var common_1 = require("@nestjs/common");
 var argon2_1 = require("argon2");
 var return_user_object_1 = require("./utils/return-user.object");
-var UsersService = /** @class */ (function() {
+var UserService = /** @class */ (function() {
   function UsersService(prisma) {
     this.prisma = prisma;
   }
@@ -247,4 +247,4 @@ var UsersService = /** @class */ (function() {
   ], UsersService);
   return UsersService;
 }());
-exports.UsersService = UsersService;
+exports.UsersService = UserService;

@@ -10,13 +10,13 @@ import { BookModule } from './book/book.module'
 import { CatalogModule } from './catalog/catalog.module'
 import { GenreModule } from './genre/genre.module'
 import { HistoryModule } from './history/history.module'
-import { ShelvesModule } from './shelves/shelves.module'
+import { ShelfModule } from './shelf/shelf.module'
 import { UploadModule } from './upload/upload.module'
-import { UsersModule } from './users/users.module'
+import { UserModule } from './user/user.module'
 
 @Module({
 	imports: [
-		UsersModule,
+		UserModule,
 		AuthModule,
 		CatalogModule,
 		HistoryModule,
@@ -35,7 +35,7 @@ import { UsersModule } from './users/users.module'
 			max: 1000
 		}),
 		AdminModule,
-		ShelvesModule
+		ShelfModule
 	],
 	controllers: [AppController],
 	providers: [AppService, ConfigService]

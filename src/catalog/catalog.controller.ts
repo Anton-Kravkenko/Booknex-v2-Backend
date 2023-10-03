@@ -12,9 +12,9 @@ export class CatalogController {
 		return this.catalogService.search(query)
 	}
 
-	@Get('/topSearchers')
-	async getTopSearchers() {
-		return this.catalogService.getTopSearchers()
+	@Get('/search-examples')
+	async getSearchExamples() {
+		return this.catalogService.getSearchExamples()
 	}
 
 	@Get('/')

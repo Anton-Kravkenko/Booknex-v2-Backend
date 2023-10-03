@@ -7,16 +7,16 @@ import { JwtService } from '@nestjs/jwt'
 import { User } from '@prisma/client'
 import { hash, verify } from 'argon2'
 import { PrismaService } from '../prisma.service'
-import { UsersService } from '../users/users.service'
+import { UserService } from '../user/user.service'
 import { AuthDto, RegisterDto } from './dto/auth.dto'
-import { getRandomPicture } from './utils/getRandomPicture'
+import { randomPicture } from './random-picture'
 
 @Injectable()
 export class AuthService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly jwt: JwtService,
-		private readonly usersService: UsersService
+		private readonly usersService: UserService
 	) {}
 
 	async login(dto: AuthDto) {
@@ -48,7 +48,7 @@ export class AuthService {
 		})
 		if (oldUser)
 			throw new BadRequestException('User already exists').getResponse()
-		const fainBackPicture = getRandomPicture()
+		const fainBackPicture = randomPicture()
 		const user = await this.prisma.user.create({
 			data: {
 				email: dto.email,

@@ -3,14 +3,12 @@ import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { CreateShelfDto } from './dto/create.shelf.dto'
 import { UpdateShelfDto } from './dto/update.shelf.dto'
-import { ShelvesService } from './shelves.service'
+import { ShelfService } from './shelf.service'
 
-//  TODO: сделать запросы на получение полок, добавление книги в полку, удаление книги из полки, создание полки, удаление полки, изменение полки
-
-@Controller('shelves')
-export class ShelvesController {
-	constructor(private readonly shelvesService: ShelvesService) {}
-	@Get('/get-shelves')
+@Controller('shelf')
+export class ShelfController {
+	constructor(private readonly shelvesService: ShelfService) {}
+	@Get('/user-shelves')
 	@Auth()
 	async getShelves(@CurrentUser('id') userId: number) {
 		return this.shelvesService.getShelves(+userId)
@@ -23,7 +21,7 @@ export class ShelvesController {
 	}
 
 	// admin
-	@Get('/get-all')
+	@Get('/all')
 	@Auth('admin')
 	async getAllShelves() {
 		return this.shelvesService.getAllShelves()

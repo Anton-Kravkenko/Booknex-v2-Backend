@@ -33,7 +33,7 @@ export class BookController {
 	//  admin
 
 	@Auth('admin')
-	@Get('/get-all-books')
+	@Get('/all')
 	async getAllBooks() {
 		return this.bookService.getAllBooks()
 	}

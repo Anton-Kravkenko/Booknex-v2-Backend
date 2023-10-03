@@ -6,7 +6,7 @@ import { CreateShelfDto } from './dto/create.shelf.dto'
 import { UpdateShelfDto } from './dto/update.shelf.dto'
 
 @Injectable()
-export class ShelvesService {
+export class ShelfService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async getShelves(userId: number) {

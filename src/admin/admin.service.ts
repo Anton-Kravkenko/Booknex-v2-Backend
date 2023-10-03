@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma.service'
 @Injectable()
 export class AdminService {
 	constructor(private readonly prisma: PrismaService) {}
-	async getStats() {
+	async getStatistics() {
 		const totalTimeRead = await this.prisma.history.aggregate({
 			_sum: {
 				time: true

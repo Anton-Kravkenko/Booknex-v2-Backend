@@ -7,8 +7,8 @@ export class AdminController {
 	constructor(private readonly adminService: AdminService) {}
 
 	@Auth('admin')
-	@Get('/stats')
-	async getStats() {
-		return this.adminService.getStats()
+	@Get('/statistics')
+	async getStatistics() {
+		return this.adminService.getStatistics()
 	}
 }

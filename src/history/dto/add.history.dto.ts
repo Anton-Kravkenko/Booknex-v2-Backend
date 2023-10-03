@@ -3,7 +3,7 @@ import { ArrayMinSize, IsArray } from 'class-validator'
 export class AddHistoryDto {
 	@IsArray()
 	@ArrayMinSize(1)
-	history: {
+	histories: {
 		time: number
 		bookId: number
 	}[]

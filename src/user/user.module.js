@@ -10,19 +10,19 @@ exports.__esModule = true;
 exports.UsersModule = void 0;
 var common_1 = require("@nestjs/common");
 var prisma_service_1 = require("../utils/prisma.service");
-var users_controller_1 = require("./users.controller");
-var users_service_1 = require("./users.service");
-var UsersModule = /** @class */ (function() {
+var users_controller_1 = require("./user.controller");
+var users_service_1 = require("./user.service");
+var UserModule = /** @class */ (function() {
   function UsersModule() {
   }
   
   UsersModule = __decorate([
     (0, common_1.Module)({
-      controllers: [users_controller_1.UsersController],
-      providers: [users_service_1.UsersService, prisma_service_1.PrismaService],
-      exports: [users_service_1.UsersService]
+      controllers: [users_controller_1.UserController],
+      providers: [users_service_1.UserService, prisma_service_1.PrismaService],
+      exports: [users_service_1.UserService]
     })
   ], UsersModule);
   return UsersModule;
 }());
-exports.UsersModule = UsersModule;
+exports.UsersModule = UserModule;

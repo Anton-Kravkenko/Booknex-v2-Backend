@@ -13,7 +13,7 @@ var config_1 = require("@nestjs/config");
 var jwt_1 = require("@nestjs/jwt");
 var jwt_config_1 = require("../config/jwt.config");
 var prisma_service_1 = require("../utils/prisma.service");
-var users_service_1 = require("../users/users.service");
+var users_service_1 = require("../users/user.service");
 var auth_controller_1 = require("./auth.controller");
 var auth_service_1 = require("./auth.service");
 var jwt_stategy_1 = require("./strategy/jwt.stategy");
@@ -24,7 +24,7 @@ var AuthModule = /** @class */ (function() {
   AuthModule = __decorate([
     (0, common_1.Module)({
       controllers: [auth_controller_1.AuthController],
-      providers: [auth_service_1.AuthService, prisma_service_1.PrismaService, jwt_stategy_1.JwtStrategy, users_service_1.UsersService],
+      providers: [auth_service_1.AuthService, prisma_service_1.PrismaService, jwt_stategy_1.JwtStrategy, users_service_1.UserService],
       imports: [
         config_1.ConfigModule,
         jwt_1.JwtModule.registerAsync({

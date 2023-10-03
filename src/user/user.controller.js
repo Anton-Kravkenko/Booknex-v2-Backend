@@ -49,7 +49,7 @@ exports.UsersController = void 0;
 var common_1 = require("@nestjs/common");
 var auth_decorator_1 = require("../auth/decorator/auth.decorator");
 var user_decorator_1 = require("../auth/decorator/user.decorator");
-var UsersController = /** @class */ (function () {
+var UserController = /** @class */ (function () {
     function UsersController(usersService) {
         this.usersService = usersService;
     }
@@ -109,4 +109,4 @@ var UsersController = /** @class */ (function () {
     ], UsersController);
     return UsersController;
 }());
-exports.UsersController = UsersController;
+exports.UsersController = UserController;

@@ -1,4 +1,4 @@
-export const getRandomPicture = () => {
+export const randomPicture = () => {
 	const randomElement = [
 		'Lily',
 		'Boo',

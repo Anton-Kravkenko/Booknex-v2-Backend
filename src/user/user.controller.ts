@@ -10,20 +10,20 @@ import {
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { UserUpdateDto } from './dto/user.update.dto'
+import { UserService } from './user.service'
 import { UserLibraryType } from './user.types'
-import { UsersService } from './users.service'
 
 @Controller('users')
-export class UsersController {
-	constructor(private readonly usersService: UsersService) {}
+export class UserController {
+	constructor(private readonly usersService: UserService) {}
 	@Auth()
-	@Get('/get-profile')
+	@Get('/profile')
 	async getProfile(@CurrentUser('id') id: number) {
 		return this.usersService.getProfile(+id)
 	}
 
 	@Auth()
-	@Get('/get-library')
+	@Get('/library')
 	async getLibrary(@CurrentUser('id') id: number) {
 		return this.usersService.getLibrary(+id)
 	}
@@ -39,7 +39,7 @@ export class UsersController {
 	}
 
 	@Auth()
-	@Post('/update-user')
+	@Post('/update')
 	async updateUser(@CurrentUser('id') id: number, @Body() dto: UserUpdateDto) {
 		return this.usersService.updateUser(+id, dto)
 	}
@@ -58,7 +58,7 @@ export class UsersController {
 	// admin
 
 	@Auth('admin')
-	@Get('/get-all-users')
+	@Get('/all')
 	async getAllUsers() {
 		return this.usersService.getAllUsers()
 	}
