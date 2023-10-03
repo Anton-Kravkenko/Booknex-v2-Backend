@@ -16,13 +16,18 @@ export class ShelvesController {
 		return this.shelvesService.getShelves(+userId)
 	}
 
-	@Get('/get-shelf/:id')
+	@Get('/by-id/:id')
 	@Auth()
 	async getShelfById(@Param('id') shelfId: number) {
 		return this.shelvesService.getShelfById(+shelfId)
 	}
 
 	// admin
+	@Get('/get-all')
+	@Auth('admin')
+	async getAllShelves() {
+		return this.shelvesService.getAllShelves()
+	}
 
 	@Post('/create')
 	@Auth('admin')

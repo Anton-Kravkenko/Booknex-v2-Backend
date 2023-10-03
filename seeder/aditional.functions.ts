@@ -60,7 +60,7 @@ export const getBookFromList = async (
 		const pages = document.querySelector(
 			'.table > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > span:nth-child(1)'
 		)
-		if (Number(pages.textContent.replace('pages', '')) - numbPages >= 60)
+		if (Number(pages.textContent.replace('pages', '')) < numbPages)
 			return Number(pages.textContent.replace('pages', ''))
 	}, numbPages)
 	if (bookPagesFunction) {

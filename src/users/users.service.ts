@@ -182,9 +182,7 @@ export class UsersService {
 			}
 		})
 		return {
-			message: `${DesignationType[type]} ${
-				isExist ? 'removed from' : 'added to'
-			} ${type}`
+			isExist: !isExist
 		}
 	}
 }

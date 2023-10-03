@@ -19,7 +19,7 @@ module.exports = {
 		'plugin:@typescript-eslint/stylistic-type-checked',
 		'plugin:prettier/recommended',
 		'plugin:sonarjs/recommended',
-		'plugin:unicorn/all'
+		'plugin:unicorn/recommended'
 	],
 	overrides: [
 		{

@@ -58,6 +58,10 @@ export class ShelvesService {
 		return shelf
 	}
 
+	async getAllShelves() {
+		return this.prisma.shelf.findMany({})
+	}
+
 	async createShelf(dto: CreateShelfDto) {
 		return this.prisma.shelf.create({
 			data: {

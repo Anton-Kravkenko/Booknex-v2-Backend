@@ -98,6 +98,10 @@ export class BookService {
 	async reviewBook(userId: number, bookId: number, dto: ReviewBookDto) {
 		await this.usersService.getUserById(userId)
 		await this.getBookById(bookId)
+		const emoji = await this.prisma.emotion.findUnique({
+			where: { name: dto.emotion }
+		})
+		if (!emoji) throw new NotFoundException('Emotion not found').getResponse()
 		await this.prisma.review.create({
 			data: {
 				user: {

@@ -74,7 +74,7 @@ export const seeder = async () => {
 		.sort((a: Book, b: Book) => b.numRatings - a.numRatings)
 		.filter((book: Book) => book.numRatings > 20_000)
 	const browser = await puppeteer.launch({
-		headless: false,
+		headless: true,
 		args: [
 			'--autoplay-policy=user-gesture-required',
 			'--disable-background-networking',
