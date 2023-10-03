@@ -13,7 +13,7 @@ import { UserUpdateDto } from './dto/user.update.dto'
 import { UserService } from './user.service'
 import { UserLibraryType } from './user.types'
 
-@Controller('users')
+@Controller('user')
 export class UserController {
 	constructor(private readonly usersService: UserService) {}
 	@Auth()
