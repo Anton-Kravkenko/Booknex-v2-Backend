@@ -25,6 +25,7 @@ module.exports = {
 		sourceType: 'module'
 	},
 	rules: {
+		'unicorn/no-null': ['warn'],
 		'max-len': [
 			'error',
 			{ code: 200, ignoreTemplateLiterals: true, ignoreUrls: true }
@@ -98,7 +99,7 @@ module.exports = {
 		'newline-per-chained-call': 'off',
 		'no-await-in-loop': 'off',
 		'no-continue': 'off',
-		'unicorn/no-null': ['warn'],
+		'no-mixed-spaces-and-tabs': 'off',
 		'react/jsx-filename-extension': 'off',
 		'unicorn/no-nested-ternary': 'off'
 	}

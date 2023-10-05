@@ -4,16 +4,17 @@ import {
 	NotFoundException
 } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
-import { hash } from 'argon2'
+import { hash, verify } from 'argon2'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
 import { returnShelfObject } from '../shelf/return.shelf.object'
-import { UserUpdateDto } from './dto/user.update.dto'
+import { UserUpdateBioDto, UserUpdatePasswordDto } from './dto/user.update.dto'
 import { returnUserObject } from './return.user.object'
 import {
 	DesignationType,
 	userLibraryFields,
-	UserLibraryType
+	UserLibraryType,
+	UserStatisticsType
 } from './user.types'
 
 @Injectable()
@@ -111,34 +112,71 @@ export class UserService {
 			_count: { id: true },
 			_sum: { pages: true }
 		})
-		return [
-			user,
-			[
-				{
-					name: 'Books read',
-					count: bookCount
-				},
-				{
-					name: 'Pages read',
-					count: totalPageCount
-				},
-				{
-					name: 'Time in read',
-					count: `${Math.floor(totalTime / 3_600_000)}h ${Math.floor(
-						(totalTime % 3_600_000) / 60_000
-					)}min`
-				},
-				{
-					name: 'Reading speed',
-					count: `${Math.floor(
-						totalPageCount / (totalTime / 3_600_000)
-					)} pages/hour`
-				}
-			]
+
+		const statistics: UserStatisticsType[] = [
+			{
+				name: 'Books read',
+				icon: 'book',
+				count: bookCount ?? 0
+			},
+			{
+				name: 'Pages read',
+				icon: 'log',
+				count: totalPageCount ?? 0
+			},
+			{
+				name: 'Time in read',
+				icon: 'hourglass',
+				count: `${Math.floor(totalTime / 3_600_000)}h ${Math.floor(
+					(totalTime % 3_600_000) / 60_000
+				)}min`
+			},
+			{
+				name: 'Reading speed',
+				icon: 'zap',
+				count:
+					totalPageCount && totalTime
+						? `${Math.floor(
+								totalPageCount / (totalTime / 3_600_000)
+						  )} pages/hour`
+						: 'unknown'
+			}
 		]
+		return {
+			...user,
+			statistics
+		}
 	}
 
-	async updateUser(userId: number, dto: UserUpdateDto) {
+	async updatePassword(userId: number, dto: UserUpdatePasswordDto) {
+		const user = await this.getUserById(userId, {
+			password: true
+		})
+		const isPasswordValid = await verify(user.password, dto.oldPassword)
+		if (!isPasswordValid)
+			throw new BadRequestException('Invalid password').getResponse()
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: {
+				password: await hash(dto.password)
+			}
+		})
+	}
+
+	async updatePicture(userId: number, fileName: string) {
+		await this.getUserById(userId, {
+			picture: true
+		})
+		await this.prisma.user.update({
+			where: { id: userId },
+			data: {
+				picture: fileName
+			}
+		})
+		return this.getUserById(userId)
+	}
+
+	async updateUserBio(userId: number, dto: UserUpdateBioDto) {
 		const isSameUser = await this.prisma.user.findUnique({
 			where: { email: dto.email }
 		})
@@ -157,9 +195,7 @@ export class UserService {
 			where: { id: userId },
 			data: {
 				email: dto.email ?? user.email,
-				password: dto.password ? await hash(dto.password) : user.password,
-				name: dto.name ?? user.name,
-				picture: dto.picture ?? user.picture
+				name: dto.name ?? user.name
 			}
 		})
 		return this.getUserById(userId)

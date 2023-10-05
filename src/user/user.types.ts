@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client'
+import { IconTypes } from '../utils/icon-types'
 
 export type UserLibraryType = keyof Pick<
 	Prisma.UserSelect,
@@ -22,3 +23,9 @@ export const userLibraryFields: UserLibraryType[] = [
 	'likedShelves',
 	'unwatchedShelves'
 ]
+
+export interface UserStatisticsType {
+	name: 'Books read' | 'Pages read' | 'Time in read' | 'Reading speed'
+	count: number | string
+	icon: IconTypes
+}

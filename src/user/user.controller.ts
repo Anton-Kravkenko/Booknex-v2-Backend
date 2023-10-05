@@ -9,7 +9,8 @@ import {
 } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
-import { UserUpdateDto } from './dto/user.update.dto'
+import { FilenameDto } from '../upload/dto/upload.dto'
+import { UserUpdateBioDto, UserUpdatePasswordDto } from './dto/user.update.dto'
 import { UserService } from './user.service'
 import { UserLibraryType } from './user.types'
 
@@ -39,9 +40,27 @@ export class UserController {
 	}
 
 	@Auth()
-	@Post('/update')
-	async updateUser(@CurrentUser('id') id: number, @Body() dto: UserUpdateDto) {
-		return this.usersService.updateUser(+id, dto)
+	@Post('/update-bio')
+	async updateUserBio(
+		@CurrentUser('id') id: number,
+		@Body() dto: UserUpdateBioDto
+	) {
+		return this.usersService.updateUserBio(+id, dto)
+	}
+
+	@Auth()
+	@Post('/update-password')
+	async updatePassword(
+		@CurrentUser('id') id: number,
+		@Body() dto: UserUpdatePasswordDto
+	) {
+		return this.usersService.updatePassword(+id, dto)
+	}
+
+	@Auth()
+	@Post('/update-picture')
+	async updatePicture(@CurrentUser('id') id: number, @Body() dto: FilenameDto) {
+		return this.usersService.updatePicture(+id, dto.filename)
 	}
 
 	@Auth()
