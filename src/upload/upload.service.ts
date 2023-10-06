@@ -1,5 +1,6 @@
 import {
 	DeleteObjectCommand,
+	GetObjectCommand,
 	PutObjectCommand,
 	S3Client
 } from '@aws-sdk/client-s3'
@@ -22,8 +23,20 @@ export class UploadService {
 	constructor(private readonly configService: ConfigService) {}
 
 	async delete(filename: string) {
+		console.log('delete', filename)
 		if (!filename)
 			throw new BadRequestException('Invalid filename').getResponse()
+		// TODO сделать проверку на присутствие файла, если его нету то выводить ошибку
+		try {
+			await this.S3.send(
+				new GetObjectCommand({
+					Bucket: this.configService.get('AWS_BUCKET'),
+					Key: filename
+				})
+			)
+		} catch {
+			throw new BadRequestException('File not found').getResponse()
+		}
 		await this.S3.send(
 			new DeleteObjectCommand({
 				Bucket: this.configService.get('AWS_BUCKET'),
@@ -37,7 +50,16 @@ export class UploadService {
 		}
 	}
 
-	async upload(file: Buffer, filename: string, folder: StorageFolderType) {
+	async upload({
+		file,
+		filename,
+		folder
+	}: {
+		file: Buffer
+		filename: string
+		folder: StorageFolderType
+	}) {
+		console.log('uploads', folder)
 		if (!['epubs', 'books-covers', 'user-pictures'].includes(folder))
 			throw new BadRequestException('Invalid folder name').getResponse()
 
@@ -53,7 +75,7 @@ export class UploadService {
 			throw new BadRequestException('File not uploaded').getResponse()
 		})
 		return {
-			name: filename
+			name: `${folder}/${filename}`
 		}
 	}
 }

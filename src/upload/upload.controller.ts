@@ -16,24 +16,6 @@ import { UploadService } from './upload.service'
 @Controller('upload')
 export class UploadController {
 	constructor(private readonly uploadService: UploadService) {}
-	@Post('/upload/:folder')
-	@UseInterceptors(FileInterceptor('file'))
-	async upload(
-		@UploadedFile(
-			new ParseFilePipe({
-				validators: [
-					new MaxFileSizeValidator({
-						maxSize: 10_000_000
-					})
-				]
-			})
-		)
-		file: Express.Multer.File,
-		@Param('folder') folder: StorageFolderType
-	) {
-		return this.uploadService.upload(file.buffer, file.originalname, folder)
-	}
-
 	@Post('/delete')
 	async delete(@Body() dto: FilenameDto) {
 		return this.uploadService.delete(dto.filename)
@@ -54,12 +36,34 @@ export class UploadController {
 		file: Express.Multer.File,
 		@Body() dto: ReplacementDto
 	) {
-		await this.uploadService.delete(dto.deleteFilename).then(() => {
-			return this.uploadService.upload(
-				file.buffer,
-				file.originalname,
-				dto.folder
-			)
+		await this.uploadService.delete(dto.deleteFilename)
+
+		return this.uploadService.upload({
+			file: file.buffer,
+			filename: file.originalname,
+			folder: dto.folder
+		})
+	}
+
+	@Post('/:folder')
+	@UseInterceptors(FileInterceptor('file'))
+	async upload(
+		@UploadedFile(
+			new ParseFilePipe({
+				validators: [
+					new MaxFileSizeValidator({
+						maxSize: 10_000_000
+					})
+				]
+			})
+		)
+		file: Express.Multer.File,
+		@Param('folder') folder: StorageFolderType
+	) {
+		return this.uploadService.upload({
+			file: file.buffer,
+			filename: file.originalname,
+			folder
 		})
 	}
 }
