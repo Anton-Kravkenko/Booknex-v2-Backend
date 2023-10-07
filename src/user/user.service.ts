@@ -11,8 +11,10 @@ import { returnShelfObject } from '../shelf/return.shelf.object'
 import { UserUpdateBioDto, UserUpdatePasswordDto } from './dto/user.update.dto'
 import { returnUserObject } from './return.user.object'
 import {
+	CatalogTitleType,
 	DesignationType,
 	userLibraryFields,
+	UserLibraryFieldsEnum,
 	UserLibraryType,
 	UserStatisticsType
 } from './user.types'
@@ -45,39 +47,53 @@ export class UserService {
 					finishedBooks: true,
 					likedBooks: true,
 					readingBooks: true,
-					likedShelves: true,
+					watchedShelves: true,
 					unwatchedShelves: true
 				}
 			}
 		})
-		return [
-			{
-				name: 'Finished books',
-				count: library._count.finishedBooks
-			},
-			{
-				name: 'Liked books',
-				count: library._count.likedBooks
-			},
-			{
-				name: 'Reading Books',
-				count: library._count.readingBooks
-			},
-			{
-				name: 'Liked Shelves',
-				count: library._count.likedShelves
-			},
-			{
-				name: 'UnWatched Shelves',
-				count: library._count.unwatchedShelves
-			}
-		]
+		return {
+			books: [
+				{
+					name: CatalogTitleType.readingBooks,
+					type: UserLibraryFieldsEnum.readingBooks,
+					icon: 'book',
+					count: library._count.readingBooks
+				},
+				{
+					name: CatalogTitleType.likedBooks,
+					type: UserLibraryFieldsEnum.likedBooks,
+					icon: 'heart',
+					count: library._count.likedBooks
+				},
+				{
+					name: CatalogTitleType.finishedBooks,
+					type: UserLibraryFieldsEnum.finishedBooks,
+					icon: 'checklist',
+					count: library._count.finishedBooks
+				}
+			],
+			shelves: [
+				{
+					name: CatalogTitleType.watchedShelves,
+					type: UserLibraryFieldsEnum.watchedShelves,
+					icon: 'eye',
+					count: library._count.watchedShelves
+				},
+				{
+					name: CatalogTitleType.unwatchedShelves,
+					type: UserLibraryFieldsEnum.unwatchedShelves,
+					icon: 'eye-closed',
+					count: library._count.unwatchedShelves
+				}
+			]
+		}
 	}
 
 	async getLibraryByType(id: number, type: UserLibraryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()
-		const books = await this.getUserById(id, {
+		const elements = await this.getUserById(id, {
 			[type]: {
 				select:
 					DesignationType[type] === 'Book'
@@ -88,7 +104,10 @@ export class UserService {
 				}
 			}
 		})
-		return books[type]
+		return {
+			title: CatalogTitleType[type],
+			[type]: elements[type]
+		}
 	}
 
 	async getProfile(id: number) {
@@ -210,7 +229,7 @@ export class UserService {
 						finishedBooks: true,
 						likedBooks: true,
 						readingBooks: true,
-						likedShelves: true,
+						watchedShelves: true,
 						unwatchedShelves: true
 					}
 				}
@@ -242,7 +261,7 @@ export class UserService {
 			likedBooks: true,
 			readingBooks: true,
 			finishedBooks: true,
-			likedShelves: true,
+			watchedShelves: true,
 			unwatchedShelves: true
 		})
 

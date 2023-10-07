@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
-import { CurrentUser } from '../decorator/user.decorator'
 import { CreateShelfDto } from './dto/create.shelf.dto'
 import { UpdateShelfDto } from './dto/update.shelf.dto'
 import { ShelfService } from './shelf.service'
@@ -8,11 +7,6 @@ import { ShelfService } from './shelf.service'
 @Controller('shelf')
 export class ShelfController {
 	constructor(private readonly shelvesService: ShelfService) {}
-	@Get('/user-shelves')
-	@Auth()
-	async getShelves(@CurrentUser('id') userId: number) {
-		return this.shelvesService.getShelves(+userId)
-	}
 
 	@Get('/by-id/:id')
 	@Auth()

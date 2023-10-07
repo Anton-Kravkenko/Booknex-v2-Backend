@@ -9,39 +9,6 @@ import { UpdateShelfDto } from './dto/update.shelf.dto'
 export class ShelfService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async getShelves(userId: number) {
-		const likedShelves = await this.prisma.shelf.findMany({
-			where: {
-				like: {
-					some: {
-						id: userId
-					}
-				}
-			}
-		})
-		const otherShelves = await this.prisma.shelf.findMany({
-			orderBy: {
-				like: {
-					_count: 'desc'
-				}
-			},
-			where: {
-				like: {
-					none: {
-						id: userId
-					}
-				},
-				unwatched: {
-					none: {
-						id: userId
-					}
-				}
-			}
-		})
-
-		return [...likedShelves, ...otherShelves]
-	}
-
 	async getShelfById(shelfId: number) {
 		const shelf = await this.prisma.shelf.findUnique({
 			where: {
@@ -66,8 +33,9 @@ export class ShelfService {
 		return this.prisma.shelf.create({
 			data: {
 				name: dto.name,
-				color: shadeRGBColor(randomColor(), -50),
-				picture: dto.picture,
+				icon: dto.icon,
+				color: shadeRGBColor(randomColor(), -20),
+				image: dto.image,
 				books: {
 					connect: dto.books.map(bookId => ({ id: bookId }))
 				}
@@ -102,7 +70,8 @@ export class ShelfService {
 			},
 			data: {
 				name: dto.name,
-				picture: dto.picture,
+				image: dto.image,
+				icon: dto.icon,
 				books: {
 					set: dto.books.map(bookId => ({ id: bookId }))
 				}

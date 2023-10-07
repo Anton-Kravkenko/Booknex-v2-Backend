@@ -23,10 +23,8 @@ export class UploadService {
 	constructor(private readonly configService: ConfigService) {}
 
 	async delete(filename: string) {
-		console.log('delete', filename)
 		if (!filename)
 			throw new BadRequestException('Invalid filename').getResponse()
-		// TODO сделать проверку на присутствие файла, если его нету то выводить ошибку
 		try {
 			await this.S3.send(
 				new GetObjectCommand({
@@ -59,7 +57,6 @@ export class UploadService {
 		filename: string
 		folder: StorageFolderType
 	}) {
-		console.log('uploads', folder)
 		if (!['epubs', 'books-covers', 'user-pictures'].includes(folder))
 			throw new BadRequestException('Invalid folder name').getResponse()
 

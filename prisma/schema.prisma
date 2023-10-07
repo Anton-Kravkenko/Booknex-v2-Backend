@@ -101,7 +101,7 @@ model User {
   likedBooks       Book[]    @relation("LikedBooks")
   finishedBooks    Book[]    @relation("FinishedBooks")
   readingBooks     Book[]    @relation("ReadingBooks")
-  likedShelves     Shelf[]   @relation("LikedShelves")
+  watchedShelves   Shelf[]   @relation("WatchedShelves")
   unwatchedShelves Shelf[]   @relation("UnwatchedShelves")
 }
 
@@ -110,9 +110,10 @@ model Shelf {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String
-  like      User[]   @relation("LikedShelves")
+  image     String   @default("")
+  icon      String   @default("")
+  watched   User[]   @relation("WatchedShelves")
   unwatched User[]   @relation("UnwatchedShelves")
   color     String   @default("#fff")
-  picture   String   @default("")
   books     Book[]
 }

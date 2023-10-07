@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
+import { returnShelfObject } from '../shelf/return.shelf.object'
 import { defaultReturnObject } from '../utils/return.default.object'
 
 @Injectable()
@@ -9,6 +10,7 @@ export class CatalogService {
 
 	async getCatalog(userId: number) {
 		return {
+			shelves: await this.getShelves(userId),
 			mostRelatedGenres: await this.getMostRelatedGenres(userId),
 			recommendations: await this.getRecommendations(userId),
 			popularNow: await this.getPopularBooks(),
@@ -17,6 +19,47 @@ export class CatalogService {
 			sameBreath: await this.getSameBreathBooks(),
 			genres: await this.getGenres()
 		}
+	}
+
+	async getShelves(userId: number) {
+		const likedShelves = await this.prisma.shelf.findMany({
+			select: {
+				...returnShelfObject,
+				icon: true
+			},
+			where: {
+				watched: {
+					some: {
+						id: userId
+					}
+				}
+			}
+		})
+		const otherShelves = await this.prisma.shelf.findMany({
+			select: {
+				...returnShelfObject,
+				icon: true
+			},
+			orderBy: {
+				watched: {
+					_count: 'desc'
+				}
+			},
+			where: {
+				watched: {
+					none: {
+						id: userId
+					}
+				},
+				unwatched: {
+					none: {
+						id: userId
+					}
+				}
+			}
+		})
+
+		return [...likedShelves, ...otherShelves]
 	}
 
 	async getSearchExamples() {

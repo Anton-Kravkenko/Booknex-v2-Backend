@@ -6,21 +6,37 @@ export type UserLibraryType = keyof Pick<
 	| 'finishedBooks'
 	| 'likedBooks'
 	| 'readingBooks'
-	| 'likedShelves'
+	| 'watchedShelves'
 	| 'unwatchedShelves'
 >
 export const DesignationType = {
 	finishedBooks: 'Book',
 	likedBooks: 'Book',
 	readingBooks: 'Book',
-	likedShelves: 'Shelf',
+	watchedShelves: 'Shelf',
 	unwatchedShelves: 'Shelf'
 }
+export enum UserLibraryFieldsEnum {
+	finishedBooks = 'finishedBooks',
+	likedBooks = 'likedBooks',
+	readingBooks = 'readingBooks',
+	watchedShelves = 'watchedShelves',
+	unwatchedShelves = 'unwatchedShelves'
+}
+
+export const CatalogTitleType = {
+	finishedBooks: 'Finished',
+	likedBooks: 'Liked',
+	readingBooks: 'Reading',
+	watchedShelves: 'Watched',
+	unwatchedShelves: 'UnWatched'
+}
+
 export const userLibraryFields: UserLibraryType[] = [
 	'finishedBooks',
 	'likedBooks',
 	'readingBooks',
-	'likedShelves',
+	'watchedShelves',
 	'unwatchedShelves'
 ]
 

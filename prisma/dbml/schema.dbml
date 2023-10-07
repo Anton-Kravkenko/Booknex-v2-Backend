@@ -89,7 +89,7 @@ Table User {
   likedBooks Book [not null]
   finishedBooks Book [not null]
   readingBooks Book [not null]
-  likedShelves Shelf [not null]
+  watchedShelves Shelf [not null]
   unwatchedShelves Shelf [not null]
 }
 
@@ -98,10 +98,11 @@ Table Shelf {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   name String [not null]
-  like User [not null]
+  image String [not null, default: '']
+  icon String [not null, default: '']
+  watched User [not null]
   unwatched User [not null]
   color String [not null, default: '#fff']
-  picture String [not null, default: '']
   books Book [not null]
 }
 
