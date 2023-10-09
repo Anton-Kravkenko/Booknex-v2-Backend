@@ -9,13 +9,15 @@ import {
 	UseInterceptors
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { Auth } from '../decorator/auth.decorator'
 import { FilenameDto, ReplacementDto } from './dto/upload.dto'
 import { StorageFolderType } from './global.types'
-import { UploadService } from './upload.service'
+import { StorageService } from './storage.service'
 
-@Controller('upload')
-export class UploadController {
-	constructor(private readonly uploadService: UploadService) {}
+@Auth()
+@Controller('storage')
+export class StorageController {
+	constructor(private readonly uploadService: StorageService) {}
 	@Post('/delete')
 	async delete(@Body() dto: FilenameDto) {
 		return this.uploadService.delete(dto.filename)

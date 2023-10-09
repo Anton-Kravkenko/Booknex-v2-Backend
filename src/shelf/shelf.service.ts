@@ -4,25 +4,45 @@ import { PrismaService } from '../prisma.service'
 import { randomColor, shadeRGBColor } from '../utils/color.functions'
 import { CreateShelfDto } from './dto/create.shelf.dto'
 import { UpdateShelfDto } from './dto/update.shelf.dto'
+import { returnShelfObject } from './return.shelf.object'
 
 @Injectable()
 export class ShelfService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async getShelfById(shelfId: number) {
+		// TODO: добавить мини статистику
 		const shelf = await this.prisma.shelf.findUnique({
 			where: {
 				id: +shelfId
 			},
-			include: {
+			select: {
+				...returnShelfObject,
+				description: true,
+				_count: {
+					select: {
+						books: true,
+						watched: true
+					}
+				},
 				books: {
-					select: returnBookObject
+					select: {
+						...returnBookObject,
+						description: true
+					}
 				}
 			}
 		})
 
 		if (!shelf) throw new NotFoundException('Shelf not found').getResponse()
-		return shelf
+		return {
+			...shelf,
+			_count: undefined,
+			statistics: {
+				books: shelf._count.books,
+				watched: shelf._count.watched
+			}
+		}
 	}
 
 	async getAllShelves() {
@@ -32,7 +52,7 @@ export class ShelfService {
 	async createShelf(dto: CreateShelfDto) {
 		return this.prisma.shelf.create({
 			data: {
-				name: dto.name,
+				title: dto.title,
 				icon: dto.icon,
 				color: shadeRGBColor(randomColor(), -20),
 				image: dto.image,
@@ -69,7 +89,7 @@ export class ShelfService {
 				id: +id
 			},
 			data: {
-				name: dto.name,
+				title: dto.title,
 				image: dto.image,
 				icon: dto.icon,
 				books: {

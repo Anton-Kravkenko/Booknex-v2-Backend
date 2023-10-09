@@ -4,12 +4,12 @@ import { CurrentUser } from '../decorator/user.decorator'
 import { AddHistoryDto } from './dto/add.history.dto'
 import { HistoryService } from './history.service'
 
+@Auth()
 @Controller('history')
 export class HistoryController {
 	constructor(private readonly historyService: HistoryService) {}
 
 	@Post('/create')
-	@Auth()
 	async addHistory(
 		@Body() addHistoryDto: AddHistoryDto,
 		@CurrentUser('id') id: number

@@ -10,7 +10,7 @@ import process from 'node:process'
 import { StorageFolderType } from './global.types'
 
 @Injectable()
-export class UploadService {
+export class StorageService {
 	private readonly S3 = new S3Client({
 		endpoint: process.env.AWS_ENDPOINT,
 		region: process.env.AWS_REGION,
@@ -43,9 +43,6 @@ export class UploadService {
 		).catch(() => {
 			throw new BadRequestException('File not found').getResponse()
 		})
-		return {
-			message: 'File deleted'
-		}
 	}
 
 	async upload({

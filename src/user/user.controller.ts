@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
-import { FilenameDto } from '../upload/dto/upload.dto'
+import { FilenameDto } from '../storage/dto/upload.dto'
 import { UserUpdateBioDto, UserUpdatePasswordDto } from './dto/user.update.dto'
 import { UserService } from './user.service'
 import { UserLibraryType } from './user.types'

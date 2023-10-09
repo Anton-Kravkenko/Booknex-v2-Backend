@@ -106,14 +106,15 @@ model User {
 }
 
 model Shelf {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  image     String   @default("")
-  icon      String   @default("")
-  watched   User[]   @relation("WatchedShelves")
-  unwatched User[]   @relation("UnwatchedShelves")
-  color     String   @default("#fff")
-  books     Book[]
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String   @unique
+  description String?  @default("")
+  image       String   @default("")
+  icon        String   @default("")
+  watched     User[]   @relation("WatchedShelves")
+  unwatched   User[]   @relation("UnwatchedShelves")
+  color       String   @default("#fff")
+  books       Book[]
 }

@@ -36,6 +36,7 @@ export class CatalogService {
 			}
 		})
 		const otherShelves = await this.prisma.shelf.findMany({
+			take: 10,
 			select: {
 				...returnShelfObject,
 				icon: true

@@ -20,6 +20,7 @@ export class BookController {
 	}
 
 	@Get('/emotions')
+	@Auth()
 	async getEmotions() {
 		return this.bookService.getEmotions()
 	}

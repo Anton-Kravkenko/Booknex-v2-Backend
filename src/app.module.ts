@@ -11,7 +11,7 @@ import { CatalogModule } from './catalog/catalog.module'
 import { GenreModule } from './genre/genre.module'
 import { HistoryModule } from './history/history.module'
 import { ShelfModule } from './shelf/shelf.module'
-import { UploadModule } from './upload/upload.module'
+import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
 
 @Module({
@@ -22,7 +22,7 @@ import { UserModule } from './user/user.module'
 		HistoryModule,
 		GenreModule,
 		BookModule,
-		UploadModule,
+		StorageModule,
 		ThrottlerModule.forRoot([
 			{
 				ttl: 60,

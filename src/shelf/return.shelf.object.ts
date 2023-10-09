@@ -1,8 +1,9 @@
+import { Prisma } from '@prisma/client'
 import { defaultReturnObject } from '../utils/return.default.object'
 
-export const returnShelfObject = {
+export const returnShelfObject: Prisma.ShelfSelect = {
 	...defaultReturnObject,
-	name: true,
+	title: true,
 	image: true,
 	color: true
 }

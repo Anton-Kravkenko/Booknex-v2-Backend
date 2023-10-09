@@ -3,6 +3,7 @@ import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { CatalogService } from './catalog.service'
 
+@Auth()
 @Controller('catalog')
 export class CatalogController {
 	constructor(private readonly catalogService: CatalogService) {}
@@ -18,7 +19,6 @@ export class CatalogController {
 	}
 
 	@Get('/')
-	@Auth()
 	async getCatalog(@CurrentUser('id') userId: number) {
 		return this.catalogService.getCatalog(+userId)
 	}
