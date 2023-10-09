@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
+import { abbrNumber } from '../utils/abbr-number'
 import { randomColor, shadeRGBColor } from '../utils/color.functions'
 import { CreateShelfDto } from './dto/create.shelf.dto'
 import { UpdateShelfDto } from './dto/update.shelf.dto'
@@ -28,7 +29,8 @@ export class ShelfService {
 				books: {
 					select: {
 						...returnBookObject,
-						description: true
+						pages: true,
+						likedPercentage: true
 					}
 				}
 			}
@@ -38,10 +40,16 @@ export class ShelfService {
 		return {
 			...shelf,
 			_count: undefined,
-			statistics: {
-				books: shelf._count.books,
-				watched: shelf._count.watched
-			}
+			statistics: [
+				{
+					title: 'Books',
+					count: shelf._count.books
+				},
+				{
+					title: 'Watched',
+					count: `${abbrNumber(shelf._count.watched, 1)}+`
+				}
+			]
 		}
 	}
 
