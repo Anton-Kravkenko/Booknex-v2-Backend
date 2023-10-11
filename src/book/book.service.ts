@@ -43,10 +43,18 @@ export class BookService {
 				popularity: dto.popularity,
 				pages: dto.pages,
 				description: dto.description,
-				image: dto.image,
+				picture: dto.picture,
 				epub: dto.epub,
 				isbn: dto.isbn,
-				author: dto.author,
+				author: {
+					connectOrCreate: {
+						where: { name: dto.author.name },
+						create: {
+							name: dto.author.name,
+							picture: dto.author.picture
+						}
+					}
+				},
 				majorGenre: {
 					connectOrCreate: {
 						where: { name: dto.majorGenre },
@@ -57,7 +65,7 @@ export class BookService {
 					}
 				},
 				color: shadeRGBColor(
-					await getAverageColor(dto.image).then(color => color.hex),
+					await getAverageColor(dto.picture).then(color => color.hex),
 					-25
 				),
 				genres: {

@@ -63,7 +63,7 @@ export class ShelfService {
 				title: dto.title,
 				icon: dto.icon,
 				color: shadeRGBColor(randomColor(), -20),
-				image: dto.image,
+				picture: dto.picture,
 				books: {
 					connect: dto.books.map(bookId => ({ id: bookId }))
 				}
@@ -98,7 +98,7 @@ export class ShelfService {
 			},
 			data: {
 				title: dto.title,
-				image: dto.image,
+				picture: dto.picture,
 				icon: dto.icon,
 				books: {
 					set: dto.books.map(bookId => ({ id: bookId }))

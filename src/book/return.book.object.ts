@@ -5,6 +5,6 @@ export const returnBookObject: Prisma.BookSelect = {
 	...defaultReturnObject,
 	title: true,
 	author: true,
-	image: true,
+	picture: true,
 	likedPercentage: true
 }

@@ -5,10 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -66,43 +62,52 @@ model Book {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   title           String
-  author          String
+  author          Author    @relation(fields: [authorId], references: [id])
   description     String
   isbn            String
-  image           String
+  picture         String
   epub            String
   color           String    @default("#fff")
   pages           Int
   likedPercentage Int
   popularity      Int       @default(0)
-  mainGenreId     Int
   majorGenre      Genre     @relation("BookMajorGenre", fields: [mainGenreId], references: [id])
   histories       History[]
   genres          Genre[]   @relation("BookGenre")
   reviews         Review[]
   shelves         Shelf[]
-  likedBy         User[]    @relation("LikedBooks")
   finishedBy      User[]    @relation("FinishedBooks")
   readingBy       User[]    @relation("ReadingBooks")
+
+  mainGenreId Int
+  authorId    Int
+}
+
+model Author {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  picture   String
+  books     Book[]
 }
 
 model User {
-  id               Int       @id @default(autoincrement())
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  email            String    @unique
-  name             String?
-  picture          String?
-  password         String
-  isAdmin          Boolean   @default(false)
-  history          History[]
-  review           Review[]
-  initialGenre     Genre[]
-  likedBooks       Book[]    @relation("LikedBooks")
-  finishedBooks    Book[]    @relation("FinishedBooks")
-  readingBooks     Book[]    @relation("ReadingBooks")
-  watchedShelves   Shelf[]   @relation("WatchedShelves")
-  unwatchedShelves Shelf[]   @relation("UnwatchedShelves")
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  email          String    @unique
+  name           String?
+  picture        String?
+  password       String
+  isAdmin        Boolean   @default(false)
+  history        History[]
+  review         Review[]
+  initialGenre   Genre[]
+  finishedBooks  Book[]    @relation("FinishedBooks")
+  readingBooks   Book[]    @relation("ReadingBooks")
+  watchedShelves Shelf[]   @relation("WatchedShelves")
+  hiddenShelves  Shelf[]   @relation("HhiddenShelves")
 }
 
 model Shelf {
@@ -111,10 +116,10 @@ model Shelf {
   updatedAt   DateTime @updatedAt
   title       String   @unique
   description String?  @default("")
-  image       String   @default("")
+  picture     String   @default("")
   icon        String   @default("")
   watched     User[]   @relation("WatchedShelves")
-  unwatched   User[]   @relation("UnwatchedShelves")
+  hidden      User[]   @relation("HhiddenShelves")
   color       String   @default("#fff")
   books       Book[]
 }

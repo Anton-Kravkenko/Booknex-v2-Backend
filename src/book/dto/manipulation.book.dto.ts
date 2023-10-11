@@ -1,11 +1,16 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsNumber, IsObject, IsOptional, IsString } from 'class-validator'
 
 export class CreateBookDto {
 	@IsString() title: string
-	@IsString() author: string
+	@IsObject()
+	author: {
+		name: string
+		picture: string
+	}
+
 	@IsString() description: string
 	@IsString() isbn: string
-	@IsString() image: string
+	@IsString() picture: string
 	@IsString() epub: string
 	@IsNumber() pages: number
 	@IsNumber() likedPercentage: number

@@ -45,10 +45,9 @@ export class UserService {
 			_count: {
 				select: {
 					finishedBooks: true,
-					likedBooks: true,
 					readingBooks: true,
 					watchedShelves: true,
-					unwatchedShelves: true
+					hiddenShelves: true
 				}
 			}
 		})
@@ -59,12 +58,6 @@ export class UserService {
 					type: UserLibraryFieldsEnum.readingBooks,
 					icon: 'book',
 					count: library._count.readingBooks
-				},
-				{
-					name: CatalogTitleType.likedBooks,
-					type: UserLibraryFieldsEnum.likedBooks,
-					icon: 'heart',
-					count: library._count.likedBooks
 				},
 				{
 					name: CatalogTitleType.finishedBooks,
@@ -81,10 +74,10 @@ export class UserService {
 					count: library._count.watchedShelves
 				},
 				{
-					name: CatalogTitleType.unwatchedShelves,
-					type: UserLibraryFieldsEnum.unwatchedShelves,
+					name: CatalogTitleType.hiddenShelves,
+					type: UserLibraryFieldsEnum.hiddenShelves,
 					icon: 'eye-closed',
-					count: library._count.unwatchedShelves
+					count: library._count.hiddenShelves
 				}
 			]
 		}
@@ -227,10 +220,9 @@ export class UserService {
 				_count: {
 					select: {
 						finishedBooks: true,
-						likedBooks: true,
 						readingBooks: true,
 						watchedShelves: true,
-						unwatchedShelves: true
+						hiddenShelves: true
 					}
 				}
 			}
@@ -258,11 +250,10 @@ export class UserService {
 			throw new NotFoundException(`${DesignationType[type]} not found`)
 
 		const user = await this.getUserById(+userId, {
-			likedBooks: true,
 			readingBooks: true,
 			finishedBooks: true,
 			watchedShelves: true,
-			unwatchedShelves: true
+			hiddenShelves: true
 		})
 
 		const isExist = user[type].some(book => book.id === id)

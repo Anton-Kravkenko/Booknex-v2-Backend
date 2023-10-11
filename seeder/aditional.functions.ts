@@ -46,9 +46,9 @@ export const getBookFromList = async (
 			waitUntil: 'domcontentloaded'
 		}
 	)
-	await page.waitForSelector(
-		'div.book-links.row.justify-content-center a.col-lg-4.col-sm-4.download-link'
-	)
+	// await page.waitForSelector(
+	// 	'div.book-links.row.justify-content-center a.col-lg-4.col-sm-4.download-link'
+	// )
 	const isEnglishBook = await page.evaluate(() => {
 		const lang = document.querySelector(
 			'.table > tbody:nth-child(1) > tr:nth-child(8) > td:nth-child(2)'

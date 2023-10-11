@@ -4,6 +4,6 @@ import { defaultReturnObject } from '../utils/return.default.object'
 export const returnShelfObject: Prisma.ShelfSelect = {
 	...defaultReturnObject,
 	title: true,
-	image: true,
+	picture: true,
 	color: true
 }

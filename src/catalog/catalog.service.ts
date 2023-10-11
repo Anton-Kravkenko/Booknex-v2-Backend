@@ -52,7 +52,7 @@ export class CatalogService {
 						id: userId
 					}
 				},
-				unwatched: {
+				hidden: {
 					none: {
 						id: userId
 					}
@@ -112,8 +112,10 @@ export class CatalogService {
 					},
 					{
 						author: {
-							mode: 'insensitive',
-							contains: query
+							name: {
+								contains: query,
+								mode: 'insensitive'
+							}
 						}
 					},
 					{
@@ -138,7 +140,7 @@ export class CatalogService {
 					{
 						books: {
 							some: {
-								likedBy: {
+								readingBy: {
 									some: {
 										id: userId
 									}
@@ -273,7 +275,7 @@ export class CatalogService {
 			where: {
 				books: {
 					some: {
-						likedBy: {
+						readingBy: {
 							some: {
 								id: userId
 							}
@@ -324,7 +326,7 @@ export class CatalogService {
 				},
 				AND: {
 					NOT: {
-						likedBy: {
+						readingBy: {
 							some: {
 								id: userId
 							}

@@ -4,7 +4,7 @@ import { gray, green, magenta, rainbow, yellow } from 'colors'
 import { getAverageColor } from 'fast-average-color-node'
 import * as process from 'node:process'
 import prompts from 'prompts'
-import puppeteer from 'puppeteer-extra'
+import puppeteer from 'puppeteer'
 import { randomColor, shadeRGBColor } from '../src/utils/color.functions'
 import { simplifyString } from '../src/utils/string.functions'
 import { customLinkSelect } from './aditional.functions'
@@ -45,11 +45,12 @@ export const seeder = async () => {
 		'Fiction',
 		'Adventure',
 		'Classics',
+		'Post Apocalyptic',
 		'School',
 		'Historical',
 		'Romance',
+		'Science Fiction',
 		'Adult',
-		'War',
 		'Philosophy',
 		'Thriller'
 	])
@@ -263,7 +264,7 @@ export const seeder = async () => {
 
 			const randomMajorGenre = BookGenres.sort(
 				(a, b) => a.majorBooks.length - b.majorBooks.length
-			)[0].name
+			)[0].name as string
 
 			if (BookGenres.length === 0) {
 				console.log(`❌ No book genres for ${BookName}`)
@@ -293,17 +294,19 @@ export const seeder = async () => {
 						}
 					},
 					genres: {
-						connectOrCreate: BookGenres.map(genre => genre.name).map(genre => ({
-							where: {
-								name: genre
-							},
-							create: {
-								name: genre,
-								color: shadeRGBColor(randomColor(), -50)
-							}
-						}))
+						connectOrCreate: BookGenres.map(genre => genre.name).map(
+							(genre: string) => ({
+								where: {
+									name: genre
+								},
+								create: {
+									name: genre,
+									color: shadeRGBColor(randomColor(), -50)
+								}
+							})
+						)
 					},
-					image: `books-covers/${simplifyString(BookName)}.jpg`,
+					picture: `books-covers/${simplifyString(BookName)}.jpg`,
 					pages:
 						typeof epub === 'string' || !epub.pages
 							? Number(book.pages)

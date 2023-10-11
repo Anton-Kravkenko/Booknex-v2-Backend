@@ -3,41 +3,33 @@ import { IconTypes } from '../utils/icon-types'
 
 export type UserLibraryType = keyof Pick<
 	Prisma.UserSelect,
-	| 'finishedBooks'
-	| 'likedBooks'
-	| 'readingBooks'
-	| 'watchedShelves'
-	| 'unwatchedShelves'
+	'finishedBooks' | 'readingBooks' | 'watchedShelves' | 'hiddenShelves'
 >
 export const DesignationType = {
 	finishedBooks: 'Book',
-	likedBooks: 'Book',
 	readingBooks: 'Book',
 	watchedShelves: 'Shelf',
-	unwatchedShelves: 'Shelf'
+	hiddenShelves: 'Shelf'
 }
 export enum UserLibraryFieldsEnum {
 	finishedBooks = 'finishedBooks',
-	likedBooks = 'likedBooks',
 	readingBooks = 'readingBooks',
 	watchedShelves = 'watchedShelves',
-	unwatchedShelves = 'unwatchedShelves'
+	hiddenShelves = 'hiddenShelves'
 }
 
 export const CatalogTitleType = {
 	finishedBooks: 'Finished',
-	likedBooks: 'Liked',
 	readingBooks: 'Reading',
 	watchedShelves: 'Watched',
-	unwatchedShelves: 'UnWatched'
+	hiddenShelves: 'Hidden'
 }
 
 export const userLibraryFields: UserLibraryType[] = [
 	'finishedBooks',
-	'likedBooks',
 	'readingBooks',
 	'watchedShelves',
-	'unwatchedShelves'
+	'hiddenShelves'
 ]
 
 export interface UserStatisticsType {
