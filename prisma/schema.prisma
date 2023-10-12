@@ -84,12 +84,13 @@ model Book {
 }
 
 model Author {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String   @unique
-  picture   String
-  books     Book[]
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String   @unique
+  picture     String
+  description String
+  books       Book[]
 }
 
 model User {
