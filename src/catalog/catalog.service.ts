@@ -117,12 +117,6 @@ export class CatalogService {
 								mode: 'insensitive'
 							}
 						}
-					},
-					{
-						isbn: {
-							mode: 'insensitive',
-							contains: query
-						}
 					}
 				]
 			}

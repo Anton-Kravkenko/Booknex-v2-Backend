@@ -5,11 +5,9 @@ export class CreateBookDto {
 	@IsObject()
 	author: {
 		name: string
-		picture: string
 	}
 
 	@IsString() description: string
-	@IsString() isbn: string
 	@IsString() picture: string
 	@IsString() epub: string
 	@IsNumber() pages: number
@@ -22,7 +20,6 @@ export class EditBookDto {
 	@IsString() @IsOptional() title: string
 	@IsString() @IsOptional() author: string
 	@IsString() @IsOptional() description: string
-	@IsString() @IsOptional() isbn: string
 	@IsString() @IsOptional() image: string
 	@IsString() @IsOptional() epub: string
 	@IsNumber() @IsOptional() pages: number

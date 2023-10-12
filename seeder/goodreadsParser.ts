@@ -1,94 +1,49 @@
+import { S3Client } from '@aws-sdk/client-s3'
+import process from 'node:process'
 import puppeteer from 'puppeteer'
+import { uploadBook } from './upload-book'
 
 export const GoodreadsParser = async () => {
 	const browser = await puppeteer.launch({
-		headless: true,
-		args: [
-			'--autoplay-policy=user-gesture-required',
-			'--disable-background-networking',
-			'--disable-background-timer-throttling',
-			'--disable-backgrounding-occluded-windows',
-			'--disable-breakpad',
-			'--disable-client-side-phishing-detection',
-			'--disable-component-update',
-			'--disable-default-apps',
-			'--disable-dev-shm-usage',
-			'--disable-domain-reliability',
-			'--disable-extensions',
-			'--disable-features=AudioServiceOutOfProcess',
-			'--disable-hang-monitor',
-			'--disable-ipc-flooding-protection',
-			'--disable-notifications',
-			'--disable-offer-store-unmasked-wallet-cards',
-			'--disable-popup-blocking',
-			'--disable-print-preview',
-			'--disable-prompt-on-repost',
-			'--disable-renderer-backgrounding',
-			'--disable-setuid-sandbox',
-			'--disable-speech-api',
-			'--disable-sync',
-			'--hide-scrollbars',
-			'--ignore-gpu-blacklist',
-			'--metrics-recording-only',
-			'--mute-audio',
-			'--no-default-browser-check',
-			'--no-first-run',
-			'--no-pings',
-			'--no-sandbox',
-			'--no-zygote',
-			'--password-store=basic',
-			'--use-gl=swiftshader',
-			'--use-mock-keychain',
-			'--headless',
-			'--hide-scrollbars',
-			'--mute-audio',
-			'--no-sandbox',
-			'--disable-canvas-aa',
-			'--disable-2d-canvas-clip-aa',
-			'--disable-dev-shm-usage',
-			'--no-zygote',
-			'--use-gl=swiftshader',
-			'--enable-webgl',
-			'--hide-scrollbars',
-			'--mute-audio',
-			'--no-first-run',
-			'--disable-infobars',
-			'--disable-breakpad',
-			'--window-size=1280,1024',
-			'--user-data-dir=./chromeData',
-			'--no-sandbox',
-			'--disable-setuid-sandbox'
-		],
+		headless: false,
+		args: ['--no-sandbox', '--disable-setuid-sandbox'],
 		ignoreHTTPSErrors: true,
 		ignoreDefaultArgs: ['--disable-extensions']
 	})
 	const page = await browser.newPage()
 	await page.setRequestInterception(true)
-	const blockedDomains = [
-		'https://pagead2.googlesyndication.com',
-		'https://creativecdn.com',
-		'https://www.googletagmanager.com',
-		'https://cdn.krxd.net',
-		'https://adservice.google.com',
-		'https://cdn.concert.io',
-		'https://z.moatads.com',
-		'https://cdn.permutive.com'
-	]
-
+	const s3 = new S3Client({
+		endpoint: process.env.AWS_ENDPOINT,
+		region: process.env.AWS_REGION,
+		credentials: {
+			accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+		}
+	})
 	page.on('request', request => {
 		if (
-			request.resourceType() === 'image' ||
-			blockedDomains.some(d => request.url().startsWith(d))
+			request.resourceType() === 'media' ||
+			request.resourceType() === 'font' ||
+			request.resourceType() === 'manifest' ||
+			[
+				'https://pagead2.googlesyndication.com',
+				'https://creativecdn.com',
+				'https://www.googletagmanager.com',
+				'https://cdn.krxd.net',
+				'https://adservice.google.com',
+				'https://cdn.concert.io',
+				'https://z.moatads.com',
+				'https://cdn.permutive.com'
+			].some(d => request.url().startsWith(d))
 		) {
 			request.abort()
 		} else {
 			request.continue()
 		}
 	})
-	const FinalBooks = []
 	const totalPage = 40
-	for (let index = 1; index < totalPage; index++) {
-		page.goto(
+	for (let index = 2; index < totalPage; index++) {
+		await page.goto(
 			'https://www.goodreads.com/list/show/1.Best_Books_Ever?page=' + index
 		)
 		await page.waitForSelector('.tableList')
@@ -96,16 +51,22 @@ export const GoodreadsParser = async () => {
 			const books = document.querySelectorAll('.tableList tr')
 			return [...books].map((book, index) => {
 				const link = book.querySelector('.bookTitle').getAttribute('href')
+				const ratingAvg = book.querySelector('.minirating')
 				return {
 					id: index++,
-					link: `https://www.goodreads.com${link}`
+					link: `https://www.goodreads.com${link}`,
+					ratingAvg: ratingAvg.textContent
+						? parseFloat(
+								ratingAvg.textContent.split('—')[0].replaceAll('avg rating', '')
+						  )
+						: 2.5
 				}
 			})
 		})
 		for (let BooksIndex = 0; BooksIndex < books.length; BooksIndex++) {
 			try {
 				const book = books[BooksIndex]
-				page.goto(book.link)
+				await page.goto(book.link)
 				await page.waitForSelector('div.BookPageTitleSection > div > h1')
 				await page.waitForSelector(
 					'div.FeaturedPerson__infoPrimary > h4 > a > span'
@@ -121,6 +82,7 @@ export const GoodreadsParser = async () => {
 				)
 
 				await page.waitForSelector('[data-testid="ratingsCount"]')
+				await page.waitForSelector('[data-testid="pagesFormat"]')
 
 				await page.waitForSelector(
 					'div.BookPage__bookCover > div > div > div > div > div > div > img'
@@ -152,7 +114,7 @@ export const GoodreadsParser = async () => {
 						picture: authorPicture.getAttribute('src') ?? 'No author picture',
 						description: authorDescription.textContent
 							? authorDescription.textContent.replaceAll(
-									/(Librarian Note|Contributor Note).*?\./g,
+									/(Librarian's note|Contributor note|See also).*?\./g,
 									''
 							  )
 							: 'No author description'
@@ -165,7 +127,7 @@ export const GoodreadsParser = async () => {
 					)
 					return description.textContent
 						? description.textContent.replaceAll(
-								/(Librarian Note|Contributor Note).*?\./g,
+								/(Librarian's note|Contributor note|See also).*?\./g,
 								''
 						  )
 						: 'No description'
@@ -174,11 +136,20 @@ export const GoodreadsParser = async () => {
 					const selector = '[data-testid="ratingsCount"]'
 					const ratingCount = document.querySelector(selector)
 					return ratingCount.textContent
-						? ratingCount.textContent
-								.replaceAll('ratings', '')
-								.replaceAll(',', '')
-								.trim()
-						: 'No rating'
+						? parseInt(
+								ratingCount.textContent
+									.replaceAll('ratings', '')
+									.replaceAll(',', '')
+									.trim()
+						  )
+						: 0
+				})
+				const pages = await page.evaluate(() => {
+					const selector = '[data-testid="pagesFormat"]'
+					const pages = document.querySelector(selector)
+					return pages.textContent
+						? parseInt(pages.textContent.replace(/[^0-9,\s]/g, '').trim())
+						: 0
 				})
 				const picture = await page.evaluate(() => {
 					const picture = document.querySelector(
@@ -195,26 +166,37 @@ export const GoodreadsParser = async () => {
 					)
 					return [...genres].map(genre => genre.textContent)
 						? [...genres].map(genre => genre.textContent)
-						: 'No genres'
+						: ['No genres']
 				})
-				if (Number(rating) < 40_000) continue
-				FinalBooks.push({
+
+				if (rating < 40_000) {
+					console.log(`❌ No result for ${title} by ${author.name}`)
+					return
+				}
+				await uploadBook({
+					s3,
 					title,
-					author,
+					author: {
+						name: author.name.replaceAll(/,.*|\(.*?\)/g, '').trim(),
+						picture: author.picture,
+						description: author.description
+					},
 					description,
-					rating: Number(rating),
-					picture,
-					genres
+					pages: pages,
+					genres: genres,
+					numRatings: rating,
+					coverImg: picture,
+					likedPercent: parseFloat((book.ratingAvg * 20).toFixed(1)),
+					page
 				})
-			} catch {}
+			} catch {
+				console.log(`❌ Error for ${BooksIndex + 1}/${books.length}`)
+			}
 		}
 	}
-	console.log(FinalBooks)
 	await browser.close()
-	return FinalBooks
 }
 
 GoodreadsParser().then(value => {
-	console.log(value)
 	process.exit(0)
 })

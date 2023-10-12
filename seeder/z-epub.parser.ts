@@ -21,24 +21,24 @@ export const ZEpubParser = async (
 	await page.click('.search-open')
 	await page.type('.search-input', betterName)
 	await page.click('#header-search')
-	// await page.waitForSelector('.row .book-grid')
+	await page.waitForSelector('.row .book-grid')
 	const isError = await page.evaluate(() => {
 		const error = document.querySelector('.books-list .top-filter > div > span')
 		return error.innerHTML.includes('0 books')
 	})
 	if (isError) {
-		if (numberRating < 300_000) {
+		if (numberRating < 100_000) {
 			console.log(yellow(`❌ No result for ${betterName} by ${author}`))
 			return
 		}
 		return customLinkSelect({
 			title: betterName,
-			author: author.replaceAll(/,.*|\(.*?\)/g, '').trim()
+			author: author
 		})
 	}
-	// await page.waitForSelector(
-	// 	'div.row div.col-md-12.col-sm-12.col-xs-12.books-listing div.books-list div.row.book-grid div.col-sm-12.col-md-6.col-lg-4.book-3-row'
-	// )
+	await page.waitForSelector(
+		'div.row div.col-md-12.col-sm-12.col-xs-12.books-listing div.books-list div.row.book-grid div.col-sm-12.col-md-6.col-lg-4.book-3-row'
+	)
 	const bookArray = await page.evaluate(() => {
 		const quotes = document.querySelectorAll(
 			'div.books-list div.row.book-grid div.col-sm-12.col-md-6.col-lg-4.book-3-row'

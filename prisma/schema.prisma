@@ -64,7 +64,6 @@ model Book {
   title           String
   author          Author    @relation(fields: [authorId], references: [id])
   description     String
-  isbn            String
   picture         String
   epub            String
   color           String    @default("#fff")

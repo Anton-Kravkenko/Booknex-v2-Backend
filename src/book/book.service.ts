@@ -38,23 +38,6 @@ export class BookService {
 	async createBook(dto: CreateBookDto) {
 		await this.prisma.book.create({
 			data: {
-				title: dto.title,
-				likedPercentage: dto.likedPercentage,
-				popularity: dto.popularity,
-				pages: dto.pages,
-				description: dto.description,
-				picture: dto.picture,
-				epub: dto.epub,
-				isbn: dto.isbn,
-				author: {
-					connectOrCreate: {
-						where: { name: dto.author.name },
-						create: {
-							name: dto.author.name,
-							picture: dto.author.picture
-						}
-					}
-				},
 				majorGenre: {
 					connectOrCreate: {
 						where: { name: dto.majorGenre },
@@ -62,6 +45,18 @@ export class BookService {
 							name: dto.majorGenre,
 							color: shadeRGBColor(randomColor(), -50)
 						}
+					}
+				},
+				title: dto.title,
+				likedPercentage: dto.likedPercentage,
+				popularity: dto.popularity,
+				pages: dto.pages,
+				description: dto.description,
+				picture: dto.picture,
+				epub: dto.epub,
+				author: {
+					connect: {
+						name: dto.author.name
 					}
 				},
 				color: shadeRGBColor(

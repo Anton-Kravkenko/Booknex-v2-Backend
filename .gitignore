@@ -1,7 +1,6 @@
 # compiled output
 /dist
 /node_modules
-/seeder/books_1.Best_Books_Ever.json
 # Logs
 logs
 *.log

@@ -15,13 +15,13 @@ export const uploadBook = async ({
 	title,
 	author,
 	description,
-	isbn,
 	coverImg,
 	pages,
 	likedPercent,
 	numRatings,
 	genres,
-	page
+	page,
+	s3
 }: {
 	title: string
 	author: {
@@ -30,13 +30,13 @@ export const uploadBook = async ({
 		description: string
 	}
 	description: string
-	isbn: string
 	coverImg: string
-	pages: string
+	pages: number
 	likedPercent: number
 	numRatings: number
-	genres: string
+	genres: string[]
 	page: Page
+	s3: S3Client
 }) => {
 	const selectGenres = new Set([
 		'Fantasy',
@@ -60,7 +60,7 @@ export const uploadBook = async ({
 			}
 		})
 		if (oldBook) {
-			console.log(gray(`⚠️ ${title} by ${author.name} already exists`))
+			return console.log(gray(`⚠️ ${title} by ${author.name} already exists`))
 		}
 		const epub:
 			| string
@@ -68,44 +68,37 @@ export const uploadBook = async ({
 					title: string
 					author: string
 					link: string
-					isbn: string | null
 					picture: string
 					pages: number | null
 			  } = await ZEpubParser(
 			title,
-			author.name.replaceAll(/,.*|\(.*?\)/g, '').trim(),
-			Number(pages),
+			author.name,
+			pages,
 			numRatings,
 			page
 		).catch(async () => {
-			if (numRatings < 200_000) {
+			if (numRatings < 100_000) {
 				console.log(yellow(`❌ No result for ${title}`))
 				return
 			}
 			const customLink = await customLinkSelect({
 				title: title,
-				author: author.name.replaceAll(/,.*|\(.*?\)/g, '').trim()
+				author: author.name
 			})
 			if (!customLink) return
 		})
 		if ((typeof epub === 'string' && !epub) || !epub.link) return
-
 		const epubFile = await fetch(typeof epub === 'string' ? epub : epub.link)
 		const imageFile = await fetch(
 			typeof epub === 'string' ? coverImg : epub.picture
 		)
-		const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
-		const epubBuffer = Buffer.from(await epubFile.arrayBuffer())
+		const authorFile = await fetch(author.picture)
 
-		const s3 = new S3Client({
-			endpoint: process.env.AWS_ENDPOINT,
-			region: process.env.AWS_REGION,
-			credentials: {
-				accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-				secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-			}
-		})
+		const imageBuffer = Buffer.from(await imageFile.arrayBuffer())
+		const authorBuffer = Buffer.from(await authorFile.arrayBuffer())
+		const epubBuffer = Buffer.from(await epubFile.arrayBuffer())
 		let BookName: string = typeof epub === 'string' ? title : epub.title
+
 		if (BookName.includes('by ')) {
 			const response = await prompts({
 				type: 'select',
@@ -140,6 +133,16 @@ export const uploadBook = async ({
 		await s3.send(
 			new PutObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
+				Key: `author-picture/${simplifyString(author.name)}.jpg`,
+				Body: authorBuffer,
+				ACL: 'public-read',
+				ContentDisposition: 'inline'
+			})
+		)
+
+		await s3.send(
+			new PutObjectCommand({
+				Bucket: process.env.AWS_BUCKET,
 				Key: `epubs/${simplifyString(BookName)}.epub`,
 				Body: epubBuffer,
 				ACL: 'public-read',
@@ -156,9 +159,7 @@ export const uploadBook = async ({
 				ContentDisposition: 'inline'
 			})
 		)
-
 		const filteredGenres = genres
-			.split(',')
 			.map(genre => genre.replaceAll(/['[\]]/g, '').trim())
 			.filter(genre => selectGenres.has(genre))
 		const BookGenres = await prisma.genre.findMany({
@@ -167,13 +168,11 @@ export const uploadBook = async ({
 				OR: filteredGenres.map(genre => ({ name: { contains: genre } }))
 			}
 		})
-
 		const randomMajorGenre = BookGenres.sort(
 			(a, b) => a.majorBooks.length - b.majorBooks.length
 		)[0].name
-
 		if (BookGenres.length === 0) {
-			console.log(`❌ No book genres for ${BookName}`)
+			return console.log(`❌ No book genres for ${BookName}`)
 		}
 		await prisma.book.create({
 			data: {
@@ -181,20 +180,19 @@ export const uploadBook = async ({
 				author: {
 					connectOrCreate: {
 						where: {
-							name: author.name.replaceAll(/,.*|\(.*?\)/g, '').trim()
+							name: author.name
 						},
 						create: {
-							name: author.name.replaceAll(/,.*|\(.*?\)/g, '').trim(),
-							picture: author.picture,
+							name: author.name,
+							picture: `author-picture/${simplifyString(author.name)}.jpg`,
 							description: author.description
 						}
 					}
 				},
 				description: description,
 				popularity: numRatings,
-				isbn: typeof epub === 'string' || !epub.isbn ? isbn : epub.isbn,
 				color: shadeRGBColor(
-					await getAverageColor(coverImg).then(color => color.hex),
+					await getAverageColor(imageBuffer).then(color => color.hex),
 					-25
 				),
 				majorGenre: {
@@ -222,19 +220,13 @@ export const uploadBook = async ({
 				},
 				picture: `books-covers/${simplifyString(BookName)}.jpg`,
 				pages:
-					typeof epub === 'string' || !epub.pages
-						? Number(pages)
-						: Number(epub.pages),
+					typeof epub === 'string' || !epub.pages ? pages : Number(epub.pages),
 				likedPercentage: likedPercent,
 				epub: `epubs/${simplifyString(BookName)}.epub`
 			}
 		})
-		console.log(
-			green(
-				`✅ ${BookName} by ${author.name.replaceAll(/,.*|\(.*?\)/g, '').trim()}`
-			)
-		)
-	} catch {
-		/* empty */
+		console.log(green(`✅ ${BookName} by ${author.name}`))
+	} catch (e) {
+		console.log(yellow(`❌ Error for ${title}` + e))
 	}
 }
