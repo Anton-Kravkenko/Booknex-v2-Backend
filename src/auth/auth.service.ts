@@ -9,7 +9,6 @@ import { hash, verify } from 'argon2'
 import { PrismaService } from '../prisma.service'
 import { UserService } from '../user/user.service'
 import { AuthDto, RegisterDto } from './dto/auth.dto'
-import { randomPicture } from './random-picture'
 
 @Injectable()
 export class AuthService {
@@ -48,13 +47,12 @@ export class AuthService {
 		})
 		if (oldUser)
 			throw new BadRequestException('User already exists').getResponse()
-		const fainBackPicture = randomPicture()
 		const user = await this.prisma.user.create({
 			data: {
 				email: dto.email,
 				password: await hash(dto.password),
 				name: dto.name ?? dto.email.split('@')[0],
-				picture: fainBackPicture,
+				picture: '/failback/empty-user-logo.png',
 				initialGenre: {
 					connectOrCreate: dto.genres.map(genre => ({
 						where: {

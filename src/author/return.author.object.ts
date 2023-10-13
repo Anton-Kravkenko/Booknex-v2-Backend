@@ -1,14 +1,9 @@
 import { Prisma } from '@prisma/client'
 import { defaultReturnObject } from '../utils/return.default.object'
 
-export const returnBookObject: Prisma.BookSelect = {
+export const returnAuthorObject: Prisma.AuthorSelect = {
 	...defaultReturnObject,
-	title: true,
-	author: {
-		select: {
-			name: true
-		}
-	},
+	name: true,
 	picture: true,
-	likedPercentage: true
+	description: true
 }

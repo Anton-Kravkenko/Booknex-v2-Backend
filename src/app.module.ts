@@ -13,6 +13,7 @@ import { HistoryModule } from './history/history.module'
 import { ShelfModule } from './shelf/shelf.module'
 import { StorageModule } from './storage/storage.module'
 import { UserModule } from './user/user.module'
+import { AuthorModule } from './author/author.module';
 
 @Module({
 	imports: [
@@ -35,7 +36,8 @@ import { UserModule } from './user/user.module'
 			max: 1000
 		}),
 		AdminModule,
-		ShelfModule
+		ShelfModule,
+		AuthorModule
 	],
 	controllers: [AppController],
 	providers: [AppService, ConfigService]

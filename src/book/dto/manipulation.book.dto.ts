@@ -20,7 +20,7 @@ export class EditBookDto {
 	@IsString() @IsOptional() title: string
 	@IsString() @IsOptional() author: string
 	@IsString() @IsOptional() description: string
-	@IsString() @IsOptional() image: string
+	@IsString() @IsOptional() picture: string
 	@IsString() @IsOptional() epub: string
 	@IsNumber() @IsOptional() pages: number
 	@IsNumber() @IsOptional() likedPercentage: number

@@ -11,49 +11,49 @@ export class BookController {
 
 	@Post('/review/:id')
 	@Auth()
-	async reviewBook(
+	async review(
 		@CurrentUser('id') userId: number,
 		@Param('id') bookId: string,
 		@Body() dto: ReviewBookDto
 	) {
-		return this.bookService.reviewBook(+userId, +bookId, dto)
+		return this.bookService.review(+userId, +bookId, dto)
 	}
 
 	@Get('/emotions')
 	@Auth()
-	async getEmotions() {
-		return this.bookService.getEmotions()
+	async emotions() {
+		return this.bookService.emotions()
 	}
 
 	@Auth()
 	@Get('by-id/:id')
-	async getBookInfoById(@Param('id') bookId: string) {
-		return this.bookService.getBookInfoById(+bookId)
+	async infoById(@Param('id') bookId: string) {
+		return this.bookService.infoById(+bookId)
 	}
 
 	//  admin
 
 	@Auth('admin')
 	@Get('/all')
-	async getAllBooks() {
-		return this.bookService.getAllBooks()
+	async all() {
+		return this.bookService.all()
 	}
 
 	@Auth('admin')
 	@Post('/create')
-	async createBook(@Body() dto: CreateBookDto) {
-		return this.bookService.createBook(dto)
+	async create(@Body() dto: CreateBookDto) {
+		return this.bookService.create(dto)
 	}
 
 	@Auth('admin')
 	@Put('/update/:id')
-	async updateBook(@Param('id') bookId: string, @Body() dto: EditBookDto) {
-		return this.bookService.updateBook(+bookId, dto)
+	async update(@Param('id') bookId: string, @Body() dto: EditBookDto) {
+		return this.bookService.update(+bookId, dto)
 	}
 
 	@Auth('admin')
 	@Delete('/delete/:id')
-	async deleteBook(@Param('id') bookId: string) {
-		return this.bookService.deleteBook(+bookId)
+	async delete(@Param('id') bookId: string) {
+		return this.bookService.delete(+bookId)
 	}
 }

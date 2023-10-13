@@ -29,13 +29,13 @@ export class BookService {
 		return book
 	}
 
-	async getAllBooks() {
+	async all() {
 		return this.prisma.book.findMany({
 			select: returnBookObject
 		})
 	}
 
-	async createBook(dto: CreateBookDto) {
+	async create(dto: CreateBookDto) {
 		await this.prisma.book.create({
 			data: {
 				majorGenre: {
@@ -73,23 +73,41 @@ export class BookService {
 		})
 	}
 
-	async deleteBook(id: number) {
+	async delete(id: number) {
 		const book = await this.getBookById(id)
 		await this.prisma.book.delete({ where: { id: book.id } })
 	}
 
-	async updateBook(id: number, dto: EditBookDto) {
+	async update(id: number, dto: EditBookDto) {
 		const book = await this.getBookById(id)
 		await this.prisma.book.update({
 			where: { id: book.id },
 			data: {
 				title: dto.title || book.title,
-				likedPercentage: dto.likedPercentage
+				likedPercentage: dto.likedPercentage || book.likedPercentage,
+				popularity: dto.popularity || book.popularity,
+				pages: dto.pages || book.pages,
+				description: dto.description || book.description,
+				picture: dto.picture || book.picture,
+				epub: dto.epub || book.epub,
+				author: {
+					connect: {
+						name: dto.author || book.author.name
+					}
+				},
+				majorGenre: {
+					connect: {
+						name: dto.majorGenre || book.majorGenre.name
+					}
+				},
+				genres: {
+					connect: dto.genres.map(g => ({ name: g }))
+				}
 			}
 		})
 	}
 
-	getEmotions() {
+	emotions() {
 		return this.prisma.emotion.findMany({
 			select: {
 				name: true,
@@ -98,7 +116,7 @@ export class BookService {
 		})
 	}
 
-	async reviewBook(userId: number, bookId: number, dto: ReviewBookDto) {
+	async review(userId: number, bookId: number, dto: ReviewBookDto) {
 		await this.usersService.getUserById(userId)
 		await this.getBookById(bookId)
 		const emoji = await this.prisma.emotion.findUnique({
@@ -128,7 +146,7 @@ export class BookService {
 		})
 	}
 
-	async getBookInfoById(id: number) {
+	async infoById(id: number) {
 		const book = await this.prisma.book.findUnique({
 			where: { id: +id },
 			include: {
