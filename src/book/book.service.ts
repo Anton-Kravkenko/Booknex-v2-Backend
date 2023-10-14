@@ -29,9 +29,11 @@ export class BookService {
 		return book
 	}
 
-	async all() {
+	async all(cursorId: number) {
 		return this.prisma.book.findMany({
-			select: returnBookObject
+			take: 20,
+			select: returnBookObject,
+			cursor: cursorId && { id: cursorId }
 		})
 	}
 
@@ -146,15 +148,21 @@ export class BookService {
 		})
 	}
 
+	async reviewsById(id: number, cursorId: number) {
+		return this.prisma.review.findMany({
+			where: { bookId: id },
+			take: 20,
+			cursor: cursorId && { id: cursorId },
+			select: returnReviewsObject
+		})
+	}
+
 	async infoById(id: number) {
 		const book = await this.prisma.book.findUnique({
 			where: { id: +id },
 			include: {
 				majorGenre: false,
-				genres: { select: GenreReturnObject },
-				reviews: {
-					select: returnReviewsObject
-				}
+				genres: { select: GenreReturnObject }
 			}
 		})
 		if (!book) return new NotFoundException('Book not found').getResponse()

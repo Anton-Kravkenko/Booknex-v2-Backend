@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	Param,
+	Post,
+	Put,
+	Query
+} from '@nestjs/common'
 import { returnBookObject } from '../book/return.book.object'
 import { Auth } from '../decorator/auth.decorator'
 import { AuthorService } from './author.service'
@@ -22,8 +31,8 @@ export class AuthorController {
 
 	@Auth('admin')
 	@Get('/all')
-	async getAll() {
-		return this.authorService.all()
+	async all(@Query('cursor') cursorId: number) {
+		return this.authorService.all(+cursorId || undefined)
 	}
 
 	@Auth('admin')

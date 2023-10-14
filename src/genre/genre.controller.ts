@@ -8,12 +8,12 @@ export class GenreController {
 	constructor(private readonly genreService: GenreService) {}
 
 	@Get()
-	async getGenres() {
-		return this.genreService.getGenres()
+	async all() {
+		return this.genreService.all()
 	}
 
 	@Get('/by-id/:id')
-	async getGenreById(@Param('id') genreId: string) {
-		return this.genreService.getGenreById(+genreId)
+	async byId(@Param('id') genreId: string) {
+		return this.genreService.byId(+genreId)
 	}
 }

@@ -10,10 +10,10 @@ export class HistoryController {
 	constructor(private readonly historyService: HistoryService) {}
 
 	@Post('/create')
-	async addHistory(
+	async create(
 		@Body() addHistoryDto: AddHistoryDto,
 		@CurrentUser('id') id: number
 	) {
-		return this.historyService.addHistory(id, addHistoryDto)
+		return this.historyService.create(id, addHistoryDto)
 	}
 }

@@ -14,12 +14,12 @@ export class CatalogController {
 	}
 
 	@Get('/search-examples')
-	async getSearchExamples() {
-		return this.catalogService.getSearchExamples()
+	async searchExamples() {
+		return this.catalogService.searchExamples()
 	}
 
 	@Get('/')
-	async getCatalog(@CurrentUser('id') userId: number) {
-		return this.catalogService.getCatalog(+userId)
+	async catalog(@CurrentUser('id') userId: number) {
+		return this.catalogService.catalog(+userId)
 	}
 }

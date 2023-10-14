@@ -6,7 +6,7 @@ import { AddHistoryDto } from './dto/add.history.dto'
 export class HistoryService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async addHistory(userId: number, dto: AddHistoryDto) {
+	async create(userId: number, dto: AddHistoryDto) {
 		const books = await this.prisma.book.findMany({
 			where: {
 				id: {

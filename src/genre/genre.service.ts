@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import { returnAuthorObject } from '../author/return.author.object'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
 import { defaultReturnObject } from '../utils/return.default.object'
@@ -7,11 +8,11 @@ import { defaultReturnObject } from '../utils/return.default.object'
 export class GenreService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	getGenres() {
+	all() {
 		return this.prisma.genre.findMany()
 	}
 
-	async getGenreById(id: number) {
+	async byId(id: number) {
 		const genre = await this.prisma.genre.findUnique({
 			where: {
 				id: +id
@@ -76,13 +77,31 @@ export class GenreService {
 				}
 			}
 		})
-
+		const bestAuthors = await this.prisma.author.findMany({
+			take: 10,
+			select: returnAuthorObject,
+			where: {
+				books: {
+					some: {
+						majorGenre: {
+							id: +id
+						}
+					}
+				}
+			},
+			orderBy: {
+				books: {
+					_count: 'desc'
+				}
+			}
+		})
 		return {
 			...genre,
 			similar: undefined,
 			newestBooks,
 			bestSellers,
-			bestSellersFromSimilar
+			bestSellersFromSimilar,
+			bestAuthors
 		}
 	}
 }

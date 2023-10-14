@@ -23,9 +23,11 @@ export class AuthorService {
 		return author
 	}
 
-	async all() {
+	async all(cursorId: number) {
 		return this.prisma.author.findMany({
-			select: returnAuthorObject
+			select: returnAuthorObject,
+			cursor: cursorId && { id: cursorId },
+			take: 20
 		})
 	}
 

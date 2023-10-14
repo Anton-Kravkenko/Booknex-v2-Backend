@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
-import { returnShelfObject } from '../shelf/return.shelf.object'
 import { defaultReturnObject } from '../utils/return.default.object'
 
 @Injectable()
 export class CatalogService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	async getCatalog(userId: number) {
+	async catalog(userId: number) {
 		return {
-			shelves: await this.getShelves(userId),
 			mostRelatedGenres: await this.getMostRelatedGenres(userId),
 			recommendations: await this.getRecommendations(userId),
 			popularNow: await this.getPopularBooks(),
@@ -21,49 +19,7 @@ export class CatalogService {
 		}
 	}
 
-	async getShelves(userId: number) {
-		const likedShelves = await this.prisma.shelf.findMany({
-			select: {
-				...returnShelfObject,
-				icon: true
-			},
-			where: {
-				watched: {
-					some: {
-						id: userId
-					}
-				}
-			}
-		})
-		const otherShelves = await this.prisma.shelf.findMany({
-			take: 10,
-			select: {
-				...returnShelfObject,
-				icon: true
-			},
-			orderBy: {
-				watched: {
-					_count: 'desc'
-				}
-			},
-			where: {
-				watched: {
-					none: {
-						id: userId
-					}
-				},
-				hidden: {
-					none: {
-						id: userId
-					}
-				}
-			}
-		})
-
-		return [...likedShelves, ...otherShelves]
-	}
-
-	async getSearchExamples() {
+	async searchExamples() {
 		const topGenres = await this.prisma.genre.findMany({
 			take: 5,
 			select: {
@@ -95,6 +51,7 @@ export class CatalogService {
 		]
 	}
 
+	// TODO: сделать тут поиск и сделать в поиске посмотреть больше
 	search(query: string) {
 		return this.prisma.book.findMany({
 			select: {

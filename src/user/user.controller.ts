@@ -5,47 +5,48 @@ import {
 	Get,
 	Param,
 	Patch,
-	Post
+	Post,
+	Query
 } from '@nestjs/common'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { FilenameDto } from '../storage/dto/upload.dto'
 import { UserUpdateBioDto, UserUpdatePasswordDto } from './dto/user.update.dto'
 import { UserService } from './user.service'
-import { UserLibraryType } from './user.types'
+import { UserLibraryCategoryType } from './user.types'
 
 @Controller('user')
 export class UserController {
 	constructor(private readonly usersService: UserService) {}
 	@Auth()
 	@Get('/profile')
-	async getProfile(@CurrentUser('id') id: number) {
-		return this.usersService.getProfile(+id)
+	async profile(@CurrentUser('id') id: number) {
+		return this.usersService.profile(+id)
 	}
 
 	@Auth()
 	@Get('/library')
-	async getLibrary(@CurrentUser('id') id: number) {
-		return this.usersService.getLibrary(+id)
+	async library(@CurrentUser('id') id: number) {
+		return this.usersService.library(+id)
 	}
 
 	@Auth()
 	@Get('/library/:type')
-	async getLibraryByType(
+	async libraryByType(
 		@CurrentUser('id') id: number,
 		@Param('type')
-		type: UserLibraryType
+		type: UserLibraryCategoryType
 	) {
-		return this.usersService.getLibraryByType(+id, type)
+		return this.usersService.libraryByType(+id, type)
 	}
 
 	@Auth()
 	@Post('/update-bio')
-	async updateUserBio(
+	async updateBio(
 		@CurrentUser('id') id: number,
 		@Body() dto: UserUpdateBioDto
 	) {
-		return this.usersService.updateUserBio(+id, dto)
+		return this.usersService.updateBio(+id, dto)
 	}
 
 	@Auth()
@@ -69,7 +70,7 @@ export class UserController {
 		@CurrentUser('id') userId: number,
 		@Param('id') id: string,
 		@Param('type')
-		type: UserLibraryType
+		type: UserLibraryCategoryType
 	) {
 		return this.usersService.toggle(userId, +id, type)
 	}
@@ -78,13 +79,13 @@ export class UserController {
 
 	@Auth('admin')
 	@Get('/all')
-	async getAllUsers() {
-		return this.usersService.getAllUsers()
+	async all(@Query('cursor') cursorId: number) {
+		return this.usersService.all(+cursorId || undefined)
 	}
 
 	@Auth('admin')
 	@Delete('/delete/:id')
-	async deleteUser(@Param('id') id: string) {
-		return this.usersService.deleteUser(+id)
+	async delete(@Param('id') id: string) {
+		return this.usersService.delete(+id)
 	}
 }

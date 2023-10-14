@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { IconTypes } from '../utils/icon-types'
 
-export type UserLibraryType = keyof Pick<
+export type UserLibraryCategoryType = keyof Pick<
 	Prisma.UserSelect,
 	'finishedBooks' | 'readingBooks' | 'watchedShelves' | 'hiddenShelves'
 >
@@ -25,7 +25,7 @@ export const CatalogTitleType = {
 	hiddenShelves: 'Hidden'
 }
 
-export const userLibraryFields: UserLibraryType[] = [
+export const userLibraryFields: UserLibraryCategoryType[] = [
 	'finishedBooks',
 	'readingBooks',
 	'watchedShelves',
@@ -36,4 +36,10 @@ export interface UserStatisticsType {
 	name: 'Books read' | 'Pages read' | 'Time in read' | 'Reading speed'
 	count: number | string
 	icon: IconTypes
+}
+
+export interface UserLibraryCatalogType
+	extends Pick<UserStatisticsType, 'count' | 'icon'> {
+	name: keyof typeof CatalogTitleType
+	type: UserLibraryFieldsEnum
 }

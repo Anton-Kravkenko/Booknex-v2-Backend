@@ -8,7 +8,7 @@ export class AdminController {
 
 	@Auth('admin')
 	@Get('/statistics')
-	async getStatistics() {
-		return this.adminService.getStatistics()
+	async statistics() {
+		return this.adminService.statistics()
 	}
 }

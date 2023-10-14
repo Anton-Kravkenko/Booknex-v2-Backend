@@ -13,9 +13,10 @@ import { returnUserObject } from './return.user.object'
 import {
 	CatalogTitleType,
 	DesignationType,
+	UserLibraryCatalogType,
+	UserLibraryCategoryType,
 	userLibraryFields,
 	UserLibraryFieldsEnum,
-	UserLibraryType,
 	UserStatisticsType
 } from './user.types'
 
@@ -35,7 +36,7 @@ export class UserService {
 		return user
 	}
 
-	async getLibrary(id: number) {
+	async library(id: number) {
 		const library = await this.getUserById(id, {
 			email: false,
 			name: false,
@@ -65,7 +66,7 @@ export class UserService {
 					icon: 'checklist',
 					count: library._count.finishedBooks
 				}
-			],
+			] as UserLibraryCatalogType[],
 			shelves: [
 				{
 					name: CatalogTitleType.watchedShelves,
@@ -79,11 +80,11 @@ export class UserService {
 					icon: 'eye-closed',
 					count: library._count.hiddenShelves
 				}
-			]
+			] as UserLibraryCatalogType[]
 		}
 	}
 
-	async getLibraryByType(id: number, type: UserLibraryType) {
+	async libraryByType(id: number, type: UserLibraryCategoryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()
 		const elements = await this.getUserById(id, {
@@ -103,7 +104,7 @@ export class UserService {
 		}
 	}
 
-	async getProfile(id: number) {
+	async profile(id: number) {
 		const user = await this.getUserById(id, {
 			...returnUserObject,
 			picture: true
@@ -188,7 +189,7 @@ export class UserService {
 		return this.getUserById(userId)
 	}
 
-	async updateUserBio(userId: number, dto: UserUpdateBioDto) {
+	async updateBio(userId: number, dto: UserUpdateBioDto) {
 		const isSameUser = await this.prisma.user.findUnique({
 			where: { email: dto.email }
 		})
@@ -213,8 +214,10 @@ export class UserService {
 		return this.getUserById(userId)
 	}
 
-	async getAllUsers() {
+	async all(cursorId: number) {
 		return this.prisma.user.findMany({
+			take: 20,
+			cursor: cursorId && { id: cursorId },
 			select: {
 				...returnUserObject,
 				_count: {
@@ -229,14 +232,14 @@ export class UserService {
 		})
 	}
 
-	async deleteUser(id: number) {
+	async delete(id: number) {
 		const user = await this.getUserById(id)
 		await this.prisma.user.delete({
 			where: { id: user.id }
 		})
 	}
 
-	async toggle(userId: number, id: number, type: UserLibraryType) {
+	async toggle(userId: number, id: number, type: UserLibraryCategoryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call

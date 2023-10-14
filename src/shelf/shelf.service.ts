@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
 import { abbrNumber } from '../utils/abbr-number'
@@ -10,9 +11,21 @@ import { returnShelfObject } from './return.shelf.object'
 @Injectable()
 export class ShelfService {
 	constructor(private readonly prisma: PrismaService) {}
+	async byId(shelfId: number, selectObject: Prisma.ShelfSelect = {}) {
+		const shelf = await this.prisma.shelf.findUnique({
+			where: {
+				id: +shelfId
+			},
+			select: {
+				...returnShelfObject,
+				...selectObject
+			}
+		})
+		if (!shelf) throw new NotFoundException('Shelf not found').getResponse()
+		return shelf
+	}
 
-	async getShelfById(shelfId: number) {
-		// TODO: добавить мини статистику
+	async infoById(shelfId: number) {
 		const shelf = await this.prisma.shelf.findUnique({
 			where: {
 				id: +shelfId
@@ -53,11 +66,64 @@ export class ShelfService {
 		}
 	}
 
-	async getAllShelves() {
-		return this.prisma.shelf.findMany({})
+	async catalog(userId: number) {
+		const likedShelves = await this.prisma.shelf.findMany({
+			select: {
+				...returnShelfObject,
+				icon: true
+			},
+			where: {
+				watched: {
+					some: {
+						id: userId
+					}
+				}
+			}
+		})
+		const otherShelves = await this.prisma.shelf.findMany({
+			take: 10,
+			select: {
+				...returnShelfObject,
+				icon: true
+			},
+			orderBy: {
+				watched: {
+					_count: 'desc'
+				}
+			},
+			where: {
+				watched: {
+					none: {
+						id: userId
+					}
+				},
+				hidden: {
+					none: {
+						id: userId
+					}
+				}
+			}
+		})
+
+		return [...likedShelves, ...otherShelves]
 	}
 
-	async createShelf(dto: CreateShelfDto) {
+	async all(cursorId: number) {
+		console.log(cursorId)
+		return this.prisma.shelf.findMany({
+			take: 20,
+			cursor: cursorId && { id: cursorId }
+		})
+	}
+
+	async create(dto: CreateShelfDto) {
+		const shelfExists = await this.prisma.shelf.findUnique({
+			where: {
+				title: dto.title
+			}
+		})
+		if (shelfExists)
+			throw new NotFoundException('Shelf already exists').getResponse()
 		return this.prisma.shelf.create({
 			data: {
 				title: dto.title,
@@ -71,8 +137,8 @@ export class ShelfService {
 		})
 	}
 
-	async deleteShelf(id: number) {
-		await this.getShelfById(+id)
+	async delete(id: number) {
+		await this.byId(+id)
 		return this.prisma.shelf.delete({
 			where: {
 				id: +id
@@ -80,8 +146,8 @@ export class ShelfService {
 		})
 	}
 
-	async updateShelf(id: number, dto: UpdateShelfDto) {
-		await this.getShelfById(+id)
+	async update(id: number, dto: UpdateShelfDto) {
+		await this.byId(+id)
 		const booksExists = await this.prisma.book.findMany({
 			where: {
 				id: {
