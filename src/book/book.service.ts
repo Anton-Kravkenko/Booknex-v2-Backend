@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { getAverageColor } from 'fast-average-color-node'
+import { returnAuthorObject } from '../author/return.author.object'
 import { GenreReturnObject } from '../genre/return.genre.object'
 import { PrismaService } from '../prisma.service'
 import { UserService } from '../user/user.service'
@@ -162,6 +163,9 @@ export class BookService {
 			where: { id: +id },
 			include: {
 				majorGenre: false,
+				author: {
+					select: returnAuthorObject
+				},
 				genres: { select: GenreReturnObject }
 			}
 		})

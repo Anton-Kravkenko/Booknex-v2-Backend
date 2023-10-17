@@ -8,12 +8,15 @@ import {
 	Put,
 	Query
 } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { BookService } from './book.service'
 import { CreateBookDto, EditBookDto } from './dto/manipulation.book.dto'
 import { ReviewBookDto } from './dto/review.book.dto'
 
+@ApiTags('book')
+@ApiBearerAuth()
 @Controller('book')
 export class BookController {
 	constructor(private readonly bookService: BookService) {}

@@ -15,7 +15,7 @@ model Genre {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   name       String   @unique
-  color      String   @default("#fff")
+  color      String   @default("#22333b")
   users      User[]
   books      Book[]   @relation("BookGenre")
   majorBooks Book[]   @relation("BookMajorGenre")
@@ -66,7 +66,7 @@ model Book {
   description     String
   picture         String
   epub            String
-  color           String    @default("#fff")
+  color           String    @default("#264653")
   pages           Int
   likedPercentage Int
   popularity      Int       @default(0)
@@ -88,6 +88,7 @@ model Author {
   updatedAt   DateTime @updatedAt
   name        String   @unique
   picture     String
+  color       String   @default("#252422")
   description String
   books       Book[]
 }
@@ -120,6 +121,6 @@ model Shelf {
   icon        String   @default("")
   watched     User[]   @relation("WatchedShelves")
   hidden      User[]   @relation("HhiddenShelves")
-  color       String   @default("#fff")
+  color       String   @default("#264653")
   books       Book[]
 }

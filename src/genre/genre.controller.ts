@@ -1,8 +1,11 @@
 import { Controller, Get, Param } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Auth } from '../decorator/auth.decorator'
 import { GenreService } from './genre.service'
 
 @Auth()
+@ApiTags('genre')
+@ApiBearerAuth()
 @Controller('genre')
 export class GenreController {
 	constructor(private readonly genreService: GenreService) {}

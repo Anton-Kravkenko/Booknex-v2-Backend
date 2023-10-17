@@ -8,12 +8,15 @@ import {
 	Put,
 	Query
 } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { CreateShelfDto } from './dto/create.shelf.dto'
 import { UpdateShelfDto } from './dto/update.shelf.dto'
 import { ShelfService } from './shelf.service'
 
+@ApiTags('shelf')
+@ApiBearerAuth()
 @Controller('shelf')
 export class ShelfController {
 	constructor(private readonly shelvesService: ShelfService) {}

@@ -9,12 +9,15 @@ import {
 	UseInterceptors
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Auth } from '../decorator/auth.decorator'
 import { FilenameDto, ReplacementDto } from './dto/upload.dto'
 import { StorageFolderType } from './global.types'
 import { StorageService } from './storage.service'
 
 @Auth()
+@ApiTags('storage')
+@ApiBearerAuth()
 @Controller('storage')
 export class StorageController {
 	constructor(private readonly uploadService: StorageService) {}

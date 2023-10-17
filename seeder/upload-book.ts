@@ -185,7 +185,8 @@ export const uploadBook = async ({
 						create: {
 							name: author.name,
 							picture: `author-picture/${simplifyString(author.name)}.jpg`,
-							description: author.description
+							description: author.description,
+							color: shadeRGBColor(randomColor(), -50)
 						}
 					}
 				},

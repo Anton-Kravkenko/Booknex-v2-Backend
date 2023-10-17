@@ -8,6 +8,7 @@ import {
 	Post,
 	Query
 } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Auth } from '../decorator/auth.decorator'
 import { CurrentUser } from '../decorator/user.decorator'
 import { FilenameDto } from '../storage/dto/upload.dto'
@@ -15,6 +16,8 @@ import { UserUpdateBioDto, UserUpdatePasswordDto } from './dto/user.update.dto'
 import { UserService } from './user.service'
 import { UserLibraryCategoryType } from './user.types'
 
+@ApiTags('user')
+@ApiBearerAuth()
 @Controller('user')
 export class UserController {
 	constructor(private readonly usersService: UserService) {}
@@ -65,6 +68,12 @@ export class UserController {
 	}
 
 	@Auth()
+	@Get('/favorite-list')
+	async favoriteList(@CurrentUser('id') id: number) {
+		return this.usersService.favoriteList(+id)
+	}
+
+	@Auth()
 	@Patch('/toggle/:type/:id')
 	async toggle(
 		@CurrentUser('id') userId: number,
@@ -76,7 +85,6 @@ export class UserController {
 	}
 
 	// admin
-
 	@Auth('admin')
 	@Get('/all')
 	async all(@Query('cursor') cursorId: number) {

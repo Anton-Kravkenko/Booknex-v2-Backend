@@ -79,7 +79,10 @@ export class GenreService {
 		})
 		const bestAuthors = await this.prisma.author.findMany({
 			take: 10,
-			select: returnAuthorObject,
+			select: {
+				...returnAuthorObject,
+				picture: true
+			},
 			where: {
 				books: {
 					some: {

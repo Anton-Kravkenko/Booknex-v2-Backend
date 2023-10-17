@@ -13,10 +13,12 @@ import { returnUserObject } from './return.user.object'
 import {
 	CatalogTitleType,
 	DesignationType,
+	idSelect,
 	UserLibraryCatalogType,
 	UserLibraryCategoryType,
 	userLibraryFields,
 	UserLibraryFieldsEnum,
+	UserOppositeToggle,
 	UserStatisticsType
 } from './user.types'
 
@@ -239,28 +241,38 @@ export class UserService {
 		})
 	}
 
+	async favoriteList(userId: number) {
+		return this.getUserById(+userId, {
+			readingBooks: idSelect,
+			finishedBooks: idSelect,
+			watchedShelves: idSelect,
+			hiddenShelves: idSelect
+		})
+	}
+
 	async toggle(userId: number, id: number, type: UserLibraryCategoryType) {
 		if (!userLibraryFields.includes(type))
 			throw new BadRequestException('Invalid type').getResponse()
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
-		const existBookOrShelf = await this.prisma[DesignationType[type]].findFirst(
-			{
-				where: { id },
-				select: { id: true }
-			}
-		)
+		const existBookOrShelf = await this.prisma[
+			DesignationType[type] as 'book'
+		].findFirst({
+			where: { id },
+			select: { id: true }
+		})
 		if (!existBookOrShelf)
 			throw new NotFoundException(`${DesignationType[type]} not found`)
 
 		const user = await this.getUserById(+userId, {
-			readingBooks: true,
-			finishedBooks: true,
-			watchedShelves: true,
-			hiddenShelves: true
+			readingBooks: idSelect,
+			finishedBooks: idSelect,
+			watchedShelves: idSelect,
+			hiddenShelves: idSelect
 		})
 
 		const isExist = user[type].some(book => book.id === id)
-
+		const isOppositeExist = user[UserOppositeToggle[type]].some(
+			book => book.id === id
+		)
 		await this.prisma.user.update({
 			where: { id: user.id },
 			data: {
@@ -268,10 +280,20 @@ export class UserService {
 					[isExist ? 'disconnect' : 'connect']: {
 						id
 					}
-				}
+				},
+				...(isOppositeExist && {
+					[UserOppositeToggle[type]]: {
+						disconnect: {
+							id
+						}
+					}
+				})
 			}
 		})
 		return {
+			message: `${DesignationType[type]} ${
+				isExist ? 'removed from' : 'added to'
+			} your ${CatalogTitleType[type].toLowerCase()} list`,
 			isExist: !isExist
 		}
 	}

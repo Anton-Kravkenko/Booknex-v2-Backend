@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { PrismaService } from '../prisma.service'
+import { randomColor, shadeRGBColor } from '../utils/color.functions'
 import { CreateAuthorDto, EditAuthorDto } from './dto/manipulation.author.dto'
 import { returnAuthorObject } from './return.author.object'
 
@@ -25,7 +26,11 @@ export class AuthorService {
 
 	async all(cursorId: number) {
 		return this.prisma.author.findMany({
-			select: returnAuthorObject,
+			select: {
+				...returnAuthorObject,
+				picture: true,
+				description: true
+			},
 			cursor: cursorId && { id: cursorId },
 			take: 20
 		})
@@ -36,6 +41,7 @@ export class AuthorService {
 			data: {
 				name: dto.name,
 				picture: dto.picture,
+				color: shadeRGBColor(randomColor(), -50),
 				description: dto.description,
 				books: {
 					connect: dto.books.map(id => ({ id }))
@@ -68,15 +74,6 @@ export class AuthorService {
 				books: {
 					connect: dto.books.map(BookId => ({ id: BookId }))
 				}
-			}
-		})
-	}
-
-	emotions() {
-		return this.prisma.emotion.findMany({
-			select: {
-				name: true,
-				path: true
 			}
 		})
 	}

@@ -8,11 +8,14 @@ import {
 	Put,
 	Query
 } from '@nestjs/common'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { returnBookObject } from '../book/return.book.object'
 import { Auth } from '../decorator/auth.decorator'
 import { AuthorService } from './author.service'
 import { CreateAuthorDto, EditAuthorDto } from './dto/manipulation.author.dto'
 
+@ApiTags('author')
+@ApiBearerAuth()
 @Controller('author')
 export class AuthorController {
 	constructor(private readonly authorService: AuthorService) {}
@@ -21,6 +24,9 @@ export class AuthorController {
 	@Get('by-id/:id')
 	async infoById(@Param('id') id: string) {
 		return this.authorService.getAuthorById(+id, {
+			picture: true,
+			description: true,
+			color: true,
 			books: {
 				select: returnBookObject
 			}
