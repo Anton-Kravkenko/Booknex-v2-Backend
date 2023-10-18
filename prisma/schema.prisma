@@ -118,9 +118,7 @@ model Shelf {
   title       String   @unique
   description String?  @default("")
   picture     String   @default("")
-  icon        String   @default("")
   watched     User[]   @relation("WatchedShelves")
   hidden      User[]   @relation("HhiddenShelves")
-  color       String   @default("#264653")
   books       Book[]
 }

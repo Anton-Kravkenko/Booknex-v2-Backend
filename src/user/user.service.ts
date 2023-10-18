@@ -92,9 +92,12 @@ export class UserService {
 		const elements = await this.getUserById(id, {
 			[type]: {
 				select:
-					DesignationType[type] === 'Book'
+					DesignationType[type] === 'book'
 						? returnBookObject
-						: returnShelfObject,
+						: {
+								...returnShelfObject,
+								description: true
+						  },
 				orderBy: {
 					createdAt: 'desc'
 				}

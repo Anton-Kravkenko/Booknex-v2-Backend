@@ -70,7 +70,7 @@ export class ShelfService {
 		const likedShelves = await this.prisma.shelf.findMany({
 			select: {
 				...returnShelfObject,
-				icon: true
+				picture: true
 			},
 			where: {
 				watched: {
