@@ -56,7 +56,7 @@ export const GoodreadsParser = async () => {
 					id: index++,
 					link: `https://www.goodreads.com${link}`,
 					ratingAvg: ratingAvg.textContent
-						? parseFloat(
+						? Number.parseFloat(
 								ratingAvg.textContent.split('—')[0].replaceAll('avg rating', '')
 						  )
 						: 2.5
@@ -136,7 +136,7 @@ export const GoodreadsParser = async () => {
 					const selector = '[data-testid="ratingsCount"]'
 					const ratingCount = document.querySelector(selector)
 					return ratingCount.textContent
-						? parseInt(
+						? Number.parseInt(
 								ratingCount.textContent
 									.replaceAll('ratings', '')
 									.replaceAll(',', '')
@@ -148,7 +148,9 @@ export const GoodreadsParser = async () => {
 					const selector = '[data-testid="pagesFormat"]'
 					const pages = document.querySelector(selector)
 					return pages.textContent
-						? parseInt(pages.textContent.replace(/[^0-9,\s]/g, '').trim())
+						? Number.parseInt(
+								pages.textContent.replaceAll(/[^\d\s,]/g, '').trim()
+						  )
 						: 0
 				})
 				const picture = await page.evaluate(() => {
@@ -186,7 +188,7 @@ export const GoodreadsParser = async () => {
 					genres: genres,
 					numRatings: rating,
 					coverImg: picture,
-					likedPercent: parseFloat((book.ratingAvg * 20).toFixed(1)),
+					likedPercent: Number.parseFloat((book.ratingAvg * 20).toFixed(1)),
 					page
 				})
 			} catch {

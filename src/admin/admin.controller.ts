@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { Prisma } from '@prisma/client'
-import { GetFindResult } from '@prisma/client/runtime/library'
+import type { Prisma } from '@prisma/client'
+import type { GetFindResult } from '@prisma/client/runtime/library'
 import { Auth } from '../decorator/auth.decorator'
 import { AdminService } from './admin.service'
 

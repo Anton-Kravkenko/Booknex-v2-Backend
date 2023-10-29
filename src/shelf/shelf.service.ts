@@ -1,11 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
 import { abbrNumber } from '../utils/abbr-number'
-import { randomColor, shadeRGBColor } from '../utils/color.functions'
-import { CreateShelfDto } from './dto/create.shelf.dto'
-import { UpdateShelfDto } from './dto/update.shelf.dto'
+import type { CreateShelfDto } from './dto/create.shelf.dto'
+import type { UpdateShelfDto } from './dto/update.shelf.dto'
 import { returnShelfObject } from './return.shelf.object'
 
 @Injectable()
@@ -83,8 +82,7 @@ export class ShelfService {
 		const otherShelves = await this.prisma.shelf.findMany({
 			take: 10,
 			select: {
-				...returnShelfObject,
-				icon: true
+				...returnShelfObject
 			},
 			orderBy: {
 				watched: {
@@ -127,8 +125,6 @@ export class ShelfService {
 		return this.prisma.shelf.create({
 			data: {
 				title: dto.title,
-				icon: dto.icon,
-				color: shadeRGBColor(randomColor(), -20),
 				picture: dto.picture,
 				books: {
 					connect: dto.books.map(bookId => ({ id: bookId }))
@@ -165,7 +161,6 @@ export class ShelfService {
 			data: {
 				title: dto.title,
 				picture: dto.picture,
-				icon: dto.icon,
 				books: {
 					set: dto.books.map(bookId => ({ id: bookId }))
 				}

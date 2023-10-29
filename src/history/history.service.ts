@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
-import { AddHistoryDto } from './dto/add.history.dto'
+import type { AddHistoryDto } from './dto/add.history.dto'
 
 @Injectable()
 export class HistoryService {
@@ -24,12 +24,10 @@ export class HistoryService {
 			data: {
 				history: {
 					createMany: {
-						data: dto.histories.map(item => {
-							return {
-								time: item.time,
-								bookId: item.bookId
-							}
-						})
+						data: dto.histories.map(item => ({
+							time: item.time,
+							bookId: item.bookId
+						}))
 					}
 				}
 			}

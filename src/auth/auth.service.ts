@@ -4,11 +4,11 @@ import {
 	NotFoundException
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { User } from '@prisma/client'
+import type { User } from '@prisma/client'
 import { hash, verify } from 'argon2'
 import { PrismaService } from '../prisma.service'
 import { UserService } from '../user/user.service'
-import { AuthDto, RegisterDto } from './dto/auth.dto'
+import type { AuthDto, RegisterDto } from './dto/auth.dto'
 
 @Injectable()
 export class AuthService {

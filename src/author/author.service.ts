@@ -3,10 +3,13 @@ import {
 	Injectable,
 	NotFoundException
 } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { PrismaService } from '../prisma.service'
 import { randomColor, shadeRGBColor } from '../utils/color.functions'
-import { CreateAuthorDto, EditAuthorDto } from './dto/manipulation.author.dto'
+import type {
+	CreateAuthorDto,
+	EditAuthorDto
+} from './dto/manipulation.author.dto'
 import { returnAuthorObject } from './return.author.object'
 
 @Injectable()

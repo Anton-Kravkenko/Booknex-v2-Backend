@@ -3,23 +3,28 @@ import {
 	Injectable,
 	NotFoundException
 } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { hash, verify } from 'argon2'
 import { returnBookObject } from '../book/return.book.object'
 import { PrismaService } from '../prisma.service'
 import { returnShelfObject } from '../shelf/return.shelf.object'
-import { UserUpdateBioDto, UserUpdatePasswordDto } from './dto/user.update.dto'
+import type {
+	UserUpdateBioDto,
+	UserUpdatePasswordDto
+} from './dto/user.update.dto'
 import { returnUserObject } from './return.user.object'
+import type {
+	UserLibraryCatalogType,
+	UserLibraryCategoryType,
+	UserStatisticsType
+} from './user.types'
 import {
 	CatalogTitleType,
 	DesignationType,
 	idSelect,
-	UserLibraryCatalogType,
-	UserLibraryCategoryType,
 	userLibraryFields,
 	UserLibraryFieldsEnum,
-	UserOppositeToggle,
-	UserStatisticsType
+	UserOppositeToggle
 } from './user.types'
 
 @Injectable()

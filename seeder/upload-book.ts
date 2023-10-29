@@ -1,10 +1,11 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import type { S3Client } from '@aws-sdk/client-s3'
+import { PutObjectCommand } from '@aws-sdk/client-s3'
 import { PrismaClient } from '@prisma/client'
 import { gray, green, magenta, yellow } from 'colors'
-import { getAverageColor } from 'fast-average-color-node'
 import * as process from 'node:process'
 import prompts from 'prompts'
-import { Page } from 'puppeteer'
+import type { Page } from 'puppeteer'
+import { StorageFolderEnum } from '../src/storage/storage.types'
 import { randomColor, shadeRGBColor } from '../src/utils/color.functions'
 import { simplifyString } from '../src/utils/string.functions'
 import { customLinkSelect } from './aditional.functions'
@@ -53,6 +54,8 @@ export const uploadBook = async ({
 		'Philosophy',
 		'Thriller'
 	])
+	const Vibrant = require('node-vibrant')
+
 	try {
 		const oldBook = await prisma.book.findFirst({
 			where: {
@@ -130,20 +133,29 @@ export const uploadBook = async ({
 				BookName = customResponse.value
 			}
 		}
-		await s3.send(
-			new PutObjectCommand({
-				Bucket: process.env.AWS_BUCKET,
-				Key: `author-picture/${simplifyString(author.name)}.jpg`,
-				Body: authorBuffer,
-				ACL: 'public-read',
-				ContentDisposition: 'inline'
-			})
-		)
+		const authorExist = await prisma.author.findFirst({
+			where: {
+				name: author.name
+			}
+		})
+		if (!authorExist) {
+			await s3.send(
+				new PutObjectCommand({
+					Bucket: process.env.AWS_BUCKET,
+					Key: `${StorageFolderEnum.authorPictures}/${simplifyString(
+						author.name
+					)}.jpg`,
+					Body: authorBuffer,
+					ACL: 'public-read',
+					ContentDisposition: 'inline'
+				})
+			)
+		}
 
 		await s3.send(
 			new PutObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
-				Key: `epubs/${simplifyString(BookName)}.epub`,
+				Key: `${StorageFolderEnum.epubs}/${simplifyString(BookName)}.epub`,
 				Body: epubBuffer,
 				ACL: 'public-read',
 				ContentType: 'application/epub+zip',
@@ -153,7 +165,7 @@ export const uploadBook = async ({
 		await s3.send(
 			new PutObjectCommand({
 				Bucket: process.env.AWS_BUCKET,
-				Key: `books-covers/${simplifyString(BookName)}.jpg`,
+				Key: `${StorageFolderEnum.booksCovers}/${simplifyString(BookName)}.jpg`,
 				Body: imageBuffer,
 				ACL: 'public-read',
 				ContentDisposition: 'inline'
@@ -174,6 +186,13 @@ export const uploadBook = async ({
 		if (BookGenres.length === 0) {
 			return console.log(`❌ No book genres for ${BookName}`)
 		}
+
+		const colorPallete = await Vibrant.from(
+			typeof epub === 'string' ? coverImg : epub.picture
+		).getPalette()
+
+		console.log(colorPallete)
+
 		await prisma.book.create({
 			data: {
 				title: BookName,
@@ -184,18 +203,23 @@ export const uploadBook = async ({
 						},
 						create: {
 							name: author.name,
-							picture: `author-picture/${simplifyString(author.name)}.jpg`,
-							description: author.description,
+							picture: `${StorageFolderEnum.authorPictures}/${simplifyString(
+								author.name
+							)}.jpg`,
+							description: author.description
+								.replace(/\s+/g, ' ')
+								.replace(/\s([?.!,:;"])/g, '$1')
+								.trim(),
 							color: shadeRGBColor(randomColor(), -50)
 						}
 					}
 				},
-				description: description,
+				description: description
+					.replace(/\s+/g, ' ')
+					.replace(/\s([?.!,:;"])/g, '$1')
+					.trim(),
 				popularity: numRatings,
-				color: shadeRGBColor(
-					await getAverageColor(imageBuffer).then(color => color.hex),
-					-25
-				),
+				color: shadeRGBColor(colorPallete.Vibrant.hex, -25),
 				majorGenre: {
 					connectOrCreate: {
 						where: {
@@ -219,15 +243,17 @@ export const uploadBook = async ({
 						})
 					)
 				},
-				picture: `books-covers/${simplifyString(BookName)}.jpg`,
+				picture: `${StorageFolderEnum.booksCovers}/${simplifyString(
+					BookName
+				)}.jpg`,
 				pages:
 					typeof epub === 'string' || !epub.pages ? pages : Number(epub.pages),
 				likedPercentage: likedPercent,
-				epub: `epubs/${simplifyString(BookName)}.epub`
+				epub: `${StorageFolderEnum.epubs}/${simplifyString(BookName)}.epub`
 			}
 		})
 		console.log(green(`✅ ${BookName} by ${author.name}`))
-	} catch (e) {
-		console.log(yellow(`❌ Error for ${title}` + e))
+	} catch (error) {
+		console.log(yellow(`❌ Error for ${title}` + error))
 	}
 }

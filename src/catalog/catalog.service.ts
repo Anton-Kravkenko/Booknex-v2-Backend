@@ -236,12 +236,11 @@ export class CatalogService {
 			}
 		})
 		const genres = likedGenres
-			.sort((a, b) => {
-				return (
+			.sort(
+				(a, b) =>
 					likedGenres.filter(genre => genre.name === a.name).length -
 					likedGenres.filter(genre => genre.name === b.name).length
-				)
-			})
+			)
 			.slice(0, 5)
 			.map(genre => genre.name)
 		return this.prisma.book.findMany({

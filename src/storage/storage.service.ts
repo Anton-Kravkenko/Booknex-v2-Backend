@@ -7,7 +7,9 @@ import {
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import process from 'node:process'
-import { StorageFolderType } from './global.types'
+import { simplifyString } from '../utils/string.functions'
+import type { StorageFolderType } from './storage.types'
+import { StorageFolderArray, UserStorageFolderArray } from './storage.types'
 
 @Injectable()
 export class StorageService {
@@ -48,19 +50,22 @@ export class StorageService {
 	async upload({
 		file,
 		filename,
-		folder
+		folder,
+		isAdmin
 	}: {
 		file: Buffer
 		filename: string
 		folder: StorageFolderType
+		isAdmin: boolean
 	}) {
-		if (!['epubs', 'books-covers', 'user-pictures'].includes(folder))
+		const folderArray = isAdmin ? StorageFolderArray : UserStorageFolderArray
+		if (!folderArray.includes(folder)) {
 			throw new BadRequestException('Invalid folder name').getResponse()
-
+		}
 		await this.S3.send(
 			new PutObjectCommand({
 				Bucket: this.configService.get('AWS_BUCKET'),
-				Key: `${folder}/${filename}`,
+				Key: `${folder}/${simplifyString(filename)}`,
 				Body: file,
 				ACL: 'public-read',
 				ContentDisposition: 'inline'
@@ -69,7 +74,7 @@ export class StorageService {
 			throw new BadRequestException('File not uploaded').getResponse()
 		})
 		return {
-			name: `${folder}/${filename}`
+			name: `${folder}/${simplifyString(filename)}`
 		}
 	}
 }

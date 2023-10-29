@@ -1,5 +1,5 @@
 import { IsString } from 'class-validator'
-import { StorageFolderType } from '../global.types'
+import { StorageFolderType } from '../storage.types'
 
 export class FilenameDto {
 	@IsString()

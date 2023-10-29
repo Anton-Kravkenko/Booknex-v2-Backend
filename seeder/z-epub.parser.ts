@@ -1,6 +1,6 @@
 import { blue, magenta, yellow } from 'colors'
 import prompts from 'prompts'
-import { Page } from 'puppeteer'
+import type { Page } from 'puppeteer'
 import { customLinkSelect, getBookFromList } from './aditional.functions'
 
 export const ZEpubParser = async (

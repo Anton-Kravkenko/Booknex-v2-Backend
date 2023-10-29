@@ -1,5 +1,5 @@
-import { Prisma } from '@prisma/client'
-import { IconTypes } from '../utils/icon-types'
+import type { Prisma } from '@prisma/client'
+import type { IconTypes } from '../utils/icon-types'
 
 export type UserLibraryCategoryType = keyof Pick<
 	Prisma.UserSelect,

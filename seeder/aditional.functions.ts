@@ -1,6 +1,6 @@
 import { bgGreen, magenta, yellow } from 'colors'
 import prompts from 'prompts'
-import { Page } from 'puppeteer'
+import type { Page } from 'puppeteer'
 
 export const customLinkSelect = async (book: {
 	title: string
@@ -28,7 +28,7 @@ export const customLinkSelect = async (book: {
 		const customResponse = await prompts({
 			type: 'text',
 			name: 'value',
-			message: `Your link:`
+			message: 'Your link:'
 		})
 		return customResponse.value
 	}
@@ -67,7 +67,7 @@ export const getBookFromList = async (
 	}
 	const bookPagesFunction = await page.evaluate(() => {
 		const pages = document.querySelector('[itemprop="numberOfPages"]')
-		return parseInt(pages.textContent.replace('pages', ''))
+		return Number.parseInt(pages.textContent.replace('pages', ''))
 	})
 
 	if (numbPages - bookPagesFunction > 60) {
