@@ -1,4 +1,5 @@
-import { bgGreen, magenta, yellow } from 'colors'
+import { parseEpub } from '@gxl/epub-parser'
+import { bgBlack, bgGreen, magenta, yellow } from 'colors'
 import prompts from 'prompts'
 import type { Page } from 'puppeteer'
 
@@ -121,3 +122,38 @@ export const getBookFromList = async (
 		}
 	}, bookPagesFunction)
 }
+
+export const parseEpubFunc = async () => {
+	const file = await fetch(
+		'https://psv4.userapi.com/c909418/u786618039/docs/d45/913a9c3a8b01/Harry_Potter_and_the_Philosopher_39_s_Stone.epub?extra=q1rVhz3xDucqGuv-GliHwfMKmsfVIC048itTyGJfjtfnkOadOKcV9ck9_PqJyLcFLFpuyU1gdx2KMhjh95vX7YqsvZtPu__dXGwSL7iXsoeCs2fF57CDJf_p_xwDKcLjHVVzK7HtepnPKGvmR4AYJkhP&dl=1'
+	).then(res => res.arrayBuffer())
+
+	const epubObj = await parseEpub(Buffer.from(file))
+	console.log(epubObj.structure)
+	const removedChapters = await prompts({
+		type: 'multiselect',
+		name: 'value',
+		message: 'Select chapters to remove:',
+		choices: epubObj.structure.map((chapter, index) => ({
+			title: chapter.name,
+			value: index
+		})),
+		max: 10
+	})
+	if (!removedChapters.value) return
+
+	const newEpub = {
+		toc: epubObj.structure.filter(
+			(_, index) => !removedChapters.value.includes(index)
+		),
+		content: epubObj.sections
+			.filter((_, index) => !removedChapters.value.includes(index))
+			.map(section => {
+				// TODO: доделать парсер, добавить одну книгу и переписать парсер
+				return Object.keys(section)
+			})
+	}
+	console.log(JSON.stringify(newEpub.content), bgBlack('newEpub'))
+}
+
+parseEpubFunc()

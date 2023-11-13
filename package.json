@@ -17,6 +17,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "seeder": "ts-node seeder/goodreads-parser.ts",
+    "test": "ts-node seeder/aditional.functions.ts",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
@@ -45,6 +46,7 @@
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "@gxl/epub-parser": "^2.0.4",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
@@ -73,7 +75,8 @@
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "xmldom": "^0.6.0"
   },
   "jest": {
     "moduleFileExtensions": [

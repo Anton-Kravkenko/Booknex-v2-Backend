@@ -1,6 +1,5 @@
 import type { S3Client } from '@aws-sdk/client-s3'
 import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { PrismaClient } from '@prisma/client'
 import { gray, green, magenta, yellow } from 'colors'
 import * as process from 'node:process'
 import prompts from 'prompts'
@@ -11,7 +10,7 @@ import { simplifyString } from '../src/utils/string.functions'
 import { customLinkSelect } from './aditional.functions'
 import { ZEpubParser } from './z-epub.parser'
 
-const prisma = new PrismaClient()
+const prisma = null
 export const uploadBook = async ({
 	title,
 	author,
@@ -255,5 +254,8 @@ export const uploadBook = async ({
 		console.log(green(`✅ ${BookName} by ${author.name}`))
 	} catch (error) {
 		console.log(yellow(`❌ Error for ${title}` + error))
+	} finally {
+		await page.close()
+		await prisma.$disconnect()
 	}
 }
