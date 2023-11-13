@@ -1,5 +1,6 @@
 import { parseEpub } from '@gxl/epub-parser'
-import { bgBlack, bgGreen, magenta, yellow } from 'colors'
+import { bgGreen, magenta, yellow } from 'colors'
+import * as fs from 'fs'
 import prompts from 'prompts'
 import type { Page } from 'puppeteer'
 
@@ -141,7 +142,6 @@ export const parseEpubFunc = async () => {
 		max: 10
 	})
 	if (!removedChapters.value) return
-
 	const newEpub = {
 		toc: epubObj.structure.filter(
 			(_, index) => !removedChapters.value.includes(index)
@@ -149,11 +149,34 @@ export const parseEpubFunc = async () => {
 		content: epubObj.sections
 			.filter((_, index) => !removedChapters.value.includes(index))
 			.map(section => {
-				// TODO: доделать парсер, добавить одну книгу и переписать парсер
-				return Object.keys(section)
+				const startTag = '<body'
+				const endTag = '</body>'
+
+				const startIndex = section.htmlString.indexOf(startTag)
+				const endIndex = section.htmlString.indexOf(endTag) + endTag.length
+
+				const bodyContent = section.htmlString.substring(startIndex, endIndex)
+				return bodyContent
+					.replace(/ class="[^"]*"/g, '')
+					.replace(/<body[^>]*>/, '')
+					.replace(/<\/body>/, '')
+					.replace(/<a[^>]*href="[^"]*"[^>]*>/g, match => {
+						return match.replace(/href="[^"]*"/g, '')
+					})
+					.replace(
+						/<(?!\/?(?:h[1-6]|span|p|i|u|abbr|address|code|q|ul|li|ol|br|strong|em|mark|a|del|sub|sup|ins|b|blockquote|cite|dfn|kbd|pre|samp|small|time|var)\b)[^>]+>/gi,
+						''
+					)
 			})
 	}
-	console.log(JSON.stringify(newEpub.content), bgBlack('newEpub'))
+	const concatenatedTags = newEpub.content.join('').trim()
+	console.log(JSON.stringify(concatenatedTags))
+	fs.writeFile('output.html', concatenatedTags, err => {
+		if (err) {
+			console.error(err)
+			return
+		}
+	})
 }
 
 parseEpubFunc()
