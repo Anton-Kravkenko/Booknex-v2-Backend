@@ -123,7 +123,7 @@ export const getBookFromList = async (
 		}
 	}, bookPagesFunction)
 }
-
+//TODO: дофиксить и дооптимизировать парсер
 export const parseEpubFunc = async () => {
 	const file = await fetch(
 		'https://psv4.userapi.com/c909418/u786618039/docs/d45/913a9c3a8b01/Harry_Potter_and_the_Philosopher_39_s_Stone.epub?extra=q1rVhz3xDucqGuv-GliHwfMKmsfVIC048itTyGJfjtfnkOadOKcV9ck9_PqJyLcFLFpuyU1gdx2KMhjh95vX7YqsvZtPu__dXGwSL7iXsoeCs2fF57CDJf_p_xwDKcLjHVVzK7HtepnPKGvmR4AYJkhP&dl=1'
@@ -135,42 +135,77 @@ export const parseEpubFunc = async () => {
 		type: 'multiselect',
 		name: 'value',
 		message: 'Select chapters to remove:',
-		choices: epubObj.structure.map((chapter, index) => ({
-			title: chapter.name,
-			value: index
-		})),
-		max: 10
+		choices: epubObj.structure.map(chapter => {
+			return {
+				title: chapter.name,
+				value: chapter.name
+			}
+		})
 	})
+
 	if (!removedChapters.value) return
-	const newEpub = {
-		toc: epubObj.structure.filter(
-			(_, index) => !removedChapters.value.includes(index)
-		),
-		content: epubObj.sections
-			.filter((_, index) => !removedChapters.value.includes(index))
-			.map(section => {
-				const startTag = '<body'
-				const endTag = '</body>'
+	const toc = epubObj.structure
+		.filter(structure => !removedChapters.value.includes(structure.name))
+		.map(structure => {
+			return {
+				title: structure.name,
+				link: `${structure.nodeId}`
+			}
+		})
 
-				const startIndex = section.htmlString.indexOf(startTag)
-				const endIndex = section.htmlString.indexOf(endTag) + endTag.length
+	console.log(toc)
 
-				const bodyContent = section.htmlString.substring(startIndex, endIndex)
-				return bodyContent
-					.replace(/ class="[^"]*"/g, '')
-					.replace(/<body[^>]*>/, '')
-					.replace(/<\/body>/, '')
-					.replace(/<a[^>]*href="[^"]*"[^>]*>/g, match => {
-						return match.replace(/href="[^"]*"/g, '')
-					})
-					.replace(
-						/<(?!\/?(?:h[1-6]|span|p|i|u|abbr|address|code|q|ul|li|ol|br|strong|em|mark|a|del|sub|sup|ins|b|blockquote|cite|dfn|kbd|pre|samp|small|time|var)\b)[^>]+>/gi,
-						''
-					)
+	const content = epubObj.sections.map(section => {
+		return {
+			content: section.htmlString
+				.substring(
+					section.htmlString.indexOf('<body'),
+					section.htmlString.indexOf('</body>') + '</body>'.length
+				)
+				.replace(/ class="[^"]*"/g, '')
+				.replace(/<body[^>]*>/, '')
+				.replace(/<\/body>/, '')
+				.replace(/href="[^"]*"/g, '')
+				.replace(
+					/<(?!\/?(?:h[1-6]|span|p|i|u|abbr|address|code|q|ul|li|ol|br|strong|em|mark|a|del|sub|sup|ins|b|blockquote|cite|dfn|kbd|pre|samp|small|time|var)\b)[^>]+>/gi,
+					''
+				)
+		}
+	})
+	const regexPattern = new RegExp(`<p><a id="${toc[0].link}"><\\/a>(.*?)<\\/p>`)
+
+	const structure = epubObj.structure.map(chapter => {
+		return {
+			title: chapter.name,
+			link: `${chapter.nodeId}`
+		}
+	})
+	const lastTOc = toc.at(-1).link
+	const lastContent =
+		structure.findIndex(chapter => chapter.link === lastTOc) + 1
+	const lastLink = structure[lastContent].link
+	const lastRegexPattern = new RegExp(
+		`<p><a id="${lastLink}"><\\/a>(.*?)<\\/p>`
+	)
+	const concatenatedTags =
+		`<p><a id="${toc[0].link}"></a></p>` +
+		content
+			.map(value => value.content)
+			.join('')
+			.split(regexPattern)
+			.pop()
+			.trim()
+			.toString()
+			.split(lastRegexPattern, 1)
+			.pop()
+			.trim()
+			.toString()
+			.replace(/id="[^"]*"/g, match => {
+				const id = match.split('"')[1]
+				const tocItem = toc.find(item => item.link === id)
+				if (!tocItem) return ''
+				return match
 			})
-	}
-	const concatenatedTags = newEpub.content.join('').trim()
-	console.log(JSON.stringify(concatenatedTags))
 	fs.writeFile('output.html', concatenatedTags, err => {
 		if (err) {
 			console.error(err)
