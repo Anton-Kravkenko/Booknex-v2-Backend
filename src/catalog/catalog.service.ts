@@ -118,14 +118,14 @@ export class CatalogService {
 					id: userId
 				},
 				select: {
-					initialGenre: {
+					selectedGenre: {
 						select: {
 							name: true
 						}
 					}
 				}
 			})
-			.initialGenre()
+			.selectedGenre()
 			.then(genres => genres.map(genre => genre.name))
 	}
 
@@ -207,7 +207,7 @@ export class CatalogService {
 			take: 5,
 			select: {
 				name: true,
-				majorBooks: {
+				books: {
 					orderBy: {
 						updatedAt: 'desc'
 					},
@@ -248,30 +248,28 @@ export class CatalogService {
 			orderBy: { popularity: 'desc' },
 			select: returnBookObject,
 			where: {
-				genres: {
-					some: {
-						name: {
-							in:
-								genres.length > 0
-									? genres
-									: await this.prisma.user
-											.findUnique({
-												where: {
-													id: userId
-												},
-												select: {
-													initialGenre: {
-														select: {
-															name: true
-														}
+				genre: {
+					name: {
+						in:
+							genres.length > 0
+								? genres
+								: await this.prisma.user
+										.findUnique({
+											where: {
+												id: userId
+											},
+											select: {
+												selectedGenre: {
+													select: {
+														name: true
 													}
 												}
-											})
-											.initialGenre()
-											.then(initialGenres =>
-												initialGenres.map(genre => genre.name)
-											)
-						}
+											}
+										})
+										.selectedGenre()
+										.then(initialGenres =>
+											initialGenres.map(genre => genre.name)
+										)
 					}
 				},
 				AND: {

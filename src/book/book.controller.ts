@@ -57,8 +57,13 @@ export class BookController {
 		return this.bookService.reviewsById(+bookId, +cursorId || undefined)
 	}
 
-	//  admin
+	@Auth()
+	@Get('/ebook/:id')
+	async ebookById(@Param('id') bookId: string) {
+		return this.bookService.ebookById(+bookId)
+	}
 
+	//  admin
 	@Auth('admin')
 	@Get('/all')
 	async all(@Query('cursor') cursorId: number) {

@@ -29,7 +29,7 @@ if (process.env.NODE_ENV === 'production') {
 		global.prisma = new PrismaService()
 	}
 
-	prisma = global.prisma
+	prisma = global.prisma as PrismaService
 }
 
 export default prisma

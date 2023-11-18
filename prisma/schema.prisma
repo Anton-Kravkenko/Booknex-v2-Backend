@@ -1,26 +1,23 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma.ts-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model Genre {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  name       String   @unique
-  color      String   @default("#22333b")
-  users      User[]
-  books      Book[]   @relation("BookGenre")
-  majorBooks Book[]   @relation("BookMajorGenre")
-  similarBy  Genre[]  @relation("Similar")
-  similar    Genre[]  @relation("Similar")
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String   @unique
+  color     String   @default("#22333b")
+  users     User[]
+  books     Book[]   @relation("BookGenre")
+  similarBy Genre[]  @relation("Similar")
+  similar   Genre[]  @relation("Similar")
 }
 
 model Review {
@@ -58,28 +55,40 @@ model History {
 }
 
 model Book {
-  id              Int       @id @default(autoincrement())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  title           String    @unique
-  author          Author    @relation(fields: [authorId], references: [id])
+  id              Int          @id @default(autoincrement())
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  title           String       @unique
+  author          Author       @relation(fields: [authorId], references: [id])
   description     String
   picture         String
-  epub            String
-  color           String    @default("#264653")
+  charapters      Json[]
+  file            String
+  color           String       @default("#264653")
   pages           Int
   likedPercentage Int
-  popularity      Int       @default(0)
-  majorGenre      Genre     @relation("BookMajorGenre", fields: [mainGenreId], references: [id])
+  visible         Boolean      @default(true)
+  popularity      Int          @default(0)
   histories       History[]
-  genres          Genre[]   @relation("BookGenre")
+  genre           Genre        @relation("BookGenre", fields: [genreId], references: [id])
   reviews         Review[]
   shelves         Shelf[]
-  finishedBy      User[]    @relation("FinishedBooks")
-  readingBy       User[]    @relation("ReadingBooks")
+  finishedBy      User[]       @relation("FinishedBooks")
+  readingBy       User[]       @relation("ReadingBooks")
+  authorId        Int
+  genreId         Int
+  complaints      complaints[]
+}
 
-  mainGenreId Int
-  authorId    Int
+model complaints {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  text      String
+  book      Book?    @relation(fields: [bookId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  bookId    Int?
+  userId    Int
 }
 
 model Author {
@@ -94,21 +103,22 @@ model Author {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  email          String    @unique
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  email          String       @unique
   name           String?
   picture        String?
   password       String
-  isAdmin        Boolean   @default(false)
+  isAdmin        Boolean      @default(false)
   history        History[]
   review         Review[]
-  initialGenre   Genre[]
-  finishedBooks  Book[]    @relation("FinishedBooks")
-  readingBooks   Book[]    @relation("ReadingBooks")
-  watchedShelves Shelf[]   @relation("WatchedShelves")
-  hiddenShelves  Shelf[]   @relation("HhiddenShelves")
+  selectedGenre  Genre[]
+  finishedBooks  Book[]       @relation("FinishedBooks")
+  readingBooks   Book[]       @relation("ReadingBooks")
+  watchedShelves Shelf[]      @relation("WatchedShelves")
+  hiddenShelves  Shelf[]      @relation("HhiddenShelves")
+  complaints     complaints[]
 }
 
 model Shelf {

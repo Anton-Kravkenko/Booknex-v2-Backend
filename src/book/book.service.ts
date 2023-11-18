@@ -30,6 +30,21 @@ export class BookService {
 		return book
 	}
 
+	async ebookById(id: number) {
+		const book = await this.prisma.book.findUnique({
+			where: { id },
+			select: {
+				charapters: true,
+				file: true
+			}
+		})
+		if (!book) throw new NotFoundException('Book not found').getResponse()
+		return {
+			charapters: book.charapters,
+			file: book.file
+		}
+	}
+
 	async all(cursorId: number) {
 		return this.prisma.book.findMany({
 			take: 20,
@@ -41,7 +56,7 @@ export class BookService {
 	async create(dto: CreateBookDto) {
 		await this.prisma.book.create({
 			data: {
-				majorGenre: {
+				genre: {
 					connectOrCreate: {
 						where: { name: dto.majorGenre },
 						create: {
@@ -56,7 +71,7 @@ export class BookService {
 				pages: dto.pages,
 				description: dto.description,
 				picture: dto.picture,
-				epub: dto.epub,
+				file: dto.epub,
 				author: {
 					connect: {
 						name: dto.author.name
@@ -65,13 +80,7 @@ export class BookService {
 				color: shadeRGBColor(
 					await getAverageColor(dto.picture).then(color => color.hex),
 					-25
-				),
-				genres: {
-					connectOrCreate: dto.genres.map(g => ({
-						where: { name: g },
-						create: { name: g, color: shadeRGBColor(randomColor(), -50) }
-					}))
-				}
+				)
 			}
 		})
 	}
@@ -92,19 +101,15 @@ export class BookService {
 				pages: dto.pages || book.pages,
 				description: dto.description || book.description,
 				picture: dto.picture || book.picture,
-				epub: dto.epub || book.epub,
 				author: {
 					connect: {
 						name: dto.author || book.author.name
 					}
 				},
-				majorGenre: {
+				genre: {
 					connect: {
-						name: dto.majorGenre || book.majorGenre.name
+						name: dto.majorGenre || 'asd'
 					}
-				},
-				genres: {
-					connect: dto.genres.map(g => ({ name: g }))
 				}
 			}
 		})
@@ -162,36 +167,29 @@ export class BookService {
 		const book = await this.prisma.book.findUnique({
 			where: { id: +id },
 			include: {
-				majorGenre: false,
 				author: {
 					select: returnAuthorObject
 				},
-				genres: { select: GenreReturnObject }
+				genre: { select: GenreReturnObject }
 			}
 		})
 		if (!book) return new NotFoundException('Book not found').getResponse()
-		const genreIds = book.genres.map(g => g.id)
 		const similarBooks = await this.prisma.book.findMany({
 			where: {
 				id: { not: +id },
-				genres: { some: { id: { in: genreIds } } }
+				genre: {
+					id: book.genre.id
+				}
 			},
 			select: {
 				...returnBookObject,
-				genres: { select: GenreReturnObject }
+				genre: { select: GenreReturnObject }
 			}
 		})
 
 		return {
 			...book,
-			similarBooks: similarBooks
-				.sort(
-					(a, b) =>
-						b.genres.filter(g => genreIds.includes(g.id)).length -
-						a.genres.filter(g => genreIds.includes(g.id)).length
-				)
-				.slice(0, 10)
-				.map(({ genres, ...rest }) => ({ ...rest }))
+			similarBooks: similarBooks.slice(0, 10)
 		}
 	}
 }

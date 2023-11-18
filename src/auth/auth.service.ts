@@ -53,7 +53,7 @@ export class AuthService {
 				password: await hash(dto.password),
 				name: dto.name ?? dto.email.split('@')[0],
 				picture: 'failback/empty-user-logo.png',
-				initialGenre: {
+				selectedGenre: {
 					connectOrCreate: dto.genres.map(genre => ({
 						where: {
 							name: genre

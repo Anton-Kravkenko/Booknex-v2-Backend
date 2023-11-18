@@ -37,7 +37,7 @@ export class GenreService {
 				description: true
 			},
 			where: {
-				majorGenre: {
+				genre: {
 					id: +id
 				}
 			},
@@ -50,7 +50,7 @@ export class GenreService {
 			take: 10,
 			select: returnBookObject,
 			where: {
-				majorGenre: {
+				genre: {
 					id: +id
 				}
 			},
@@ -68,7 +68,7 @@ export class GenreService {
 			select: {
 				...defaultReturnObject,
 				name: true,
-				majorBooks: {
+				books: {
 					select: returnBookObject,
 					take: 10,
 					orderBy: {
@@ -86,7 +86,7 @@ export class GenreService {
 			where: {
 				books: {
 					some: {
-						majorGenre: {
+						genre: {
 							id: +id
 						}
 					}
